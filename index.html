@@ -1125,8 +1125,8 @@
                 const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'});
                 const footerY = pageHeight - 15;
                 doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.1); doc.line(10, footerY - 5, pageWidth - 10, footerY - 5);
-                doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(100, 100, 100);
-                doc.text(`Dicetak melalui Sistem E-Administrasi BK Pro | ${dateStr}`, 10, footerY);
+                doc.setFont("helvetica", "italic"); doc.setFontSize(6); doc.setTextColor(100, 100, 100);
+                doc.text(`Dicetak melalui Aplikasi SIAP-BK UPT SPF SMP Negeri 16 Makassar | ${dateStr}`, 10, footerY);
                 doc.text(`Halaman ${pageNumber} dari ${totalPages}`, pageWidth - 10, footerY, { align: 'right' });
                 doc.setTextColor(0,0,0);
             };
@@ -1355,4 +1355,5 @@
         }
     </script>
 </body>
+
 </html>
