@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAP-BK | 16</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        lightbg: '#f8fafc',
+                        primary: '#3b82f6',
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'fade-out': 'fadeOut 0.3s ease-in forwards',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeOut: {
+                            '0%': { opacity: '1' },
+                            '100%': { opacity: '0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 (Masih dipakai untuk Confirm Delete/Logout) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Chart.js (Statistik) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- QRious (QR Code Generator) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        
+        /* Background Styles */
+        .bg-custom-dark { 
+            background-color: #0f172a; 
+            background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+            background-blend-mode: overlay;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        .bg-custom-light {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Glassmorphism Dynamic */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .light .glass {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(200, 200, 200, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        
+        .btn-press:active { transform: scale(0.95); }
+        .hide { display: none !important; }
+        
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
+        
+        /* Timeline Styles */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 15px;
+            width: 3px; background: #e2e8f0;
+            z-index: 0;
+        }
+        .dark .timeline-line::before { background: #334155; }
+
+        /* Loading Overlay (Initial Load) */
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            color: white; flex-direction: column;
+        }
+
+        /* Toast Container */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        /* Skeleton Shimmer */
+        .skeleton {
+            background: #e2e8f0;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        .dark .skeleton {
+            background: #334155;
+            background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body id="main-body" class="bg-custom-dark min-h-screen text-slate-800 dark:text-white flex flex-col transition-colors duration-500">
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading" class="hide">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+            <div class="absolute top-0 left-0 w-16 h-16 border-4 border-t-blue-300 border-transparent rounded-full animate-pulse"></div>
+        </div>
+        <p class="mt-4 text-blue-200 font-medium tracking-wider animate-pulse">PROSES DATA...</p>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="flex-grow w-full max-w-md mx-auto md:max-w-6xl p-4 flex flex-col relative">
+
+        <!-- PROFESSIONAL APP HEADER -->
+        <header id="app-header" class="hide mb-6 sticky top-2 z-50">
+			<div class="glass rounded-2xl p-3 md:p-4 shadow-lg flex justify-between items-center transition-all duration-300">
+				<div class="flex items-center gap-3 md:gap-4 cursor-pointer" onclick="goHome()">
+					<div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+						<img id="header-logo" src="https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L" class="w-7 h-7 md:w-9 md:h-9 object-contain" alt="Logo Sekolah">
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold dark:text-white text-slate-800 tracking-wide leading-tight">SIAP-BK <span class="text-blue-500">PRO</span></h1>
+                        <p id="greeting-text" class="text-[10px] md:text-xs dark:text-slate-300 text-slate-500 font-light">Sistem Informasi Administrasi & Pelayanan BK</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Refresh Button -->
+                    <button onclick="refreshApp()" id="btn-refresh" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-blue-400 transition hover:scale-105 shadow-inner" title="Refresh Data">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-yellow-300 transition hover:scale-105 shadow-inner">
+                        <i id="theme-icon" class="fa-solid fa-sun"></i>
+                    </button>
+
+                    <div class="hidden md:flex flex-col text-right">
+                        <span id="user-display" class="text-sm font-semibold dark:text-white text-slate-800">Guru BK</span>
+                        <span class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Online</span>
+                    </div>
+                    
+                    <button onclick="logout()" class="group relative bg-slate-200 dark:bg-slate-800/50 hover:bg-red-500 dark:hover:bg-red-500 text-slate-600 dark:text-white hover:text-white w-10 h-10 rounded-xl shadow border border-transparent dark:border-white/5 flex items-center justify-center transition-all duration-300" title="Logout">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- FLOATING HOME BUTTON -->
+        <button id="btn-back" onclick="goHome()" class="hide fixed bottom-24 right-6 md:bottom-10 md:right-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-50 hover:from-blue-500 hover:to-indigo-500 btn-press transition-all duration-300 ring-4 ring-blue-500/30 group">
+            <i class="fa-solid fa-house group-hover:scale-110 transition-transform"></i>
+        </button>
+
+        <!-- 1. LOGIN PAGE -->
+        <section id="page-login" class="flex-1 flex flex-col justify-center items-center min-h-[80vh]">
+            <div class="glass p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-sm text-center transform transition duration-500 relative overflow-hidden border border-white/40 dark:border-white/10">
+                <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/30 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl"></div>
+                
+                <img src="https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L" 
+                     class="w-24 h-24 mx-auto mb-6 drop-shadow-2xl float-anim object-contain relative z-10" 
+                     alt="Logo Sekolah">
+
+                <h2 class="text-2xl font-bold dark:text-white text-slate-800 mb-1 relative z-10">SIAP-BK</h2>
+                <p class="dark:text-slate-300 text-slate-500 text-sm mb-8 relative z-10">UPT SPF SMP NEGERI 16 MAKASSAR</p>
+                
+                <form onsubmit="handleLogin(event)" class="space-y-5 relative z-10">
+                    <div class="text-left relative group">
+                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
+                        <input type="text" id="login-username" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 transition-all shadow-sm" placeholder="Username" required>
+                    </div>
+                    <div class="text-left relative group">
+                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
+                        <input type="password" id="login-password" class="w-full pl-10 pr-12 py-3 rounded-xl border border-gray-200 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 transition-all shadow-sm" placeholder="Password" required>
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-3.5 text-gray-400 hover:text-blue-500 transition z-20 focus:outline-none" title="Lihat Password">
+                            <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 btn-press">
+                        MASUK APLIKASI
+                    </button>
+                </form>
+            </div>
+            <p class="mt-8 dark:text-slate-400 text-slate-500 text-xs text-center font-light tracking-wide">© 2026 SIAP-BK<br>Mappaguru Online.</p>
+        </section>
+
+        <!-- 2. DASHBOARD GRID (PREMIUM DASHBOARD) -->
+        <section id="page-dashboard" class="hide flex-1 pb-10">
+            
+            <!-- HEADING & SEARCH -->
+            <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+                <div class="text-center md:text-left w-full">
+                    <h2 class="text-3xl font-bold dark:text-white text-slate-800 drop-shadow-sm">Dashboard</h2>
+                    <p class="dark:text-blue-200 text-slate-500 font-light text-sm">Statistik & Menu Layanan</p>
+                </div>
+                
+                <div class="w-full md:w-96 relative">
+                    <div class="flex bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <input type="text" id="global-student-search" placeholder="Cari Riwayat Siswa (Ketik Nama)..." class="w-full px-4 py-2 bg-transparent outline-none text-slate-700 dark:text-white">
+                        <button onclick="searchStudentHistory()" class="bg-blue-600 text-white px-4 hover:bg-blue-700 transition"><i class="fa-solid fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE SUMMARY CARDS (NEW) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Card 1 -->
+                <div class="glass p-4 rounded-2xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                    <div class="absolute right-0 top-0 w-24 h-24 bg-blue-500/10 rounded-bl-full transition-all group-hover:scale-110"></div>
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Total Layanan</p>
+                    <h3 class="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1" id="stat-total">0</h3>
+                    <p class="text-[10px] text-gray-400 mt-2">Semua Jenis Layanan</p>
+                    <i class="fa-solid fa-folder-open absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass p-4 rounded-2xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                    <div class="absolute right-0 top-0 w-24 h-24 bg-green-500/10 rounded-bl-full transition-all group-hover:scale-110"></div>
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Siswa Terbantu</p>
+                    <h3 class="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400 mt-1" id="stat-students">0</h3>
+                    <p class="text-[10px] text-gray-400 mt-2">Siswa Unik</p>
+                    <i class="fa-solid fa-user-check absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass p-4 rounded-2xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                    <div class="absolute right-0 top-0 w-24 h-24 bg-purple-500/10 rounded-bl-full transition-all group-hover:scale-110"></div>
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Top Layanan</p>
+                    <h3 class="text-lg md:text-xl font-bold text-purple-600 dark:text-purple-400 mt-1 line-clamp-1" id="stat-top">-</h3>
+                    <p class="text-[10px] text-gray-400 mt-2">Frekuensi Tertinggi</p>
+                    <i class="fa-solid fa-ranking-star absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
+                </div>
+                <!-- Card 4 -->
+                <div class="glass p-4 rounded-2xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+                    <div class="absolute right-0 top-0 w-24 h-24 bg-orange-500/10 rounded-bl-full transition-all group-hover:scale-110"></div>
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Penyelesaian</p>
+                    <h3 class="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1" id="stat-status">0%</h3>
+                    <p class="text-[10px] text-gray-400 mt-2">Kasus Selesai</p>
+                    <i class="fa-solid fa-check-double absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
+                </div>
+            </div>
+
+            <!-- PREMIUM CHART AREA -->
+            <div class="glass p-5 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
+                    <h3 class="text-sm font-bold dark:text-white text-slate-700 uppercase tracking-wider">Analitik Layanan</h3>
+                    <button onclick="toggleChartType()" class="text-xs bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 transition text-slate-600 dark:text-white font-medium shadow-sm">
+                        <i class="fa-solid fa-chart-pie mr-1"></i> Ganti Tampilan
+                    </button>
+                </div>
+                <div class="h-64 w-full">
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- MENU GRID (GROUPED) -->
+            <!-- KELOMPOK 1 -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                    <h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Layanan Utama</h3>
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div onclick="openService('7_Layanan_Individu', 'Konseling Individu')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-blue-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-blue-500/10">
+                            <i class="fa-solid fa-user-shield text-3xl text-blue-600 dark:text-blue-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Konseling Individu</span>
+                    </div>
+                    <div onclick="openService('8_Layanan_Kelompok', 'Konseling Kelompok')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-green-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center group-hover:bg-green-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-green-500/10">
+                            <i class="fa-solid fa-users-rays text-3xl text-green-600 dark:text-green-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Konseling Kelompok</span>
+                    </div>
+                    <div onclick="openService('9_Bimbingan_Kelompok', 'Bimbingan Kelompok')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-purple-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-purple-500/10">
+                            <i class="fa-solid fa-chalkboard-user text-3xl text-purple-600 dark:text-purple-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Bimbingan Kelompok</span>
+                    </div>
+                    <div onclick="openService('11_Layanan_Klasikal', 'Layanan Klasikal')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-red-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center group-hover:bg-red-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-red-500/10">
+                            <i class="fa-solid fa-person-chalkboard text-3xl text-red-600 dark:text-red-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Layanan Klasikal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KELOMPOK 2 -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                    <h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Layanan Responsif</h3>
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div onclick="openService('12_Konferensi_Kasus', 'Konferensi Kasus')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-cyan-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-cyan-500/10">
+                            <i class="fa-solid fa-users-gear text-3xl text-cyan-600 dark:text-cyan-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Konferensi Kasus</span>
+                    </div>
+                    <div onclick="openService('13_Alih_Tangan_Kasus', 'Alih Tangan Kasus')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-teal-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-teal-500/20 flex items-center justify-center group-hover:bg-teal-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-teal-500/10">
+                            <i class="fa-solid fa-share-from-square text-3xl text-teal-600 dark:text-teal-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Alih Tangan Kasus</span>
+                    </div>
+                    <div onclick="openService('14_Mediasi', 'Mediasi')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-pink-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-pink-500/10">
+                            <i class="fa-solid fa-handshake-angle text-3xl text-pink-600 dark:text-pink-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Mediasi</span>
+                    </div>
+                    <div onclick="openService('15_Advokasi', 'Advokasi')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-indigo-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-indigo-500/10">
+                            <i class="fa-solid fa-gavel text-3xl text-indigo-600 dark:text-indigo-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Advokasi</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KELOMPOK 3 -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                    <h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Dukungan Sistem</h3>
+                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                    <div onclick="openService('10_Konsultasi', 'Konsultasi')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-orange-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-orange-500/10">
+                            <i class="fa-solid fa-handshake-simple text-3xl text-orange-600 dark:text-orange-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Konsultasi</span>
+                    </div>
+                    <div onclick="openService('16_Dukungan_Sistem', 'Dukungan Sistem')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-slate-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-500/20 flex items-center justify-center group-hover:bg-slate-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-slate-500/10">
+                            <i class="fa-solid fa-network-wired text-3xl text-slate-600 dark:text-slate-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Dukungan Sistem</span>
+                    </div>
+                    <div onclick="showAbout()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-gray-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-gray-500/20 flex items-center justify-center group-hover:bg-gray-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-gray-500/10">
+                            <i class="fa-solid fa-circle-info text-3xl text-gray-600 dark:text-gray-200 group-hover:text-white transition-colors"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Info Aplikasi</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SERVICE DETAIL (WITH DATE FILTER & PAGINATION) -->
+        <section id="page-service" class="hide flex-1 pb-10 flex flex-col h-screen">
+            <!-- Title Bar & Toolbar -->
+            <div class="flex-none flex flex-col gap-4 mb-4 pt-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 id="service-title" class="text-2xl font-bold dark:text-white text-slate-800 drop-shadow-md">Judul Layanan</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-green-500/20 text-green-600 dark:text-green-300 border border-green-500/30">Active</span>
+                            <p class="dark:text-blue-200 text-slate-500 text-xs">Mappaguru Online</p>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW: DATE FILTER INPUTS -->
+                    <div class="flex flex-col md:flex-row gap-2 bg-white/50 dark:bg-slate-800/50 p-2 rounded-xl border border-gray-200 dark:border-slate-700 backdrop-blur-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase">Filter Tgl:</span>
+                            <input type="date" id="filter-start" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
+                            <span class="text-xs">-</span>
+                            <input type="date" id="filter-end" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl text-sm font-bold shadow-lg transition btn-press flex items-center gap-2" title="Download Excel">
+                            <i class="fa-solid fa-file-excel"></i> <span class="hidden md:inline">Excel</span>
+                        </button>
+                        <button onclick="printRecap()" class="glass hover:bg-white/20 dark:text-white text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-300 dark:border-white/20" title="Cetak Rekap Sesuai Filter">
+                            <i class="fa-solid fa-print"></i> <span class="hidden md:inline">Rekap</span>
+                        </button>
+                        <button onclick="showForm()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition btn-press flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> <span class="hidden md:inline">Input</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative w-full">
+                    <i class="fa-solid fa-search absolute left-4 top-3 text-gray-400"></i>
+                    <input type="text" id="service-search" onkeyup="renderDataList()" placeholder="Cari data (Nama, Kelas, Masalah)..." 
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-slate-800/50 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm">
+                </div>
+            </div>
+
+            <!-- Data List Container with Scroll -->
+            <div id="data-container" class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scroll mb-4">
+                <!-- Data or Skeleton will be injected here -->
+            </div>
+
+            <!-- PAGINATION CONTROLS -->
+            <div id="pagination-controls" class="flex flex-col md:flex-row justify-between items-center gap-4 p-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t dark:border-slate-700 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)] sticky bottom-0 z-20">
+                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <span>Tampil:</span>
+                    <select id="rows-per-page" onchange="changeRowsPerPage()" class="bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 focus:outline-none">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="all">Semua</option>
+                    </select>
+                    <span id="showing-info" class="hidden md:inline ml-2">Menampilkan 0-0 dari 0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="changePage(-1)" id="btn-prev" class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 disabled:opacity-50 transition"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="page-info" class="text-sm font-bold mx-2">Page 1</span>
+                    <button onclick="changePage(1)" id="btn-next" class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 disabled:opacity-50 transition"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURE 3: STUDENT PROFILE TIMELINE -->
+        <section id="page-student-profile" class="hide flex-1 pb-10 flex flex-col">
+            <div class="flex-none mb-6">
+                <button onclick="goHome()" class="text-sm text-blue-500 hover:underline mb-2"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</button>
+                <h2 class="text-2xl font-bold dark:text-white text-slate-800">Riwayat Layanan Siswa</h2>
+                <div class="glass p-4 rounded-xl mt-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-3xl">
+                        <i class="fa-solid fa-user-graduate dark:text-white text-slate-500"></i>
+                    </div>
+                    <div>
+                        <h3 id="profile-name" class="text-xl font-bold dark:text-white text-slate-800">Nama Siswa</h3>
+                        <p id="profile-class" class="text-sm dark:text-blue-200 text-slate-500">Kelas -</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="timeline-container" class="flex-1 overflow-y-auto pr-2 custom-scroll relative timeline-line pl-4 max-h-[60vh]"></div>
+        </section>
+
+        <!-- 4. MODAL FORM -->
+        <section id="page-form" class="hide fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] overflow-y-auto p-4 md:p-8 flex justify-center items-start">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl my-8 overflow-hidden transform transition-all animate-fade-in-up border border-slate-200 dark:border-slate-700">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 flex justify-between items-center text-white shadow-md">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-pen-to-square"></i></div>
+                        <h3 class="font-bold text-lg tracking-wide" id="form-header">Input Data</h3>
+                    </div>
+                    <button onclick="closeForm()" class="text-white/80 hover:text-white transition bg-white/10 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <form id="dynamic-form" onsubmit="handleSave(event)" class="p-6 md:p-8 space-y-5 bg-slate-50 dark:bg-slate-900">
+                    <!-- Form generated by JS -->
+                </form>
+
+                <div class="p-5 bg-white dark:bg-slate-900 border-t dark:border-slate-800 border-gray-100 flex justify-end gap-4 sticky bottom-0 z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+                    <button type="button" onclick="closeForm()" class="px-6 py-2.5 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition">Batal</button>
+                    <button type="button" onclick="document.getElementById('dynamic-form').requestSubmit()" class="px-8 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition btn-press flex items-center gap-2">
+                        <i class="fa-solid fa-save"></i> Simpan Data
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROFESSIONAL APP FOOTER -->
+        <footer id="app-footer" class="hide mt-auto pt-6 pb-2">
+            <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/5 border dark:border-white/5 border-slate-200 backdrop-blur-sm">
+                    <span class="text-[10px] dark:text-slate-400 text-slate-500 font-light">Sistem Informasi Administrasi & Pelayanan BK</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-500"></span>
+                    <span class="text-[10px] dark:text-slate-400 text-slate-500 font-light">Build 2026</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2 font-light">Developed with <i class="fa-solid fa-heart text-red-500 text-[8px] mx-0.5"></i> by Muhammad Hasratul</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbywHe4JLD_Vd9z-vYuhsvT78TLMEFM-cts6nBVAL9Ff_PTYUhjjlm3EXD59Au6lGhBO/exec"; 
+
+        // State
+        let currentUser = null;
+        let currentSheet = "";
+        let currentTitle = "";
+        let metaData = {};
+        let activeDataList = [];
+        let editMode = false;
+        let editId = null;
+        let cachedAllServices = null; 
+        let chartType = 'bar'; // State for chart toggle
+
+        // Pagination & Filter
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let filteredData = []; 
+
+        // --- THEME ---
+        function toggleTheme() {
+            const html = document.documentElement, body = document.body, icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark'); html.classList.add('light');
+                body.classList.remove('bg-custom-dark'); body.classList.add('bg-custom-light');
+                icon.className = 'fa-solid fa-moon'; localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark'); html.classList.remove('light');
+                body.classList.add('bg-custom-dark'); body.classList.remove('bg-custom-light');
+                icon.className = 'fa-solid fa-sun'; localStorage.setItem('theme', 'dark');
+            }
+        }
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const body = document.getElementById('main-body') || document.body;
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light');
+                body.classList.remove('bg-custom-dark'); body.classList.add('bg-custom-light');
+            }
+        })();
+
+        // --- UTILS ---
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('login-password'), icon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') { pwdInput.type = 'text'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); } 
+            else { pwdInput.type = 'password'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+        }
+
+        const getBase64FromUrl = async (url) => {
+            if(!url) return null;
+            try { const data = await fetch(url); const blob = await data.blob(); return new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(blob); reader.onloadend = () => resolve(reader.result); }); } catch (e) { console.warn("Image Error:", url); return null; }
+        };
+
+        const toProperCase = (str) => { if(!str) return ''; return str.replace(/\w\S*/g, function(txt){ return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); }); };
+        const getItemDate = (item) => item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+
+        // --- NEW: TOAST NOTIFICATION ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colorClass = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-white font-medium transform transition-all duration-300 translate-x-10 opacity-0 ${colorClass} min-w-[300px] animate-slide-in`;
+            toast.innerHTML = `<i class="fa-solid ${iconClass} text-xl"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Remove after 3s
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- NEW: SKELETON LOADING ---
+        function renderSkeleton() {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            // Render 5 skeletons
+            for(let i=0; i<5; i++) {
+                const skel = document.createElement('div');
+                skel.className = "bg-white/50 dark:bg-slate-800/50 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row gap-4";
+                skel.innerHTML = `
+                    <div class="flex-1 space-y-3">
+                        <div class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-1/4 skeleton"></div>
+                        <div class="h-6 bg-gray-200 dark:bg-slate-700 rounded w-3/4 skeleton"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-slate-700 rounded w-1/2 skeleton"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-10 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg skeleton"></div>
+                        <div class="w-10 h-10 bg-gray-200 dark:bg-slate-700 rounded-lg skeleton"></div>
+                    </div>
+                `;
+                container.appendChild(skel);
+            }
+        }
+
+        // --- NEW: PERSONAL GREETING ---
+        function updateGreeting() {
+            if(!currentUser) return;
+            const hour = new Date().getHours();
+            let greet = "Selamat Pagi";
+            if(hour >= 12 && hour < 15) greet = "Selamat Siang";
+            else if(hour >= 15 && hour < 18) greet = "Selamat Sore";
+            else if(hour >= 18) greet = "Selamat Malam";
+            
+            const firstName = currentUser.nama.split(',')[0].split(' ')[0];
+            document.getElementById('greeting-text').innerHTML = `<span class="text-blue-500 font-bold">${greet}, Pak/Bu ${firstName}!</span> Siap melayani siswa hari ini?`;
+        }
+
+        // --- NEW: REFRESH APP ---
+        async function refreshApp() {
+            const btn = document.getElementById('btn-refresh');
+            if(btn) btn.classList.add('animate-spin');
+            
+            // Refresh Metadata & Stats
+            await initApp();
+            
+            // If currently viewing a sheet, refresh that list too
+            if(!document.getElementById('page-service').classList.contains('hide') && currentSheet) {
+                await openService(currentSheet, currentTitle);
+            } 
+            
+            if(btn) btn.classList.remove('animate-spin');
+            showToast('Data berhasil diperbarui');
+        }
+
+        // --- NAVIGATION ---
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(el => el.classList.add('hide'));
+            const target = document.getElementById(id);
+            target.classList.remove('hide');
+            target.classList.add('animate-[fadeIn_0.5s_ease-out]');
+            
+            if(id === 'page-login') {
+                document.getElementById('app-header').classList.add('hide');
+                document.getElementById('app-footer').classList.add('hide');
+                document.getElementById('btn-back').classList.add('hide');
+            } else {
+                document.getElementById('app-header').classList.remove('hide');
+                document.getElementById('app-footer').classList.remove('hide');
+                if(id === 'page-dashboard') document.getElementById('btn-back').classList.add('hide');
+                else document.getElementById('btn-back').classList.remove('hide');
+            }
+        }
+
+        function goHome() {
+            showSection('page-dashboard');
+            currentSheet = "";
+            loadDashboardStats();
+        }
+
+        function logout() {
+            Swal.fire({
+                title: 'Keluar Aplikasi?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Ya, Keluar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    currentUser = null;
+                    localStorage.removeItem('bk_user');
+                    showSection('page-login');
+                }
+            })
+        }
+
+        // --- API ---
+        async function apiCall(params, method = 'GET', body = null) {
+            // Only show full loading overlay for login/init
+            if(params.action === 'login' || params.action === 'getMetadata') document.getElementById('loading').classList.remove('hide');
+            
+            try {
+                let url = API_URL + "?";
+                for (const key in params) { url += `${key}=${encodeURIComponent(params[key])}&`; }
+                if(method === 'GET') { const response = await fetch(url); return await response.json(); } 
+                else { const response = await fetch(url, { method: "POST", body: JSON.stringify(body) }); return await response.json(); }
+            } catch (error) {
+                console.error(error); Swal.fire({ title: "Koneksi Gagal", text: "Cek internet Anda.", icon: "error" }); return null;
+            } finally { document.getElementById('loading').classList.add('hide'); }
+        }
+
+        // --- AUTH ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+            if(!u || !p) return;
+            const res = await apiCall({ action: 'login', username: u, password: p });
+            if (res && res.status === 'success') {
+                currentUser = res.data;
+                localStorage.setItem('bk_user', JSON.stringify(currentUser));
+                initApp();
+            } else { Swal.fire("Login Gagal", res?.message || "Error", "error"); }
+        }
+
+        async function initApp() {
+            document.getElementById('user-display').innerText = currentUser.nama.split(',')[0];
+            updateGreeting(); // Update Greeting
+            
+            const meta = await apiCall({ action: 'getMetadata' });
+            if(meta && meta.status === 'success') {
+                metaData = meta;
+                if(meta.sekolah.logo_url) {
+                    document.getElementById('header-logo').src = meta.sekolah.logo_url;
+                    document.querySelector('#page-login img').src = meta.sekolah.logo_url;
+                }
+            }
+            showSection('page-dashboard');
+            loadDashboardStats();
+        }
+
+        window.onload = () => {
+            const saved = localStorage.getItem('bk_user');
+            if (saved) { currentUser = JSON.parse(saved); initApp(); } 
+            else { showSection('page-login'); }
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.getElementById('theme-icon').className = savedTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        };
+
+        // --- PREMIUM DASHBOARD LOGIC ---
+        const fetchData = async (sheet) => {
+            const res = await apiCall({ action: 'getData', sheetName: sheet, username: currentUser.username });
+            return res && res.status === 'success' ? res.data : [];
+        };
+
+        function toggleChartType() {
+            chartType = chartType === 'bar' ? 'doughnut' : 'bar';
+            loadDashboardStats();
+        }
+
+        async function loadDashboardStats() {
+            const sheets = [
+                '7_Layanan_Individu', '8_Layanan_Kelompok', '9_Bimbingan_Kelompok', '10_Konsultasi', '11_Layanan_Klasikal',
+                '12_Konferensi_Kasus', '13_Alih_Tangan_Kasus', '14_Mediasi', '15_Advokasi', '16_Dukungan_Sistem'
+            ];
+            
+            // Check cache or fetch
+            let results = [];
+            if(cachedAllServices) {
+                results = sheets.map(s => cachedAllServices[s] || []);
+            } else {
+                const promises = sheets.map(s => fetchData(s));
+                results = await Promise.all(promises);
+                cachedAllServices = {};
+                sheets.forEach((s, i) => cachedAllServices[s] = results[i]);
+            }
+
+            // 1. CALCULATE SUMMARY STATS
+            let totalLayanan = 0;
+            let siswaSet = new Set();
+            let countsPerSheet = {};
+            let selesaiCount = 0;
+
+            sheets.forEach((sheet, idx) => {
+                const data = results[idx];
+                totalLayanan += data.length;
+                countsPerSheet[sheet] = data.length;
+
+                data.forEach(item => {
+                    // Unique Student Count
+                    if(item.Nama_Siswa) siswaSet.add(item.Nama_Siswa);
+                    if(item.Nama_Siswa_1) siswaSet.add(item.Nama_Siswa_1);
+                    
+                    // Status Count
+                    const status = (item.Status_Konseling || item.Status_Proses || item.Status_Rujukan || item.Status_Mediasi || '').toLowerCase();
+                    if(status.includes('selesai') || status.includes('berhasil')) selesaiCount++;
+                });
+            });
+
+            // Find Top Service
+            let topService = "-";
+            let maxCount = 0;
+            const labelsMap = {
+                '7_Layanan_Individu': 'Individu', '8_Layanan_Kelompok': 'Kelompok', 
+                '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
+                '11_Layanan_Klasikal': 'Klasikal', '12_Konferensi_Kasus': 'Konferensi',
+                '13_Alih_Tangan_Kasus': 'Alih Tangan', '14_Mediasi': 'Mediasi',
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan'
+            };
+            
+            for(let [key, val] of Object.entries(countsPerSheet)) {
+                if(val > maxCount) { maxCount = val; topService = labelsMap[key]; }
+            }
+
+            const percentSelesai = totalLayanan > 0 ? Math.round((selesaiCount / totalLayanan) * 100) : 0;
+
+            // UPDATE UI CARDS
+            document.getElementById('stat-total').innerText = totalLayanan;
+            document.getElementById('stat-students').innerText = siswaSet.size;
+            document.getElementById('stat-top').innerText = topService;
+            document.getElementById('stat-status').innerText = `${percentSelesai}%`;
+
+            // 2. RENDER PREMIUM CHART
+            const mainCounts = results.slice(0, 5).map(r => r.length);
+            const specialCount = results.slice(5).reduce((acc, curr) => acc + curr.length, 0);
+
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            if(window.myStatsChart) window.myStatsChart.destroy();
+
+            // Gradient Setup
+            const gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+
+            const gradientPurple = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientPurple.addColorStop(0, 'rgba(168, 85, 247, 0.8)');
+            gradientPurple.addColorStop(1, 'rgba(168, 85, 247, 0.1)');
+
+            window.myStatsChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: ['Individu', 'Kelompok', 'Bimbingan', 'Konsultasi', 'Klasikal', 'Layanan Khusus'],
+                    datasets: [{
+                        label: 'Total',
+                        data: [...mainCounts, specialCount],
+                        backgroundColor: [
+                            gradientBlue, 
+                            'rgba(34, 197, 94, 0.7)',
+                            gradientPurple,
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(6, 182, 212, 0.7)'
+                        ],
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        borderRadius: chartType === 'bar' ? 8 : 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: { display: chartType === 'doughnut', position: 'right', labels: { color: '#94a3b8' } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#cbd5e1',
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    scales: chartType === 'bar' ? {
+                        y: { beginAtZero: true, grid: { display: false }, ticks: { color: '#94a3b8' }, border: { display: false } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' }, border: { display: false } }
+                    } : {
+                        y: { display: false }, x: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- TIMELINE SEARCH ---
+        function searchStudentHistory() {
+            const keyword = document.getElementById('global-student-search').value.toLowerCase();
+            if(!keyword) return;
+            if(!cachedAllServices) { Swal.fire("Tunggu", "Data sedang dimuat...", "info"); return; }
+
+            let history = [];
+            const sheetLabels = {
+                '7_Layanan_Individu': { label: 'Konseling Individu', icon: 'fa-user', color: 'blue' },
+                '8_Layanan_Kelompok': { label: 'Konseling Kelompok', icon: 'fa-users', color: 'green' },
+                // ... (Existing mappings) ...
+                '9_Bimbingan_Kelompok': { label: 'Bim. Kelompok', icon: 'fa-chalkboard-user', color: 'purple' },
+                '10_Konsultasi': { label: 'Konsultasi', icon: 'fa-handshake', color: 'orange' },
+                '11_Layanan_Klasikal': { label: 'Klasikal', icon: 'fa-person-chalkboard', color: 'red' },
+                '12_Konferensi_Kasus': { label: 'Konferensi', icon: 'fa-users-gear', color: 'cyan' },
+                '13_Alih_Tangan_Kasus': { label: 'Alih Tangan', icon: 'fa-share-from-square', color: 'teal' },
+                '14_Mediasi': { label: 'Mediasi', icon: 'fa-handshake-angle', color: 'pink' },
+                '15_Advokasi': { label: 'Advokasi', icon: 'fa-gavel', color: 'indigo' },
+                '16_Dukungan_Sistem': { label: 'Dukungan', icon: 'fa-network-wired', color: 'slate' }
+            };
+
+            for(const [sheet, data] of Object.entries(cachedAllServices)) {
+                data.forEach(item => {
+                    const names = (item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Siswa_2'] || item['Anggota_Kelompok_Siswa'] || item['Nama_Konsulti'] || item['Sasaran_Layanan'] || '').toLowerCase();
+                    if(names.includes(keyword)) {
+                        const conf = sheetLabels[sheet] || { label: 'Lainnya', color: 'gray' };
+                        history.push({ ...item, _type: conf, _date: getItemDate(item) || '0000-00-00' });
+                    }
+                });
+            }
+
+            if(history.length === 0) { Swal.fire("Info", "Tidak ada riwayat.", "info"); return; }
+            history.sort((a, b) => new Date(b._date) - new Date(a._date));
+
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+            document.getElementById('profile-name').innerText = toProperCase(keyword);
+            document.getElementById('profile-class').innerText = `Total: ${history.length} Riwayat Layanan`;
+
+            history.forEach(h => {
+                const dateFmt = new Date(h._date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                const detail = h['Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || h['Nama_Kegiatan'] || h['Topik_Layanan'] || 'Detail Layanan';
+                const status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || 'Selesai';
+                
+                container.innerHTML += `
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-[-5px] top-1 w-4 h-4 rounded-full bg-${h._type.color}-500 border-2 border-white dark:border-slate-800 shadow z-10"></div>
+                        <div class="glass p-4 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                            <div class="flex justify-between items-start">
+                                <div><span class="text-xs font-bold text-${h._type.color}-500 uppercase tracking-wide mb-1 block">${h._type.label}</span><h4 class="font-bold dark:text-white text-slate-800 text-lg">${detail}</h4></div>
+                                <span class="text-xs dark:text-slate-400 text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">${dateFmt}</span>
+                            </div>
+                            <p class="text-sm dark:text-slate-300 text-slate-600 mt-2 line-clamp-2">${h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || '-'}</p>
+                            <div class="mt-2 text-xs font-semibold">Status: <span class="${String(status).toLowerCase().includes('selesai') ? 'text-green-500' : 'text-yellow-500'}">${status}</span></div>
+                        </div>
+                    </div>`;
+            });
+            showSection('page-student-profile');
+        }
+
+        // --- SERVICE LIST ---
+        async function openService(sheetName, title) {
+            currentSheet = sheetName;
+            currentTitle = title;
+            document.getElementById('service-title').innerText = title;
+            document.getElementById('service-search').value = ''; 
+            document.getElementById('filter-start').value = '';
+            document.getElementById('filter-end').value = '';
+            currentPage = 1;
+            rowsPerPage = 10;
+            document.getElementById('rows-per-page').value = "10";
+            
+            showSection('page-service');
+            renderSkeleton(); // SHOW SKELETON
+
+            const res = await apiCall({ action: 'getData', sheetName: sheetName, username: currentUser.username });
+            if(res && res.status === 'success') {
+                activeDataList = res.data;
+                renderDataList();
+            } else {
+                Swal.fire("Gagal", "Tidak dapat mengambil data.", "error");
+            }
+        }
+
+        function renderDataList() {
+            // Filter
+            const search = document.getElementById('service-search').value.toLowerCase();
+            const startStr = document.getElementById('filter-start').value;
+            const endStr = document.getElementById('filter-end').value;
+            const startDate = startStr ? new Date(startStr) : null;
+            const endDate = endStr ? new Date(endStr) : null;
+
+            filteredData = activeDataList.filter(item => {
+                let textMatch = true;
+                if (search) { const text = Object.values(item).join(' ').toLowerCase(); textMatch = text.includes(search); }
+                let dateMatch = true;
+                if (startDate || endDate) {
+                    const dStr = getItemDate(item);
+                    if (dStr) {
+                        const itemDate = new Date(dStr);
+                        if (startDate && itemDate < startDate) dateMatch = false;
+                        if (endDate && itemDate > endDate) dateMatch = false;
+                    }
+                }
+                return textMatch && dateMatch;
+            });
+
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+
+            // Empty State Estetik
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 opacity-70">
+                        <div class="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <i class="fa-solid fa-folder-open text-5xl text-slate-300 dark:text-slate-600"></i>
+                        </div>
+                        <p class="dark:text-white text-slate-600 font-bold text-lg">Belum Ada Data</p>
+                        <p class="text-slate-400 text-sm mt-1">Silakan input data baru atau ubah filter pencarian.</p>
+                        <button onclick="showForm()" class="mt-6 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 transition hover:-translate-y-1">
+                            <i class="fa-solid fa-plus mr-2"></i> Input Data Baru
+                        </button>
+                    </div>`;
+                updatePaginationUI(0, 0, 0);
+                return;
+            }
+
+            // Pagination Logic
+            const totalItems = filteredData.length;
+            let startIdx = 0, endIdx = totalItems;
+            if (rowsPerPage !== 'all') {
+                const limit = parseInt(rowsPerPage);
+                const maxPage = Math.ceil(totalItems / limit);
+                if (currentPage > maxPage) currentPage = maxPage;
+                if (currentPage < 1) currentPage = 1;
+                startIdx = (currentPage - 1) * limit;
+                endIdx = Math.min(startIdx + limit, totalItems);
+            }
+            const pageData = filteredData.slice(startIdx, endIdx);
+
+            pageData.forEach(item => {
+                let main = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Kegiatan'] || item['Topik_Layanan'] || 'Data Layanan';
+                if(main.length > 50) main = main.substring(0,50) + '...';
+                let date = getItemDate(item) || '-';
+                let sub = item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Kelas'] || item['Bidang_Layanan'] || 'Umum';
+                
+                const card = document.createElement('div');
+                card.className = "bg-white/95 dark:bg-slate-800/80 backdrop-blur rounded-xl p-5 shadow-lg border-l-4 border-blue-500 hover:shadow-xl hover:translate-x-1 transition-all duration-300 flex flex-col md:flex-row justify-between gap-4 group";
+                card.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${currentTitle.split(' ')[0]}</span>
+                            <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${date}</span>
+                        </div>
+                        <h4 class="font-bold dark:text-white text-slate-800 text-lg group-hover:text-blue-500 transition">${main}</h4>
+                        <p class="text-sm dark:text-slate-400 text-slate-600 mt-1 line-clamp-1">${sub}</p>
+                    </div>
+                    <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
+                        <button onclick="printItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
+                        <button onclick="editItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-lg transition" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg transition" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updatePaginationUI(startIdx + 1, endIdx, totalItems);
+        }
+
+        function changeRowsPerPage() { rowsPerPage = document.getElementById('rows-per-page').value; currentPage = 1; renderDataList(); }
+        function changePage(direction) { currentPage += direction; renderDataList(); }
+        function updatePaginationUI(start, end, total) {
+            document.getElementById('showing-info').innerText = `Menampilkan ${start}-${end} dari ${total} data`;
+            document.getElementById('page-info').innerText = `Page ${currentPage}`;
+            const btnPrev = document.getElementById('btn-prev'), btnNext = document.getElementById('btn-next');
+            btnPrev.disabled = currentPage === 1 || total === 0;
+            if (rowsPerPage === 'all') btnNext.disabled = true;
+            else btnNext.disabled = currentPage >= Math.ceil(total / parseInt(rowsPerPage)) || total === 0;
+        }
+
+        // --- EXPORT & PRINT (Unchanged Logic) ---
+        function exportExcel() {
+            if(filteredData.length === 0) { Swal.fire("Kosong", "Tidak ada data (sesuai filter) untuk diexport.", "warning"); return; }
+            const cleanData = filteredData.map(({ ID_Unik, rowIndex, Created_By, ...rest }) => rest);
+            const ws = XLSX.utils.json_to_sheet(cleanData); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Data Layanan"); XLSX.writeFile(wb, `Export_${currentTitle}.xlsx`);
+        }
+
+        function printRecap() {
+            if(filteredData.length === 0) { Swal.fire("Kosong", "Tidak ada data untuk dicetak.", "warning"); return; }
+            const sDate = document.getElementById('filter-start').value;
+            const eDate = document.getElementById('filter-end').value;
+            let periode = "";
+            if(sDate && eDate) {
+                const d1 = new Date(sDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+                const d2 = new Date(eDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+                periode = `Periode: ${d1} s.d. ${d2}`;
+            }
+            generatePDF(filteredData, `Rekapitulasi_${currentTitle}`, true, periode);
+        }
+
+        function printItem(id) {
+            const item = activeDataList.find(x => x.ID_Unik === id);
+            generatePDF([item], `Laporan_${currentTitle}`, false);
+        }
+
+        // --- PDF (WITH SIGNATURE LOGIC) ---
+        async function generatePDF(data, filename, isRecap, subTitle = "") {
+            const { jsPDF } = window.jspdf;
+            const orientation = isRecap ? 'landscape' : 'portrait';
+            const format = isRecap ? [330.2, 215.9] : [215.9, 330.2]; // F4
+            const doc = new jsPDF({ orientation, unit: 'mm', format });
+            const s = metaData.sekolah || {};
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const centerX = pageWidth / 2;
+
+            const addHeader = async () => {
+                doc.setFont("times", "normal");
+                const defaultLogoKiri = "https://lh3.googleusercontent.com/u/0/d/1lxB2aQC5H-bnz7OlwnpmC9dl2Z3RERwI";
+                const defaultLogoKanan = "https://lh3.googleusercontent.com/d/1jA8C9RLNHSxlumS1NfyIrNTi3VHv7N-u"; 
+                const urlKiri = s.logo_kiri || defaultLogoKiri;
+                const urlKanan = s.logo_kanan || defaultLogoKanan; 
+                if (urlKiri) { const imgData = await getBase64FromUrl(urlKiri); if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); }
+                if (urlKanan) { const imgData2 = await getBase64FromUrl(urlKanan); if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); }
+
+                let currentY = 15;
+                doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+                currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+                currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+                currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+                currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+                currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+                doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+                return currentY + 10;
+            };
+
+            const addFooter = (pageNumber, totalPages) => {
+                const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+                const footerY = pageHeight - 15;
+                doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.1); doc.line(10, footerY - 5, pageWidth - 10, footerY - 5);
+                doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+                doc.text(`Dicetak melalui Sistem E-Administrasi BK Pro | ${dateStr}`, 10, footerY);
+                doc.text(`Halaman ${pageNumber} dari ${totalPages}`, pageWidth - 10, footerY, { align: 'right' });
+                doc.setTextColor(0,0,0);
+            };
+
+            let startY = await addHeader();
+
+            if (isRecap) {
+                // === MODE REKAP ===
+                doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+                doc.text(`REKAPITULASI ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
+                if(subTitle) { startY += 5; doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
+                
+                if(data.length > 0) {
+                    const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
+                    const allKeys = Object.keys(data[0]);
+                    const relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
+                    const headerDisplay = relevantKeys.map(h => toProperCase(h.replace(/_/g, ' ')));
+                    const body = data.map(row => relevantKeys.map(h => row[h]));
+                    doc.autoTable({
+                        startY: startY + 5, head: [headerDisplay], body: body, theme: 'grid',
+                        styles: { font: "helvetica", fontSize: 9, cellPadding: 2, lineWidth: 0.1, lineColor: 0 },
+                        headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', lineWidth: 0.1 },
+                        margin: { top: 10, left: 10, right: 10, bottom: 20 }
+                    });
+                }
+            } else {
+                // === MODE SATUAN ===
+                const item = data[0]; 
+                doc.setFillColor(240, 240, 240); doc.rect(centerX - 60, startY - 5, 120, 10, 'F');
+                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(0, 0, 0); 
+                doc.text(`LAPORAN ${currentTitle.toUpperCase()}`, centerX, startY + 2, { align: 'center' });
+                let currentY = startY + 15;
+                const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
+                const keys = Object.keys(item).filter(k => !excludedKeys.includes(k));
+                const bodyData = keys.map(key => [toProperCase(key.replace(/_/g, ' ')), String(item[key] || '-')]);
+                doc.autoTable({
+                    startY: currentY, head: [['DATA / INFORMASI', 'KETERANGAN']], body: bodyData, theme: 'grid', 
+                    styles: { font: "times", fontSize: 11, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1, valign: 'middle', overflow: 'linebreak' },
+                    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold', halign: 'center', cellPadding: 3 },
+                    columnStyles: { 0: { cellWidth: 60, fillColor: [245, 245, 245], fontStyle: 'bold', textColor: [50, 50, 50] }, 1: { cellWidth: 'auto', fillColor: 255, textColor: 0 } },
+                    margin: { left: 15, right: 15 }
+                });
+            }
+
+            // --- TANDA TANGAN ---
+            let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : startY + 50;
+            const limitPage = pageHeight - 60; 
+            if(finalY > limitPage) { doc.addPage(); finalY = 40; }
+
+            const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            doc.setFont("times", "normal"); doc.setFontSize(11); doc.setTextColor(0,0,0);
+            const namaKepsek = (metaData.sekolah && metaData.sekolah.kepsek) ? metaData.sekolah.kepsek : "..............................";
+            const nipKepsek = (metaData.sekolah && metaData.sekolah.nip_kepsek) ? metaData.sekolah.nip_kepsek : "..................";
+
+            if (isRecap) {
+                // REKAP: KEPALA SEKOLAH + GURU BK
+                doc.text("Mengetahui,", 40, finalY, { align: 'center' });
+                doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
+                doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' });
+                doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+                finalY += 25;
+                doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
+                const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
+                doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
+                const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+            } else {
+                // SATUAN
+                if (currentSheet === '14_Mediasi') {
+                    doc.text("Pihak I (Siswa 1)", 40, finalY, { align: 'center' }); doc.text("Pihak II (Siswa 2)", pageWidth - 40, finalY, { align: 'center' });
+                    finalY += 25; doc.text(`( ${data[0].Nama_Siswa_1 || '....................'} )`, 40, finalY, { align: 'center' }); doc.text(`( ${data[0].Nama_Siswa_2 || '....................'} )`, pageWidth - 40, finalY, { align: 'center' });
+                    finalY += 10; doc.text("Mengetahui,", centerX, finalY - 5, { align: 'center' });
+                    doc.text("Wali Kelas", 40, finalY, { align: 'center' }); doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Mediator / Guru BK", pageWidth - 40, finalY + 5, { align: 'center' });
+                    finalY += 25; doc.text("( .............................. )", 40, finalY, { align: 'center' }); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' }); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+                } else if (currentSheet === '12_Konferensi_Kasus' || currentSheet === '13_Alih_Tangan_Kasus') {
+                    // Multi Sig Logic (Kepsek Left)
+                    if (currentSheet === '12_Konferensi_Kasus') {
+                         doc.text("Pihak Terlibat / Wali Kelas", 40, finalY, { align: 'center' }); doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+                         finalY += 25; doc.text("( .............................. )", 40, finalY, { align: 'center' }); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' }); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+                         finalY += 15; doc.text("Mengetahui,", centerX, finalY, { align: 'center' }); doc.text("Kepala Sekolah", centerX, finalY + 5, { align: 'center' });
+                         finalY += 25; doc.setFont("times", "bold"); doc.text(namaKepsek, centerX, finalY, { align: 'center' });
+                         doc.setLineWidth(0.2); const kWidth = doc.getTextWidth(namaKepsek); doc.line(centerX - kWidth/2, finalY + 1, centerX + kWidth/2, finalY + 1);
+                         doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, centerX, finalY + 5, { align: 'center' });
+                    } else {
+                         doc.text("Mengetahui,", 40, finalY, { align: 'center' }); doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
+                         doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+                         finalY += 25; doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
+                         const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
+                         doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
+                         doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
+                         const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
+                         doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+                    }
+                } else {
+                    // STANDARD (SINGLE GURU BK)
+                    doc.text(`Makassar, ${dateStr}`, centerX, finalY, { align: 'center' });
+                    doc.text("Guru Bimbingan Konseling,", centerX, finalY + 5, { align: 'center' });
+                    doc.setFont("times", "bold"); doc.text(currentUser.nama, centerX, finalY + 25, { align: 'center' });
+                    const textWidth = doc.getTextWidth(currentUser.nama);
+                    doc.setDrawColor(0,0,0); doc.setLineWidth(0.2); doc.line(centerX - (textWidth / 2), finalY + 26, centerX + (textWidth / 2), finalY + 26);
+                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX, finalY + 31, { align: 'center' });
+                }
+            }
+
+            // QR CODE
+            try {
+                let qrText = "";
+                if (isRecap) {
+                    const periodText = subTitle ? subTitle : "Semua Periode";
+                    qrText = `DOKUMEN SAH SIAP-BK UPT SPF SMP Negeri 16 Makassar.\nJenis: REKAPITULASI ${currentTitle}\nPeriode: ${periodText}\nTotal Data: ${data.length}\nGuru BK: ${currentUser.nama}\nMengetahui Kepala Sekolah: ${namaKepsek}`;
+                } else {
+                    const studentName = data[0]['Nama_Siswa'] || data[0]['Nama_Siswa_1'] || data[0]['Nama_Kegiatan'] || '-';
+                    qrText = `DOKUMEN SAH SIAP-BK UPT SPF SMP Negeri 16 Makassar.\nJenis: ${currentTitle}\nSiswa: ${studentName}\nTanggal: ${dateStr}\nGuru BK: ${currentUser.nama}\nMengetahui Kepala Sekolah: ${namaKepsek}`;
+                }
+                const qr = new QRious({ value: qrText, size: 100, level: 'H' });
+                const qrData = qr.toDataURL();
+                doc.addImage(qrData, 'PNG', 10, pageHeight - 50, 25, 25);
+                doc.setFontSize(8); doc.text("Scan untuk validasi", 22.5, pageHeight - 22, { align: 'center' });
+            } catch (qrErr) { console.warn("QR Error", qrErr); }
+
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) { doc.setPage(i); addFooter(i, totalPages); }
+            try { const blob = doc.output('blob'); const blobURL = URL.createObjectURL(blob); window.open(blobURL, '_blank'); } catch (e) { doc.save(`${filename}.pdf`); }
+        }
+
+        // --- FORM ---
+        function getFieldsConfig(sheetName) { /* ... unchanged ... */ 
+            const common = [{ key: 'Tanggal_Layanan', label: 'Tanggal Layanan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }];
+            if(sheetName === '7_Layanan_Individu') return [...common, { key: 'Konseling_Ke', label: 'Konseling Ke-', type: 'number' }, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Ruang', label: 'Ruang', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan', 'Layanan Responsif', 'Dukungan Sistem'] }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Penjelasan_Masalah', label: 'Penjelasan Masalah', type: 'textarea' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik Konseling', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek Layanan', type: 'select', options: 'aspek' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Konseling', type: 'textarea' }, { key: 'Status_Konseling', label: 'Status', type: 'select', options: ['Proses', 'Selesai', 'Rujuk', 'Drop Out'] }];
+            if(sheetName === '8_Layanan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok (Siswa)', type: 'textarea', placeholder: 'Tuliskan nama-nama siswa...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Responsif', 'Layanan Dasar'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Penyebab_Masalah', label: 'Penyebab Masalah', type: 'textarea' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Layanan', type: 'textarea' }, { key: 'Status_Proses', label: 'Status Proses', type: 'select', options: ['Aktif', 'Selesai'] }];
+            if(sheetName === '9_Bimbingan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok', type: 'textarea' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir'] }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Tujuan_Layanan', label: 'Tujuan Layanan', type: 'textarea' }, { key: 'Eksperientasi_Awal', label: 'Tahap Awal', type: 'textarea' }, { key: 'Identifikasi', label: 'Tahap Identifikasi', type: 'textarea' }, { key: 'Analisis', label: 'Tahap Analisis', type: 'textarea' }, { key: 'Generalisasi', label: 'Tahap Generalisasi', type: 'textarea' }, { key: 'Status_Proses', label: 'Status', type: 'select', options: ['Selesai', 'Berlanjut'] }];
+            if(sheetName === '10_Konsultasi') return [...common, { key: 'Durasi', label: 'Durasi', type: 'text' }, { key: 'Nama_Konsulti', label: 'Nama Konsulti (Orang Tua/Guru)', type: 'text' }, { key: 'Status_Konsulti', label: 'Status Konsulti', type: 'select', options: ['Orang Tua', 'Guru Mapel', 'Wali Kelas', 'Lainnya'] }, { key: 'Nama_Konsultan_GuruBK', label: 'Nama Konsultan (Guru BK)', type: 'text', value: currentUser.nama }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Dukungan Sistem', 'Layanan Responsif'] }, { key: 'Bidang_Bimbingan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir'] }, { key: 'Uraian_Topik', label: 'Uraian Topik', type: 'textarea' }, { key: 'Hasil_Konsultasi', label: 'Hasil Konsultasi', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
+            if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir'] }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
+            if(sheetName === '12_Konferensi_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa (Kasus)', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terlibat', label: 'Pihak Terlibat (Ortu/Kepsek)', type: 'text' }, { key: 'Tempat_Pertemuan', label: 'Tempat Pertemuan', type: 'text' }, { key: 'Deskripsi_Kasus', label: 'Deskripsi Kasus', type: 'textarea' }, { key: 'Hasil_Keputusan', label: 'Hasil Keputusan (Berita Acara)', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
+            if(sheetName === '13_Alih_Tangan_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Penerima', label: 'Dirujuk Kepada (Psikolog/Dokter/dll)', type: 'text' }, { key: 'Alamat_Penerima', label: 'Alamat Pihak Penerima', type: 'text' }, { key: 'Alasan_Rujukan', label: 'Alasan Rujukan', type: 'textarea' }, { key: 'Dokumen_Penyerta', label: 'Dokumen Penyerta (Rekam Medis dll)', type: 'text' }, { key: 'Hasil_Rujukan', label: 'Hasil (Umpan Balik)', type: 'textarea' }, { key: 'Status_Rujukan', label: 'Status', type: 'select', options: ['Dikirim', 'Diterima', 'Selesai'] }];
+            if(sheetName === '14_Mediasi') return [...common, { key: 'Nama_Siswa_1', label: 'Pihak 1 (Siswa)', type: 'select', options: 'siswa' }, { key: 'Nama_Siswa_2', label: 'Pihak 2 (Siswa/Lawan)', type: 'text', placeholder: 'Ketik nama pihak lawan...' }, { key: 'Pokok_Masalah', label: 'Pokok Masalah', type: 'textarea' }, { key: 'Hasil_Kesepakatan', label: 'Isi Perjanjian Damai', type: 'textarea' }, { key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }];
+            if(sheetName === '15_Advokasi') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
+            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'text' }];
+            return [];
+        }
+        function showForm(isEdit = false, id = null) {
+            editMode = isEdit;
+            editId = id;
+            document.getElementById('form-header').innerText = isEdit ? `Edit Data` : `Input Data Baru`;
+            const form = document.getElementById('dynamic-form');
+            form.innerHTML = '';
+            const fields = getFieldsConfig(currentSheet);
+            let existingData = {};
+            if(isEdit) existingData = activeDataList.find(x => x.ID_Unik === id) || {};
+            fields.forEach(f => {
+                const div = document.createElement('div'); div.className = "flex flex-col gap-1";
+                const label = document.createElement('label'); label.className = "text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1"; label.innerText = f.label;
+                let input;
+                const val = isEdit ? (existingData[f.key] || '') : (f.value || '');
+                const baseClass = "w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium placeholder-gray-400";
+                
+                if (f.type === 'select') {
+                    if (f.options === 'siswa') {
+                        input = document.createElement('input');
+                        input.setAttribute('list', `list-${f.key}`);
+                        input.className = baseClass;
+                        input.value = val;
+                        input.placeholder = "Ketik untuk mencari nama siswa..."; // Add placeholder
+                        const datalist = document.createElement('datalist');
+                        datalist.id = `list-${f.key}`;
+                        let opts = metaData[f.options] || [];
+                        datalist.innerHTML = opts.map(o => {
+                            if(typeof o === 'object') return `<option value="${o.nama}">${o.kelas} - ${o.nisn || ''}</option>`; // More details
+                            return `<option value="${o}"></option>`;
+                        }).join('');
+                        if(f.key === 'Nama_Siswa' || f.key === 'Nama_Siswa_1') input.onchange = (e) => autoFillSiswa(e.target.value);
+                        div.appendChild(datalist);
+                    } else {
+                        input = document.createElement('select'); input.className = baseClass;
+                        let opts = f.options || [];
+                        if(typeof f.options === 'string') opts = metaData[f.options] || [];
+                        input.innerHTML = `<option value="">-- Pilih ${f.label} --</option>` + opts.map(o => {
+                            if(typeof o === 'object') return `<option value="${o.nama}" ${o.nama===val?'selected':''}>${o.nama} (${o.kelas})</option>`;
+                            return `<option value="${o}" ${o===val?'selected':''}>${o}</option>`;
+                        }).join('');
+                        if(f.key === 'Nama_Siswa' || f.key === 'Nama_Siswa_1') input.onchange = (e) => autoFillSiswa(e.target.value);
+                    }
+                } else if (f.type === 'textarea') {
+                    input = document.createElement('textarea'); input.className = baseClass + " min-h-[100px]"; input.rows = 3; input.value = val; input.placeholder = f.placeholder || '';
+                } else if (f.type === 'date') {
+                    input = document.createElement('input'); input.type = 'date'; input.className = baseClass;
+                    if(val) { let d = new Date(val); if(!isNaN(d)) input.value = d.toISOString().split('T')[0]; }
+                } else {
+                    input = document.createElement('input'); input.type = f.type || 'text'; input.className = baseClass + (f.type === 'readonly' ? " bg-gray-100 dark:bg-slate-700 text-gray-500 cursor-not-allowed" : ""); input.value = val; if(f.type === 'readonly') input.readOnly = true; input.placeholder = f.placeholder || '';
+                }
+                input.name = f.key; input.id = `field-${f.key}`;
+                div.appendChild(label); div.appendChild(input); form.appendChild(div);
+            });
+            document.getElementById('page-form').classList.remove('hide');
+        }
+        function closeForm() { document.getElementById('page-form').classList.add('hide'); }
+        function autoFillSiswa(nama) {
+            const s = metaData.siswa.find(x => x.nama === nama);
+            if(s) {
+                if(document.getElementById('field-Kelas')) document.getElementById('field-Kelas').value = s.kelas;
+                if(document.getElementById('field-NISN')) document.getElementById('field-NISN').value = s.nisn;
+            }
+        }
+        async function handleSave(e) {
+            e.preventDefault(); const formData = new FormData(document.getElementById('dynamic-form')); const dataObj = {}; formData.forEach((value, key) => dataObj[key] = value); dataObj['Created_By'] = currentUser.username;
+            if(!dataObj['Tanggal_Layanan'] && !dataObj['Tanggal'] && !dataObj['Tanggal_Kegiatan']) {
+                const d = new Date().toISOString().split('T')[0];
+                if(currentSheet.includes('Klasikal')) dataObj['Tanggal'] = d; else if(currentSheet.includes('Dukungan')) dataObj['Tanggal_Kegiatan'] = d; else dataObj['Tanggal_Layanan'] = d;
+            }
+            const payload = { action: editMode ? 'updateData' : 'saveData', sheetName: currentSheet, values: dataObj, id: editId };
+            const res = await apiCall(payload, 'POST', payload);
+            if(res && res.status === 'success') { showToast('Data berhasil disimpan'); closeForm(); openService(currentSheet, currentTitle); } else { Swal.fire("Gagal", res?.message, "error"); }
+        }
+        async function deleteItem(id) {
+            const confirm = await Swal.fire({ title: 'Hapus Data?', text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Hapus Data', cancelButtonText: 'Batal' });
+            if(confirm.isConfirmed) {
+                const payload = { action: 'deleteData', sheetName: currentSheet, id: id, username: currentUser.username };
+                const res = await apiCall(payload, 'POST', payload);
+                if(res.status === 'success') { showToast('Data berhasil dihapus', 'success'); openService(currentSheet, currentTitle); } else { Swal.fire("Gagal", res.message, "error"); }
+            }
+        }
+        function editItem(id) { showForm(true, id); }
+        function showAbout() {
+            Swal.fire({ title: 'Tentang Aplikasi', html: `<div class="text-left text-sm"><p><strong>SIAP-BK Pro</strong></p><p class="mb-2">Sistem Informasi Administrasi Pelayanan BK.</p><ul class="list-disc pl-4 text-gray-600"><li>Fitur Cetak: Professional Report & Smart Recap</li><li>Database: Google Sheets</li><li>Keamanan: User Auth & Encrypted Traffic</li></ul><p class="mt-4 text-xs text-gray-400">Developed with ❤️ by Muhammad Hasratul</p></div>`, icon: 'info', confirmButtonColor: '#3b82f6' });
+        }
+    </script>
+</body>
+</html>
