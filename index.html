@@ -207,8 +207,8 @@
                      class="w-24 h-24 mx-auto mb-6 drop-shadow-2xl float-anim object-contain relative z-10" 
                      alt="Logo Sekolah">
 
-                <h2 class="text-2xl font-bold dark:text-white text-slate-800 mb-1 relative z-10">Selamat Datang</h2>
-                <p class="dark:text-slate-300 text-slate-500 text-sm mb-8 relative z-10">Login Guru Bimbingan Konseling</p>
+                <h2 class="text-2xl font-bold dark:text-white text-slate-800 mb-1 relative z-10">SIAP-BK</h2>
+                <p class="dark:text-slate-300 text-slate-500 text-sm mb-8 relative z-10">UPT SPF SMP NEGERI 16 MAKASSAR</p>
                 
                 <form onsubmit="handleLogin(event)" class="space-y-5 relative z-10">
                     <div class="text-left relative group">
@@ -375,7 +375,7 @@
                     <h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Dukungan Sistem</h3>
                     <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                     <div onclick="openService('10_Konsultasi', 'Konsultasi')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-orange-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
                         <div class="w-16 h-16 rounded-2xl bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-orange-500/10">
                             <i class="fa-solid fa-handshake-simple text-3xl text-orange-600 dark:text-orange-200 group-hover:text-white transition-colors"></i>
@@ -387,14 +387,6 @@
                             <i class="fa-solid fa-network-wired text-3xl text-slate-600 dark:text-slate-200 group-hover:text-white transition-colors"></i>
                         </div>
                         <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Dukungan Sistem</span>
-                    </div>
-                    <!-- NEW: RPL GENERATOR MENU (Moved from Group 1 to Group 3) -->
-                    <div onclick="openRPLGenerator()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-yellow-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-yellow-500 text-white text-[9px] px-2 py-1 rounded-bl-lg font-bold">AI POWERED</div>
-                        <div class="w-16 h-16 rounded-2xl bg-yellow-500/20 flex items-center justify-center group-hover:bg-yellow-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-yellow-500/10">
-                            <i class="fa-solid fa-wand-magic-sparkles text-3xl text-yellow-600 dark:text-yellow-200 group-hover:text-white transition-colors"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Generator RPLBK</span>
                     </div>
                     <div onclick="showAbout()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-gray-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
                         <div class="w-16 h-16 rounded-2xl bg-gray-500/20 flex items-center justify-center group-hover:bg-gray-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-gray-500/10">
@@ -415,7 +407,7 @@
                         <h2 id="service-title" class="text-2xl font-bold dark:text-white text-slate-800 drop-shadow-md">Judul Layanan</h2>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="px-2 py-0.5 rounded text-[10px] bg-green-500/20 text-green-600 dark:text-green-300 border border-green-500/30">Active</span>
-                            <p class="dark:text-blue-200 text-slate-500 text-xs">Data Database</p>
+                            <p class="dark:text-blue-200 text-slate-500 text-xs">Mappaguru Online</p>
                         </div>
                     </div>
                     
@@ -472,60 +464,6 @@
                     <span id="page-info" class="text-sm font-bold mx-2">Page 1</span>
                     <button onclick="changePage(1)" id="btn-next" class="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 disabled:opacity-50 transition"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-            </div>
-        </section>
-        
-        <!-- NEW SECTION: GENERATOR RPLBK -->
-        <section id="page-rpl-generator" class="hide flex-1 pb-10 flex flex-col h-screen">
-            <div class="flex-none mb-4">
-                <button onclick="goHome()" class="text-sm text-blue-500 hover:underline mb-2"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</button>
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-yellow-500 flex items-center justify-center text-white text-2xl shadow-lg"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <div>
-                        <h2 class="text-2xl font-bold dark:text-white text-slate-800">Generator RPLBK Cerdas</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Powered by AI (Kurikulum Merdeka & ARKA)</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Input Form -->
-            <div class="glass p-6 rounded-2xl shadow-lg mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Topik / Materi Layanan</label>
-                        <input type="text" id="rpl-topik" placeholder="Contoh: Stop Bullying, Motivasi Belajar, Etika Pergaulan..." class="w-full p-3 rounded-xl border mt-1 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Sasaran Kelas</label>
-                            <select id="rpl-kelas" class="w-full p-3 rounded-xl border mt-1 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
-                                <option>Kelas 7</option><option>Kelas 8</option><option>Kelas 9</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Durasi</label>
-                            <select id="rpl-durasi" class="w-full p-3 rounded-xl border mt-1 dark:bg-slate-800 dark:border-slate-600 dark:text-white">
-                                <option>1 x 40 Menit</option><option>2 x 40 Menit</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button onclick="handleGenerateRPL()" class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition flex items-center gap-2">
-                        <i class="fa-solid fa-robot"></i> Buat Modul Otomatis
-                    </button>
-                </div>
-            </div>
-
-            <!-- Result Preview (Hidden initially) -->
-            <div id="rpl-result" class="hide flex-1 overflow-y-auto custom-scroll space-y-6 pb-20">
-                <!-- RPL Content injected here -->
-            </div>
-            
-            <!-- Action Floating Bar -->
-            <div id="rpl-actions" class="hide fixed bottom-0 left-0 w-full p-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-t dark:border-slate-700 flex justify-center gap-4 z-40">
-                <button onclick="saveRPLToBank()" class="px-6 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg"><i class="fa-solid fa-save mr-2"></i> Simpan ke Bank RPL</button>
-                <button onclick="printModulRPL()" class="px-6 py-2 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 shadow-lg"><i class="fa-solid fa-file-pdf mr-2"></i> Cetak Modul Lengkap</button>
             </div>
         </section>
 
@@ -947,264 +885,7 @@
             });
         }
 
-        // --- NEW: RPL GENERATOR LOGIC ---
-        let generatedRPLData = null;
-
-        function openRPLGenerator() {
-            showSection('page-rpl-generator');
-            document.getElementById('rpl-result').classList.add('hide');
-            document.getElementById('rpl-actions').classList.add('hide');
-        }
-
-        async function handleGenerateRPL() {
-            const topik = document.getElementById('rpl-topik').value;
-            const kelas = document.getElementById('rpl-kelas').value;
-            const durasi = document.getElementById('rpl-durasi').value;
-
-            if(!topik) { Swal.fire("Isi Topik", "Mohon isi topik layanan.", "warning"); return; }
-
-            // Show Loading Custom
-            document.getElementById('loading').classList.remove('hide');
-            document.querySelector('#loading p').innerText = "AI SEDANG MERACIK MODUL AJAR...";
-
-            const payload = {
-                action: 'generateRPL',
-                topik: topik,
-                sasaran: kelas,
-                durasi: durasi
-            };
-
-            const res = await apiCall(payload, 'POST', payload);
-            document.getElementById('loading').classList.add('hide');
-
-            if(res && res.status === 'success') {
-                generatedRPLData = res.data;
-                renderRPLResult(res.data);
-                showToast("Modul Berhasil Dibuat!", "success");
-            } else {
-                Swal.fire("Gagal", res?.message || "AI sedang sibuk, coba lagi.", "error");
-            }
-        }
-
-        function renderRPLResult(data) {
-            const container = document.getElementById('rpl-result');
-            container.classList.remove('hide');
-            document.getElementById('rpl-actions').classList.remove('hide');
-
-            // Render Preview Card
-            container.innerHTML = `
-                <div class="glass p-6 rounded-2xl border-l-4 border-yellow-500 bg-white/80 dark:bg-slate-800/80">
-                    <h3 class="text-xl font-bold dark:text-white mb-2">1. Identitas Layanan</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-gray-500 block">Topik</span><b>${document.getElementById('rpl-topik').value}</b></div>
-                        <div><span class="text-gray-500 block">Bidang</span><b>${data.identitas.bidang}</b></div>
-                        <div><span class="text-gray-500 block">Fungsi</span><b>${data.identitas.fungsi}</b></div>
-                        <div><span class="text-gray-500 block">Tujuan</span><b>${data.identitas.skkpd}</b></div>
-                    </div>
-                </div>
-
-                <div class="glass p-6 rounded-2xl border-l-4 border-blue-500 bg-white/80 dark:bg-slate-800/80">
-                    <h3 class="text-xl font-bold dark:text-white mb-4">2. Langkah Kegiatan (Model ARKA)</h3>
-                    <div class="space-y-4 text-sm">
-                        <div class="bg-blue-50 dark:bg-slate-700 p-3 rounded-lg">
-                            <b class="text-blue-600 block mb-1">TAHAP AWAL</b>
-                            <p>${data.kegiatan.awal}</p>
-                        </div>
-                        <div class="bg-green-50 dark:bg-slate-700 p-3 rounded-lg border-l-4 border-green-500">
-                            <b class="text-green-600 block mb-1">AMATI (Experiential)</b>
-                            <p>${data.kegiatan.inti_amati}</p>
-                        </div>
-                        <div class="bg-yellow-50 dark:bg-slate-700 p-3 rounded-lg border-l-4 border-yellow-500">
-                            <b class="text-yellow-600 block mb-1">REFLEKSI (Deep Thinking)</b>
-                            <p>${data.kegiatan.inti_refleksi}</p>
-                        </div>
-                        <div class="bg-purple-50 dark:bg-slate-700 p-3 rounded-lg border-l-4 border-purple-500">
-                            <b class="text-purple-600 block mb-1">KONSEPTUALISASI (Materi)</b>
-                            <p>${data.kegiatan.inti_konsep}</p>
-                        </div>
-                        <div class="bg-red-50 dark:bg-slate-700 p-3 rounded-lg border-l-4 border-red-500">
-                            <b class="text-red-600 block mb-1">AKSI / APLIKASI (Nyata)</b>
-                            <p>${data.kegiatan.penutup_aksi}</p>
-                        </div>
-                        <div class="bg-gray-100 dark:bg-slate-700 p-3 rounded-lg">
-                            <b class="text-gray-600 block mb-1">PENUTUP</b>
-                            <p>${data.kegiatan.penutup_akhir}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass p-6 rounded-2xl border-l-4 border-indigo-500 bg-white/80 dark:bg-slate-800/80">
-                    <h3 class="text-xl font-bold dark:text-white mb-2">3. Lampiran Materi (Generated)</h3>
-                    <div class="prose dark:prose-invert text-sm max-w-none p-4 bg-white dark:bg-slate-900 rounded-xl border h-40 overflow-y-auto">
-                        ${data.materi_lengkap}
-                    </div>
-                </div>
-            `;
-        }
-
-        async function saveRPLToBank() {
-            if(!generatedRPLData) return;
-            const payload = {
-                action: 'saveData',
-                sheetName: '17_Bank_RPLBK',
-                values: {
-                    'Topik_Layanan': document.getElementById('rpl-topik').value,
-                    'Sasaran_Kelas': document.getElementById('rpl-kelas').value,
-                    'Durasi': document.getElementById('rpl-durasi').value,
-                    'Created_By': currentUser.username,
-                    'Tanggal_Dibuat': new Date().toISOString().split('T')[0],
-                    'JSON_Data_Lengkap': JSON.stringify(generatedRPLData)
-                }
-            };
-            const res = await apiCall(payload, 'POST', payload);
-            if(res.status === 'success') showToast("Modul Tersimpan di Bank RPL");
-        }
-
-        // --- PDF GENERATOR KHUSUS RPL (MULTI PAGE) ---
-        async function printModulRPL() {
-            if(!generatedRPLData) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' }); // A4 Standard
-            const data = generatedRPLData;
-            const topik = document.getElementById('rpl-topik').value;
-            const s = metaData.sekolah || {};
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const centerX = pageWidth / 2;
-
-            // --- HEADER HELPER ---
-            const addHeader = async () => {
-                doc.setFont("times", "normal");
-                const defaultLogoKiri = "https://lh3.googleusercontent.com/u/0/d/1lxB2aQC5H-bnz7OlwnpmC9dl2Z3RERwI";
-                const defaultLogoKanan = "https://lh3.googleusercontent.com/d/1jA8C9RLNHSxlumS1NfyIrNTi3VHv7N-u"; 
-                const urlKiri = s.logo_kiri || defaultLogoKiri;
-                const urlKanan = s.logo_kanan || defaultLogoKanan; 
-                
-                // Add Images
-                if (urlKiri) { const img = await getBase64FromUrl(urlKiri); if(img) doc.addImage(img, 'PNG', 15, 10, 20, 20); }
-                if (urlKanan) { const img = await getBase64FromUrl(urlKanan); if(img) doc.addImage(img, 'PNG', pageWidth-35, 10, 20, 20); }
-
-                let y = 15;
-                doc.setFontSize(11); doc.text((s.pemerintah || "PEMERINTAH").toUpperCase(), centerX, y, { align: 'center' }); y+=5;
-                doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, y, { align: 'center' }); y+=6;
-                doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "SEKOLAH").toUpperCase(), centerX, y, { align: 'center' }); y+=5;
-                doc.setFontSize(10); doc.setFont("times", "normal"); doc.text(s.alamat || "Alamat", centerX, y, { align: 'center' }); y+=4;
-                doc.setLineWidth(0.5); doc.line(15, y, pageWidth-15, y);
-                return y + 10;
-            };
-
-            // === PAGE 1: RPL MATRIX ===
-            let y = await addHeader();
-            
-            doc.setFont("times", "bold"); doc.setFontSize(12);
-            doc.text("RENCANA PELAKSANAAN LAYANAN (RPL)", centerX, y, { align: 'center' }); y+=5;
-            doc.text("BIMBINGAN KLASIKAL", centerX, y, { align: 'center' }); y+=10;
-
-            // Identity Table
-            doc.autoTable({
-                startY: y,
-                body: [
-                    ['Topik Layanan', `: ${topik}`, 'Sasaran', `: ${document.getElementById('rpl-kelas').value}`],
-                    ['Komponen', ': Layanan Dasar', 'Durasi', `: ${document.getElementById('rpl-durasi').value}`],
-                    ['Bidang', `: ${data.identitas.bidang}`, 'Fungsi', `: ${data.identitas.fungsi}`]
-                ],
-                theme: 'plain',
-                styles: { fontSize: 10, cellPadding: 1 },
-                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 30 }, 2: { fontStyle: 'bold', cellWidth: 20 } },
-                margin: { left: 15, right: 15 }
-            });
-            y = doc.lastAutoTable.finalY + 5;
-
-            // Tujuan & Profil
-            doc.setFontSize(10);
-            doc.setFont("times", "bold"); doc.text("A. TUJUAN LAYANAN", 15, y); y+=5;
-            doc.setFont("times", "normal"); doc.text(`SKKPD: ${data.identitas.skkpd}`, 20, y, { maxWidth: 170 }); y+=10; // Approx
-            doc.text(`Tujuan Khusus: ${data.tujuan_khusus}`, 20, y, { maxWidth: 170 }); 
-            y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : y+15; // Safe buffer
-
-            doc.setFont("times", "bold"); doc.text("B. PROFIL PELAJAR PANCASILA", 15, y); y+=5;
-            doc.setFont("times", "normal"); doc.text(data.karakter, 20, y); y+=10;
-
-            doc.setFont("times", "bold"); doc.text("C. KEGIATAN LAYANAN (Model ARKA)", 15, y); y+=5;
-
-            // ARKA TABLE
-            doc.autoTable({
-                startY: y,
-                head: [['TAHAP', 'SINTAKS ARKA', 'KEGIATAN']],
-                body: [
-                    ['PENDAHULUAN', '-', data.kegiatan.awal],
-                    ['INTI', 'A (AMATI)', data.kegiatan.inti_amati],
-                    ['INTI', 'R (REFLEKSI)', data.kegiatan.inti_refleksi],
-                    ['INTI', 'K (KONSEPTUALISASI)', data.kegiatan.inti_konsep],
-                    ['PENUTUP', 'A (AKSI/APLIKASI)', data.kegiatan.penutup_aksi],
-                    ['PENUTUP', '-', data.kegiatan.penutup_akhir]
-                ],
-                theme: 'grid',
-                headStyles: { fillColor: [200, 200, 200], textColor: 0, fontStyle: 'bold' },
-                columnStyles: { 0: { cellWidth: 30, fontStyle: 'bold' }, 1: { cellWidth: 35, fontStyle: 'bold' } },
-                styles: { fontSize: 10, cellPadding: 3, valign: 'middle' },
-                margin: { left: 15, right: 15 }
-            });
-            y = doc.lastAutoTable.finalY + 15;
-
-            // SIGNATURES
-            if (y > 250) { doc.addPage(); y = 40; } // New page if low space
-            const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-            
-            doc.setFont("times", "normal");
-            doc.text(`Makassar, ${dateStr}`, pageWidth-50, y, { align: 'center' }); y+=5;
-            doc.text("Mengetahui,", 50, y, { align: 'center' });
-            doc.text("Guru BK,", pageWidth-50, y, { align: 'center' }); y+=5;
-            doc.text("Kepala Sekolah", 50, y, { align: 'center' }); y+=20;
-            
-            const kepsek = (metaData.sekolah && metaData.sekolah.kepsek) || "..................";
-            const nipK = (metaData.sekolah && metaData.sekolah.nip_kepsek) || "..................";
-            
-            doc.setFont("times", "bold");
-            doc.text(kepsek, 50, y, { align: 'center' });
-            doc.text(currentUser.nama, pageWidth-50, y, { align: 'center' }); y+=5;
-            doc.setFont("times", "normal");
-            doc.text(`NIP. ${nipK}`, 50, y, { align: 'center' });
-            doc.text(`NIP. ${currentUser.nip}`, pageWidth-50, y, { align: 'center' });
-
-            // === PAGE 2: MATERI ===
-            doc.addPage();
-            await addHeader();
-            doc.setFont("times", "bold"); doc.setFontSize(12);
-            doc.text("LAMPIRAN 1: MATERI LAYANAN", centerX, 40, { align: 'center' });
-            doc.setFontSize(14); doc.text(topik.toUpperCase(), centerX, 50, { align: 'center' });
-            
-            doc.setFont("times", "normal"); doc.setFontSize(11);
-            const splitText = doc.splitTextToSize(data.materi_lengkap, 170);
-            doc.text(splitText, 20, 60);
-
-            // === PAGE 3: EVALUASI ===
-            doc.addPage();
-            await addHeader();
-            doc.setFont("times", "bold"); doc.setFontSize(12);
-            doc.text("LAMPIRAN 2: INSTRUMEN EVALUASI", centerX, 40, { align: 'center' });
-
-            let evalY = 50;
-            doc.setFontSize(11); doc.text("A. EVALUASI PROSES (Observasi Guru)", 20, evalY); evalY+=10;
-            doc.setFont("times", "normal");
-            doc.text(doc.splitTextToSize(data.evaluasi.proses, 170), 25, evalY);
-            evalY += 30; // Spacing
-
-            doc.setFont("times", "bold"); doc.text("B. EVALUASI HASIL (Refleksi Siswa)", 20, evalY); evalY+=10;
-            doc.setFont("times", "normal");
-            doc.text("1. Understanding (Pemahaman):", 25, evalY); evalY+=5;
-            doc.text(doc.splitTextToSize(data.evaluasi.hasil_understanding, 160), 30, evalY); evalY+=15;
-            
-            doc.text("2. Comfort (Perasaan):", 25, evalY); evalY+=5;
-            doc.text(doc.splitTextToSize(data.evaluasi.hasil_comfort, 160), 30, evalY); evalY+=15;
-
-            doc.text("3. Action (Rencana Tindakan):", 25, evalY); evalY+=5;
-            doc.text(doc.splitTextToSize(data.evaluasi.hasil_action, 160), 30, evalY);
-
-            // Print
-            window.open(URL.createObjectURL(doc.output('blob')), '_blank');
-        }
-
-        // --- TIMELINE SEARCH (EXISTING CODE) ---
+        // --- TIMELINE SEARCH ---
         function searchStudentHistory() {
             const keyword = document.getElementById('global-student-search').value.toLowerCase();
             if(!keyword) return;
@@ -1214,6 +895,7 @@
             const sheetLabels = {
                 '7_Layanan_Individu': { label: 'Konseling Individu', icon: 'fa-user', color: 'blue' },
                 '8_Layanan_Kelompok': { label: 'Konseling Kelompok', icon: 'fa-users', color: 'green' },
+                // ... (Existing mappings) ...
                 '9_Bimbingan_Kelompok': { label: 'Bim. Kelompok', icon: 'fa-chalkboard-user', color: 'purple' },
                 '10_Konsultasi': { label: 'Konsultasi', icon: 'fa-handshake', color: 'orange' },
                 '11_Layanan_Klasikal': { label: 'Klasikal', icon: 'fa-person-chalkboard', color: 'red' },
@@ -1263,8 +945,7 @@
             showSection('page-student-profile');
         }
 
-        // --- SERVICE LIST: FILTER & PAGINATION ---
-        
+        // --- SERVICE LIST ---
         async function openService(sheetName, title) {
             currentSheet = sheetName;
             currentTitle = title;
@@ -1444,8 +1125,8 @@
                 const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'});
                 const footerY = pageHeight - 15;
                 doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.1); doc.line(10, footerY - 5, pageWidth - 10, footerY - 5);
-                doc.setFont("helvetica", "italic"); doc.setFontSize(6); doc.setTextColor(100, 100, 100);
-                doc.text(`Dicetak melalui Aplikasi SIAP-BK UPT SPF SMP Negeri 16 Makassar | ${dateStr}`, 10, footerY);
+                doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+                doc.text(`Dicetak melalui Sistem E-Administrasi BK Pro | ${dateStr}`, 10, footerY);
                 doc.text(`Halaman ${pageNumber} dari ${totalPages}`, pageWidth - 10, footerY, { align: 'right' });
                 doc.setTextColor(0,0,0);
             };
