@@ -1130,16 +1130,6 @@
                 return currentY + 10;
             };
 
-            const addFooter = (pageNumber, totalPages) => {
-                const dateStr = new Date().toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'});
-                const footerY = pageHeight - 15;
-                doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.1); doc.line(10, footerY - 5, pageWidth - 10, footerY - 5);
-                doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(100, 100, 100);
-                doc.text(`Dicetak melalui SIAP-BK UPT SPF SMP Negeri 16 Makassar | ${dateStr}`, 6, footerY);
-                doc.text(`Halaman ${pageNumber} dari ${totalPages}`, pageWidth - 10, footerY, { align: 'right' });
-                doc.setTextColor(0,0,0);
-            };
-
             let startY = await addHeader();
 
             if (isRecap) {
@@ -1273,8 +1263,6 @@
                 doc.setFontSize(8); doc.text("Scan untuk validasi", 22.5, pageHeight - 22, { align: 'center' });
             } catch (qrErr) { console.warn("QR Error", qrErr); }
 
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) { doc.setPage(i); addFooter(i, totalPages); }
             try { const blob = doc.output('blob'); const blobURL = URL.createObjectURL(blob); window.open(blobURL, '_blank'); } catch (e) { doc.save(`${filename}.pdf`); }
         }
 
