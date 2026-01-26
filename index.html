@@ -1034,24 +1034,142 @@
             }
             const pageData = filteredData.slice(startIdx, endIdx);
 
+            // --- LOOPING DATA UTAMA ---
             pageData.forEach(item => {
-                let main = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Kegiatan'] || item['Topik_Layanan'] || 'Data Layanan';
-                if(main.length > 50) main = main.substring(0,50) + '...';
                 let date = getItemDate(item) || '-';
-                let sub = item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Kelas'] || item['Bidang_Layanan'] || 'Umum';
+                let main = 'Data Layanan';
+                let sub = '-';
+
+                // --- HELPER 1: FORMAT NAMA & KELAS ---
+                const formatNamaKelas = (nama, kls) => {
+                    if (!nama) return 'Tanpa Nama';
+                    return kls ? `${nama} (${kls})` : nama;
+                };
+
+                // --- HELPER 2: AMBIL BIDANG & STATUS ---
+                const getBidang = () => {
+                    let b = item['Bidang_Bimbingan'] || item['Bidang_Layanan'];
+                    return b ? `[${b}] ` : ''; 
+                };
+                const getStatus = () => {
+                    let s = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'];
+                    return s ? ` (Status: ${s})` : ''; 
+                };
+
+                // --- HELPER 3: EARLY WARNING SYSTEM (FITUR BARU) 🔥 ---
+                const getRiskBadge = (studentName) => {
+                    if (!studentName || !cachedAllServices) return ''; // Cek ketersediaan data
+                    
+                    // Jangan hitung jika ini bukan nama siswa (misal nama kegiatan/guru)
+                    if (currentSheet === '16_Dukungan_Sistem' || currentSheet === '10_Konsultasi') return '';
+
+                    let totalKasus = 0;
+                    // Loop semua sheet yang ada di memori (cache)
+                    Object.values(cachedAllServices).forEach(sheetData => {
+                        sheetData.forEach(row => {
+                            // Cek apakah nama siswa ini muncul di data lain
+                            const rowName = (row['Nama_Siswa'] || row['Nama_Siswa_1'] || row['Nama_Siswa_2'] || '').toLowerCase();
+                            if (rowName.includes(studentName.toLowerCase())) totalKasus++;
+                        });
+                    });
+
+                    // Logika Penentuan Level Risiko
+                    if (totalKasus >= 5) {
+                        return `<span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200" title="Siswa ini memiliki ${totalKasus} riwayat kasus!"><i class="fa-solid fa-fire animate-pulse"></i> ${totalKasus}x Kasus</span>`;
+                    } else if (totalKasus >= 3) {
+                        return `<span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-700 border border-yellow-200" title="Perhatian! Siswa ini sudah ${totalKasus} kali terlibat."><i class="fa-solid fa-triangle-exclamation"></i> ${totalKasus}x</span>`;
+                    }
+                    return '';
+                };
+
+                // Variabel untuk menyimpan Nama Siswa Murni (untuk dicek risikonya)
+                let namaSiswaCheck = ''; 
+
+                // --- LOGIKA TAMPILAN PER LAYANAN ---
+
+                if (currentSheet === '7_Layanan_Individu') {
+                    namaSiswaCheck = item['Nama_Siswa']; // Simpan nama untuk dicek
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    let ke = item['Konseling_Ke'] || '-';
+                    let masalah = item['Identifikasi_Masalah'] || 'Masalah belum diisi';
+                    sub = `${getBidang()}Konseling Ke-${ke}: ${masalah}${getStatus()}`;
+
+                } else if (currentSheet === '8_Layanan_Kelompok' || currentSheet === '9_Bimbingan_Kelompok') {
+                    main = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || 'Topik Kelompok';
+                    let anggota = item['Anggota_Kelompok_Siswa'] || '';
+                    let count = anggota.split(',').length; 
+                    sub = `${getBidang()}${anggota ? `Anggota: ${count} Siswa` : 'Anggota kosong'}${getStatus()}`;
+
+                } else if (currentSheet === '10_Konsultasi') {
+                    let nama = item['Nama_Konsulti'] || 'Tanpa Nama';
+                    let statusK = item['Status_Konsulti'] || '-';
+                    main = `${nama} (${statusK})`;
+                    sub = `${getBidang()}Topik: ${item['Uraian_Topik'] || item['Topik_Layanan'] || '-'}`;
+
+                } else if (currentSheet === '11_Layanan_Klasikal') {
+                    main = item['Topik_Layanan'] || 'Materi Klasikal';
+                    let sasaran = item['Sasaran_Layanan'] || '-';
+                    sub = `${getBidang()}Sasaran: Kelas ${sasaran}`;
+
+                } else if (currentSheet === '12_Konferensi_Kasus') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    let pihak = item['Pihak_Terlibat'] || '-';
+                    sub = `${getBidang()}Bersama: ${pihak}`;
+
+                } else if (currentSheet === '13_Alih_Tangan_Kasus') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    let penerima = item['Pihak_Penerima'] || 'Pihak Luar';
+                    sub = `${getBidang()}Dirujuk ke: ${penerima}${getStatus()}`;
+
+                } else if (currentSheet === '14_Mediasi') {
+                    // Untuk mediasi, kita cek salah satu saja atau biarkan kosong dulu agar tidak terlalu ramai
+                    let s1 = item['Nama_Siswa_1'] || 'Pihak 1';
+                    let s2 = item['Nama_Siswa_2'] || 'Pihak 2';
+                    main = `${s1} & ${s2}`; 
+                    sub = `${getBidang()}${item['Pokok_Masalah'] ? `Masalah: ${item['Pokok_Masalah']}` : 'Masalah Mediasi'}${getStatus()}`;
+
+                } else if (currentSheet === '15_Advokasi') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    let terkait = item['Pihak_Terkait'] || '-';
+                    sub = `${getBidang()}Terkait: ${terkait}${getStatus()}`;
+
+                } else if (currentSheet === '16_Dukungan_Sistem') {
+                    main = item['Nama_Kegiatan'] || 'Kegiatan';
+                    sub = item['Peran_GuruBK'] ? `Peran: ${item['Peran_GuruBK']}` : '-';
+
+                } else {
+                    main = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Kegiatan'] || 'Data Layanan';
+                    sub = item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Kelas'] || 'Keterangan umum';
+                }
                 
+                // --- GENERATE WARNING BADGE ---
+                // Kita panggil fungsi Early Warning dan tempelkan di sebelah Judul (Main)
+                const warningBadge = getRiskBadge(namaSiswaCheck);
+
+                // --- RENDER KARTU ---
                 const card = document.createElement('div');
                 card.className = "bg-white/95 dark:bg-slate-800/80 backdrop-blur rounded-xl p-5 shadow-lg border-l-4 border-blue-500 hover:shadow-xl hover:translate-x-1 transition-all duration-300 flex flex-col md:flex-row justify-between gap-4 group";
                 card.innerHTML = `
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${currentTitle.split(' ')[0]}</span>
                             <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${date}</span>
                         </div>
-                        <h4 class="font-bold dark:text-white text-slate-800 text-lg group-hover:text-blue-500 transition">${main}</h4>
-                        <p class="text-sm dark:text-slate-400 text-slate-600 mt-1 line-clamp-1">${sub}</p>
+                        
+                        <div class="flex items-start justify-between">
+                            <h4 class="font-bold dark:text-white text-slate-800 text-lg group-hover:text-blue-500 transition break-words leading-tight flex-1">
+                                ${main} ${warningBadge} 
+                            </h4>
+                        </div>
+                        
+                        <p class="text-sm dark:text-slate-400 text-slate-600 mt-2 break-words leading-relaxed">
+                            ${sub}
+                        </p>
                     </div>
-                    <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
+                    <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4 flex-shrink-0">
                         <button onclick="printItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
                         <button onclick="editItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-lg transition" title="Edit"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg transition" title="Hapus"><i class="fa-solid fa-trash"></i></button>
