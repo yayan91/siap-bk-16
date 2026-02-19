@@ -1217,25 +1217,34 @@
             generatePDF([item], `Laporan_${currentTitle}`, false);
         }
 
-        // --- PDF (WITH SIGNATURE LOGIC) ---
+        // --- PDF FUNCTION (UPDATED) ---
         async function generatePDF(data, filename, isRecap, subTitle = "") {
             const { jsPDF } = window.jspdf;
             const orientation = isRecap ? 'landscape' : 'portrait';
-            const format = isRecap ? [330.2, 215.9] : [215.9, 330.2]; // F4
+            const format = isRecap ? [330.2, 215.9] : [215.9, 330.2]; // Ukuran F4
             const doc = new jsPDF({ orientation, unit: 'mm', format });
             const s = metaData.sekolah || {};
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
             const centerX = pageWidth / 2;
 
+            // 1. HEADER KOP SURAT
             const addHeader = async () => {
                 doc.setFont("times", "normal");
                 const defaultLogoKiri = "https://lh3.googleusercontent.com/u/0/d/1lxB2aQC5H-bnz7OlwnpmC9dl2Z3RERwI";
                 const defaultLogoKanan = "https://lh3.googleusercontent.com/d/1jA8C9RLNHSxlumS1NfyIrNTi3VHv7N-u"; 
+                
                 const urlKiri = s.logo_kiri || defaultLogoKiri;
                 const urlKanan = s.logo_kanan || defaultLogoKanan; 
-                if (urlKiri) { const imgData = await getBase64FromUrl(urlKiri); if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); }
-                if (urlKanan) { const imgData2 = await getBase64FromUrl(urlKanan); if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); }
+                
+                if (urlKiri) { 
+                    const imgData = await getBase64FromUrl(urlKiri); 
+                    if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); 
+                }
+                if (urlKanan) { 
+                    const imgData2 = await getBase64FromUrl(urlKanan); 
+                    if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); 
+                }
 
                 let currentY = 15;
                 doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
@@ -1243,6 +1252,8 @@
                 currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
                 currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
                 currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+                
+                // Garis Kop
                 currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
                 doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
                 return currentY + 10;
@@ -1250,6 +1261,7 @@
 
             let startY = await addHeader();
 
+            // 2. ISI TABEL
             if (isRecap) {
                 // === MODE REKAP ===
                 doc.setFont("helvetica", "bold"); doc.setFontSize(12);
@@ -1259,10 +1271,10 @@
                 if(data.length > 0) {
                     const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
                     const allKeys = Object.keys(data[0]);
+                    // Ambil 8 kolom pertama agar muat di kertas
                     const relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
                     const headerDisplay = relevantKeys.map(h => toProperCase(h.replace(/_/g, ' ')));
                     
-                    // --- APPLY FORMAT TANGGAL DI REKAP ---
                     const body = data.map(row => relevantKeys.map(h => {
                          let val = row[h];
                          if(h.includes('Tanggal')) val = formatTanggalIndo(val);
@@ -1277,16 +1289,17 @@
                     });
                 }
             } else {
-                // === MODE SATUAN ===
+                // === MODE LAPORAN SATUAN ===
                 const item = data[0]; 
+                // Kotak Judul
                 doc.setFillColor(240, 240, 240); doc.rect(centerX - 60, startY - 5, 120, 10, 'F');
                 doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(0, 0, 0); 
                 doc.text(`LAPORAN ${currentTitle.toUpperCase()}`, centerX, startY + 2, { align: 'center' });
+                
                 let currentY = startY + 15;
                 const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
                 const keys = Object.keys(item).filter(k => !excludedKeys.includes(k));
                 
-                // --- APPLY FORMAT TANGGAL DI SATUAN ---
                 const bodyData = keys.map(key => {
                     let val = item[key] || '-';
                     if(key.includes('Tanggal')) val = formatTanggalIndo(val);
@@ -1302,78 +1315,86 @@
                 });
             }
 
-            // --- TANDA TANGAN ---
+            // 3. LOGIKA TANDA TANGAN (BAGIAN YANG DIMINTA)
             let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : startY + 50;
             const limitPage = pageHeight - 60; 
             if(finalY > limitPage) { doc.addPage(); finalY = 40; }
 
-            // PERBAIKAN: Menghapus 'weekday: long' agar nama hari tidak muncul
             const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             
             doc.setFont("times", "normal"); doc.setFontSize(11); doc.setTextColor(0,0,0);
+            
+            // Ambil data Kepsek dari Metadata (jika ada)
             const namaKepsek = (metaData.sekolah && metaData.sekolah.kepsek) ? metaData.sekolah.kepsek : "..............................";
             const nipKepsek = (metaData.sekolah && metaData.sekolah.nip_kepsek) ? metaData.sekolah.nip_kepsek : "..................";
 
             if (isRecap) {
-                // REKAP: KEPALA SEKOLAH + GURU BK
+                // LOGIKA REKAP (Selalu Kepsek + Guru BK)
                 doc.text("Mengetahui,", 40, finalY, { align: 'center' });
                 doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
                 doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' });
                 doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+                
                 finalY += 25;
+                
+                // Kepsek (Kiri)
                 doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
                 const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
                 doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
+                
+                // Guru BK (Kanan)
                 doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
                 const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
                 doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+
             } else {
-                // SATUAN
-                if (currentSheet === '14_Mediasi') {
-                    doc.text("Pihak I (Siswa 1)", 40, finalY, { align: 'center' }); doc.text("Pihak II (Siswa 2)", pageWidth - 40, finalY, { align: 'center' });
-                    finalY += 25; doc.text(`( ${data[0].Nama_Siswa_1 || '....................'} )`, 40, finalY, { align: 'center' }); doc.text(`( ${data[0].Nama_Siswa_2 || '....................'} )`, pageWidth - 40, finalY, { align: 'center' });
-                    finalY += 10; doc.text("Mengetahui,", centerX, finalY - 5, { align: 'center' });
-                    doc.text("Wali Kelas", 40, finalY, { align: 'center' }); doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Mediator / Guru BK", pageWidth - 40, finalY + 5, { align: 'center' });
-                    finalY += 25; doc.text("( .............................. )", 40, finalY, { align: 'center' }); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' }); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
-                } else if (currentSheet === '12_Konferensi_Kasus' || currentSheet === '13_Alih_Tangan_Kasus') {
-                    // Multi Sig Logic (Kepsek Left)
-                    if (currentSheet === '12_Konferensi_Kasus') {
-                         doc.text("Pihak Terlibat / Wali Kelas", 40, finalY, { align: 'center' }); doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
-                         finalY += 25; doc.text("( .............................. )", 40, finalY, { align: 'center' }); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' }); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
-                         finalY += 15; doc.text("Mengetahui,", centerX, finalY, { align: 'center' }); doc.text("Kepala Sekolah", centerX, finalY + 5, { align: 'center' });
-                         finalY += 25; doc.setFont("times", "bold"); doc.text(namaKepsek, centerX, finalY, { align: 'center' });
-                         doc.setLineWidth(0.2); const kWidth = doc.getTextWidth(namaKepsek); doc.line(centerX - kWidth/2, finalY + 1, centerX + kWidth/2, finalY + 1);
-                         doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, centerX, finalY + 5, { align: 'center' });
-                    } else {
-                         doc.text("Mengetahui,", 40, finalY, { align: 'center' }); doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
-                         doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' }); doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
-                         finalY += 25; doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
-                         const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
-                         doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
-                         doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
-                         const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
-                         doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
-                    }
-                } else {
-                    // STANDARD (SINGLE GURU BK)
+                // LOGIKA LAPORAN SATUAN (SESUAI PERMINTAAN)
+                
+                // KELOMPOK 1: KEPSEK & GURU BK (Untuk Konferensi & Alih Tangan)
+                if (['12_Konferensi_Kasus', '13_Alih_Tangan_Kasus'].includes(currentSheet)) {
+                    
+                    doc.text("Mengetahui,", 40, finalY, { align: 'center' });
+                    doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
+
+                    doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' });
+                    doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+
+                    finalY += 25;
+
+                    // Nama Kepsek (Kiri)
+                    doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
+                    const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
+                    doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
+
+                    // Nama Guru BK (Kanan)
+                    doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
+                    const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
+                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
+
+                } 
+                // KELOMPOK 2: HANYA GURU BK (Untuk Mediasi, Advokasi, dan sisanya)
+                else {
                     doc.text(`Makassar, ${dateStr}`, centerX, finalY, { align: 'center' });
-                    doc.text("Guru Bimbingan Konseling,", centerX, finalY + 5, { align: 'center' });
-                    doc.setFont("times", "bold"); doc.text(currentUser.nama, centerX, finalY + 25, { align: 'center' });
+                    doc.text("Guru Bimbingan Konseling", centerX, finalY + 5, { align: 'center' });
+                    
+                    finalY += 25;
+                    
+                    doc.setFont("times", "bold"); doc.text(currentUser.nama, centerX, finalY, { align: 'center' });
                     const textWidth = doc.getTextWidth(currentUser.nama);
-                    doc.setDrawColor(0,0,0); doc.setLineWidth(0.2); doc.line(centerX - (textWidth / 2), finalY + 26, centerX + (textWidth / 2), finalY + 26);
-                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX, finalY + 31, { align: 'center' });
+                    doc.setLineWidth(0.2); doc.line(centerX - (textWidth / 2), finalY + 1, centerX + (textWidth / 2), finalY + 1);
+                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX, finalY + 5, { align: 'center' });
                 }
             }
 
-            // QR CODE
+            // 4. QR CODE (VALIDASI)
             try {
                 let qrText = "";
                 if (isRecap) {
                     const periodText = subTitle ? subTitle : "Semua Periode";
-                    qrText = `DOKUMEN SAH SIAP-BK UPT SPF SMP Negeri 16 Makassar.\nJenis: REKAPITULASI ${currentTitle}\nPeriode: ${periodText}\nTotal Data: ${data.length}\nGuru BK: ${currentUser.nama}\nMengetahui Kepala Sekolah: ${namaKepsek}`;
+                    qrText = `DOKUMEN SAH SIAP-BK.\nJenis: REKAP ${currentTitle}\nTotal: ${data.length}\nGuru BK: ${currentUser.nama}\nKepsek: ${namaKepsek}`;
                 } else {
                     const studentName = data[0]['Nama_Siswa'] || data[0]['Nama_Siswa_1'] || data[0]['Nama_Kegiatan'] || '-';
-                    qrText = `DOKUMEN SAH SIAP-BK UPT SPF SMP Negeri 16 Makassar.\nJenis: ${currentTitle}\nSiswa: ${studentName}\nTanggal: ${dateStr}\nGuru BK: ${currentUser.nama}\nMengetahui Kepala Sekolah: ${namaKepsek}`;
+                    qrText = `DOKUMEN SAH SIAP-BK.\nJenis: ${currentTitle}\nSiswa: ${studentName}\nTgl: ${dateStr}\nGuru BK: ${currentUser.nama}`;
                 }
                 const qr = new QRious({ value: qrText, size: 100, level: 'H' });
                 const qrData = qr.toDataURL();
@@ -1381,7 +1402,13 @@
                 doc.setFontSize(8); doc.text("Scan untuk validasi", 22.5, pageHeight - 22, { align: 'center' });
             } catch (qrErr) { console.warn("QR Error", qrErr); }
 
-            try { const blob = doc.output('blob'); const blobURL = URL.createObjectURL(blob); window.open(blobURL, '_blank'); } catch (e) { doc.save(`${filename}.pdf`); }
+            try { 
+                const blob = doc.output('blob'); 
+                const blobURL = URL.createObjectURL(blob); 
+                window.open(blobURL, '_blank'); 
+            } catch (e) { 
+                doc.save(`${filename}.pdf`); 
+            }
         }
 
         // --- FORM ---
@@ -1394,7 +1421,20 @@
             if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
             if(sheetName === '12_Konferensi_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa (Kasus)', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terlibat', label: 'Pihak Terlibat (Ortu/Kepsek)', type: 'text' }, { key: 'Tempat_Pertemuan', label: 'Tempat Pertemuan', type: 'text' }, { key: 'Deskripsi_Kasus', label: 'Deskripsi Kasus', type: 'textarea' }, { key: 'Hasil_Keputusan', label: 'Hasil Keputusan (Berita Acara)', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
             if(sheetName === '13_Alih_Tangan_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Penerima', label: 'Dirujuk Kepada (Psikolog/Dokter/dll)', type: 'text' }, { key: 'Alamat_Penerima', label: 'Alamat Pihak Penerima', type: 'text' }, { key: 'Alasan_Rujukan', label: 'Alasan Rujukan', type: 'textarea' }, { key: 'Dokumen_Penyerta', label: 'Dokumen Penyerta (Rekam Medis dll)', type: 'text' }, { key: 'Hasil_Rujukan', label: 'Hasil (Umpan Balik)', type: 'textarea' }, { key: 'Status_Rujukan', label: 'Status', type: 'select', options: ['Dikirim', 'Diterima', 'Selesai'] }];
-            if(sheetName === '14_Mediasi') return [...common, { key: 'Nama_Siswa_1', label: 'Pihak 1 (Siswa)', type: 'select', options: 'siswa' }, { key: 'Nama_Siswa_2', label: 'Pihak 2 (Siswa/Lawan)', type: 'text', placeholder: 'Ketik nama pihak lawan...' }, { key: 'Pokok_Masalah', label: 'Pokok Masalah', type: 'textarea' }, { key: 'Hasil_Kesepakatan', label: 'Isi Perjanjian Damai', type: 'textarea' }, { key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }];
+            if(sheetName === '14_Mediasi') return [
+				...common, 
+				// Pihak 1
+				{ key: 'Nama_Siswa_1', label: 'Pihak 1 (Siswa)', type: 'select', options: 'siswa' }, 
+				{ key: 'Kelas_1', label: 'Kelas Pihak 1', type: 'readonly' }, // <--- INI KITA TAMBAH
+				
+				// Pihak 2 (Kita ubah jadi select siswa juga, dan tambah kelasnya)
+				{ key: 'Nama_Siswa_2', label: 'Pihak 2 (Siswa Lawan)', type: 'select', options: 'siswa' }, 
+				{ key: 'Kelas_2', label: 'Kelas Pihak 2', type: 'readonly' }, // <--- INI KITA TAMBAH
+
+				{ key: 'Pokok_Masalah', label: 'Pokok Masalah', type: 'textarea' }, 
+				{ key: 'Hasil_Kesepakatan', label: 'Isi Perjanjian Damai', type: 'textarea' }, 
+				{ key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }
+			];
             if(sheetName === '15_Advokasi') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
             if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'text' }];
             return [];
@@ -1429,7 +1469,9 @@
                             if(typeof o === 'object') return `<option value="${o.nama}">${o.kelas} - ${o.nisn || ''}</option>`; // More details
                             return `<option value="${o}"></option>`;
                         }).join('');
-                        if(f.key === 'Nama_Siswa' || f.key === 'Nama_Siswa_1') input.onchange = (e) => autoFillSiswa(e.target.value);
+                        if(f.key.includes('Nama_Siswa')) {
+							input.onchange = (e) => autoFillSiswa(e.target.value, f.key);
+						}
                         div.appendChild(datalist);
                     } else {
                         input = document.createElement('select'); input.className = baseClass;
@@ -1439,7 +1481,9 @@
                             if(typeof o === 'object') return `<option value="${o.nama}" ${o.nama===val?'selected':''}>${o.nama} (${o.kelas})</option>`;
                             return `<option value="${o}" ${o===val?'selected':''}>${o}</option>`;
                         }).join('');
-                        if(f.key === 'Nama_Siswa' || f.key === 'Nama_Siswa_1') input.onchange = (e) => autoFillSiswa(e.target.value);
+                        if(f.key.includes('Nama_Siswa')) {
+							input.onchange = (e) => autoFillSiswa(e.target.value, f.key);
+						}
                     }
                 } else if (f.type === 'textarea') {
                     input = document.createElement('textarea'); input.className = baseClass + " min-h-[100px]"; input.rows = 3; input.value = val; input.placeholder = f.placeholder || '';
@@ -1455,23 +1499,81 @@
             document.getElementById('page-form').classList.remove('hide');
         }
         function closeForm() { document.getElementById('page-form').classList.add('hide'); }
-        function autoFillSiswa(nama) {
-            const s = metaData.siswa.find(x => x.nama === nama);
-            if(s) {
-                if(document.getElementById('field-Kelas')) document.getElementById('field-Kelas').value = s.kelas;
-                if(document.getElementById('field-NISN')) document.getElementById('field-NISN').value = s.nisn;
-            }
-        }
-        async function handleSave(e) {
-            e.preventDefault(); const formData = new FormData(document.getElementById('dynamic-form')); const dataObj = {}; formData.forEach((value, key) => dataObj[key] = value); dataObj['Created_By'] = currentUser.username;
-            if(!dataObj['Tanggal_Layanan'] && !dataObj['Tanggal'] && !dataObj['Tanggal_Kegiatan']) {
-                const d = new Date().toISOString().split('T')[0];
-                if(currentSheet.includes('Klasikal')) dataObj['Tanggal'] = d; else if(currentSheet.includes('Dukungan')) dataObj['Tanggal_Kegiatan'] = d; else dataObj['Tanggal_Layanan'] = d;
-            }
-            const payload = { action: editMode ? 'updateData' : 'saveData', sheetName: currentSheet, values: dataObj, id: editId };
-            const res = await apiCall(payload, 'POST', payload);
-            if(res && res.status === 'success') { showToast('Data berhasil disimpan'); closeForm(); openService(currentSheet, currentTitle); } else { Swal.fire("Gagal", res?.message, "error"); }
-        }
+        // GANTI FUNCTION autoFillSiswa YANG LAMA DENGAN INI
+		function autoFillSiswa(nama, fieldKey) {
+			// 1. Cari data siswa di metadata
+			const s = metaData.siswa.find(x => x.nama === nama);
+			if(!s) return;
+
+			// 2. Tentukan target kolom Kelas berdasarkan siapa yang dipilih
+			let targetKelasId = 'field-Kelas'; // Default (untuk layanan individu dll)
+			let targetNisnId = 'field-NISN';
+
+			if (fieldKey === 'Nama_Siswa_1') {
+				targetKelasId = 'field-Kelas_1'; // Target khusus Mediasi Pihak 1
+			} else if (fieldKey === 'Nama_Siswa_2') {
+				targetKelasId = 'field-Kelas_2'; // Target khusus Mediasi Pihak 2
+			}
+
+			// 3. Isi Nilainya jika elemennya ada di form
+			const elKelas = document.getElementById(targetKelasId);
+			if(elKelas) elKelas.value = s.kelas;
+
+			const elNisn = document.getElementById(targetNisnId);
+			if(elNisn) elNisn.value = s.nisn;
+		}
+        // --- LOGIKA SIMPAN DATA DENGAN LOADING ---
+		async function handleSave(e) {
+			e.preventDefault();
+
+			// 1. TAMPILKAN LOADING SEBELUM PROSES MULAI
+			document.getElementById('loading').classList.remove('hide');
+
+			try {
+				// Ambil Data dari Form
+				const formData = new FormData(document.getElementById('dynamic-form'));
+				const dataObj = {};
+				
+				formData.forEach((value, key) => dataObj[key] = value);
+				dataObj['Created_By'] = currentUser.username;
+
+				// Auto-Fill Tanggal jika kosong
+				if(!dataObj['Tanggal_Layanan'] && !dataObj['Tanggal'] && !dataObj['Tanggal_Kegiatan']) {
+					const d = new Date().toISOString().split('T')[0];
+					if(currentSheet.includes('Klasikal')) dataObj['Tanggal'] = d; 
+					else if(currentSheet.includes('Dukungan')) dataObj['Tanggal_Kegiatan'] = d; 
+					else dataObj['Tanggal_Layanan'] = d;
+				}
+
+				// Siapkan Payload
+				const payload = { 
+					action: editMode ? 'updateData' : 'saveData', 
+					sheetName: currentSheet, 
+					values: dataObj, 
+					id: editId 
+				};
+
+				// 2. KIRIM KE BACKEND (Proses Tunggu)
+				const res = await apiCall(payload, 'POST', payload);
+
+				// 3. CEK HASIL
+				if(res && res.status === 'success') { 
+					showToast('Data berhasil disimpan!', 'success'); 
+					closeForm(); 
+					// Refresh data list agar data baru muncul
+					await openService(currentSheet, currentTitle); 
+				} else { 
+					Swal.fire("Gagal", res?.message || "Terjadi kesalahan saat menyimpan.", "error"); 
+				}
+
+			} catch (error) {
+				console.error(error);
+				Swal.fire("Error", "Gagal menghubungi server.", "error");
+			} finally {
+				// 4. SEMBUNYIKAN LOADING (Wajib dijalankan, sukses ataupun gagal)
+				document.getElementById('loading').classList.add('hide');
+			}
+		}
         async function deleteItem(id) {
             const confirm = await Swal.fire({ title: 'Hapus Data?', text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Hapus Data', cancelButtonText: 'Batal' });
             if(confirm.isConfirmed) {
@@ -1487,4 +1589,3 @@
     </script>
 </body>
 </html>
-
