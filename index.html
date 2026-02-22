@@ -284,21 +284,80 @@
                 </div>
             </div>
 
-            <!-- PREMIUM CHART AREA -->
-            <div class="glass p-5 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
-                <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
-                    <h3 class="text-sm font-bold dark:text-white text-slate-700 uppercase tracking-wider">Analitik Layanan</h3>
-                    <button onclick="toggleChartType()" class="text-xs bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 transition text-slate-600 dark:text-white font-medium shadow-sm">
-                        <i class="fa-solid fa-chart-pie mr-1"></i> Ganti Tampilan
-                    </button>
+            <div id="ai-smart-insight" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-4 mb-6 shadow-lg shadow-purple-500/30 text-white flex items-center gap-4 animate-slide-in hide">
+                <div class="bg-white/20 p-3 rounded-full backdrop-blur-sm animate-pulse-fast">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xl text-yellow-300"></i>
                 </div>
-                <div class="h-64 w-full">
-                    <canvas id="statsChart"></canvas>
+                <div>
+                    <h4 class="text-sm font-bold tracking-wide uppercase text-white/90">AI Smart Insight</h4>
+                    <p id="ai-insight-text" class="text-sm font-medium mt-0.5">Menganalisis pola layanan siswa...</p>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                
+                <div class="glass p-5 rounded-2xl shadow-lg relative overflow-hidden lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
+                        <h3 class="text-sm font-bold dark:text-white text-slate-700 uppercase tracking-wider">Analitik Layanan</h3>
+                        <button onclick="toggleChartType()" class="text-xs bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 transition text-slate-600 dark:text-white font-medium shadow-sm">
+                            <i class="fa-solid fa-chart-pie mr-1"></i> Ganti Tampilan
+                        </button>
+                    </div>
+                    <div class="h-64 w-full flex-1">
+                        <canvas id="statsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col h-[350px]">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
+                        <h3 class="text-sm font-bold text-red-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation animate-pulse"></i> Early Warning
+                        </h3>
+                    </div>
+                    <div id="early-warning-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-2">
+                        <p class="text-xs text-center text-slate-400 mt-10">Memuat data risiko...</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- MENU GRID (GROUPED) -->
             <!-- KELOMPOK 1 -->
+			
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="glass p-5 rounded-2xl shadow-lg relative flex flex-col h-[350px]">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
+                        <h3 class="text-sm font-bold dark:text-white text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-user-check text-green-500"></i> Siswa Terbantu
+                        </h3>
+                        <span id="badge-total-siswa" class="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded font-bold border border-green-200 dark:border-green-800">0 Siswa</span>
+                    </div>
+                    <div id="helped-students-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-2">
+                        <p class="text-xs text-center text-slate-400 mt-10">Merekap data siswa...</p>
+                    </div>
+                </div>
+
+                <div class="glass p-5 rounded-2xl shadow-lg relative flex flex-col h-[350px]">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2">
+                        <h3 class="text-sm font-bold dark:text-white text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-blue-500"></i> Rincian Seluruh Layanan
+                        </h3>
+                        <span class="text-[10px] text-slate-400">Total 10 Kategori</span>
+                    </div>
+                    <div id="all-services-list" class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-2">
+                        <p class="text-xs text-center text-slate-400 mt-10">Merekap data layanan...</p>
+                    </div>
+                </div>
+            </div>
+			
+			<div class="mb-8 flex justify-center">
+                <button onclick="runAiForecast()" class="group relative px-8 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-500/20 hover:scale-105 transition-all duration-300 btn-press flex items-center gap-3 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-700 -skew-x-12"></div>
+                    <i class="fa-solid fa-crystal-ball animate-spin-slow text-xl"></i>
+                    <span>PREDIKSI TREN & ANALISIS PREVENTIF (AI)</span>
+                </button>
+            </div>
+			
             <div class="mb-8">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
@@ -332,6 +391,7 @@
                     </div>
                 </div>
             </div>
+			
 
             <!-- KELOMPOK 2 -->
             <div class="mb-8">
@@ -471,7 +531,14 @@
         <section id="page-student-profile" class="hide flex-1 pb-10 flex flex-col">
             <div class="flex-none mb-6">
                 <button onclick="goHome()" class="text-sm text-blue-500 hover:underline mb-2"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</button>
-                <h2 class="text-2xl font-bold dark:text-white text-slate-800">Riwayat Layanan Siswa</h2>
+                
+                <div class="flex justify-between items-center mt-2">
+                    <h2 class="text-2xl font-bold dark:text-white text-slate-800">Riwayat Layanan Siswa</h2>
+                    <button id="btn-print-profile" class="hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:shadow-pink-500/30 transition hover:-translate-y-1 items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">Cetak Profil</span>
+                    </button>
+                </div>
+
                 <div class="glass p-4 rounded-xl mt-4 flex items-center gap-4">
                     <div class="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-3xl">
                         <i class="fa-solid fa-user-graduate dark:text-white text-slate-500"></i>
@@ -649,6 +716,9 @@
             const btn = document.getElementById('btn-refresh');
             if(btn) btn.classList.add('animate-spin');
             
+            // note+++ KOSONGKAN CACHE SECARA PAKSA SAAT TOMBOL REFRESH DITEKAN
+            cachedAllServices = null;
+            
             // Refresh Metadata & Stats
             await initApp();
             
@@ -798,7 +868,11 @@
             let totalLayanan = 0;
             let siswaSet = new Set();
             let countsPerSheet = {};
+            
+            // Variabel baru agar hitungannya akurat
             let selesaiCount = 0;
+            let pendingCount = 0; 
+            let totalLayananBerstatus = 0; 
 
             sheets.forEach((sheet, idx) => {
                 const data = results[idx];
@@ -810,9 +884,21 @@
                     if(item.Nama_Siswa) siswaSet.add(item.Nama_Siswa);
                     if(item.Nama_Siswa_1) siswaSet.add(item.Nama_Siswa_1);
                     
-                    // Status Count
-                    const status = (item.Status_Konseling || item.Status_Proses || item.Status_Rujukan || item.Status_Mediasi || '').toLowerCase();
-                    if(status.includes('selesai') || status.includes('berhasil')) selesaiCount++;
+                    // Status Count (DIPERBAIKI: Hanya cek yang punya field status)
+                    const statusVal = item.Status_Konseling || item.Status_Proses || item.Status_Rujukan || item.Status_Mediasi || item.Status_Advokasi;
+                    
+                    if (statusVal) {
+                        totalLayananBerstatus++; // Hitung total layanan yang memang butuh status
+                        const s = statusVal.toLowerCase();
+                        
+                        // Kategori Selesai / Ditutup
+                        if(s.includes('selesai') || s.includes('berhasil') || s.includes('diterima') || s.includes('drop out') || s.includes('gagal')) {
+                            selesaiCount++;
+                        } else {
+                            // Kategori Masih Berjalan (Proses, Aktif, Berlanjut, Dikirim, dsb)
+                            pendingCount++;
+                        }
+                    }
                 });
             });
 
@@ -831,78 +917,213 @@
                 if(val > maxCount) { maxCount = val; topService = labelsMap[key]; }
             }
 
-            const percentSelesai = totalLayanan > 0 ? Math.round((selesaiCount / totalLayanan) * 100) : 0;
+            // PERBAIKAN: Persentase selesai hanya dihitung dari layanan yang butuh status
+            const percentSelesai = totalLayananBerstatus > 0 ? Math.round((selesaiCount / totalLayananBerstatus) * 100) : 100;
 
             // UPDATE UI CARDS
             document.getElementById('stat-total').innerText = totalLayanan;
             document.getElementById('stat-students').innerText = siswaSet.size;
             document.getElementById('stat-top').innerText = topService;
             document.getElementById('stat-status').innerText = `${percentSelesai}%`;
+			
+			// --- note+++ LOGIKA AI SMART INSIGHT & EARLY WARNING ---
+            
+            // A. Early Warning System (Hitung frekuensi siswa bermasalah/dilayani)
+            let studentCounts = {};
+            sheets.forEach((sheet, idx) => {
+                // Abaikan sheet dukungan sistem atau konsultasi (karena targetnya bukan siswa spesifik)
+                if(sheet === '16_Dukungan_Sistem' || sheet === '10_Konsultasi') return; 
+                
+                results[idx].forEach(item => {
+                    const names = [];
+                    // Kumpulkan semua variabel yang mungkin berisi nama siswa
+                    if(item.Nama_Siswa) names.push({ name: item.Nama_Siswa, kls: item.Kelas });
+                    if(item.Nama_Siswa_1) names.push({ name: item.Nama_Siswa_1, kls: item.Kelas_1 || item.Kelas });
+                    if(item.Nama_Siswa_2) names.push({ name: item.Nama_Siswa_2, kls: item.Kelas_2 || item.Kelas });
+                    
+                    names.forEach(n => {
+                        if(!n.name) return;
+                        if(!studentCounts[n.name]) studentCounts[n.name] = { count: 0, kls: n.kls || '-' };
+                        studentCounts[n.name].count++;
+                    });
+                });
+            });
 
-            // 2. RENDER PREMIUM CHART
-            const mainCounts = results.slice(0, 5).map(r => r.length);
-            const specialCount = results.slice(5).reduce((acc, curr) => acc + curr.length, 0);
+            // Urutkan siswa berdasarkan jumlah kasus/layanan terbanyak (Top 5)
+            const topStudents = Object.entries(studentCounts)
+                .map(([name, data]) => ({ name, count: data.count, kls: data.kls }))
+                .sort((a, b) => b.count - a.count)
+                .filter(s => s.count >= 2) // Hanya tampilkan yang minimal punya 2 riwayat
+                .slice(0, 5); // Ambil 5 teratas
 
+            // Render ke UI Panel Early Warning
+            const warningContainer = document.getElementById('early-warning-list');
+            warningContainer.innerHTML = '';
+            
+            if(topStudents.length === 0) {
+                warningContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60"><i class="fa-solid fa-shield-halved text-4xl mb-3 text-green-500"></i><p class="text-xs text-center dark:text-slate-300 text-slate-500">Aman. Belum ada siswa yang butuh perhatian khusus.</p></div>`;
+            } else {
+                topStudents.forEach((s) => {
+                    let badgeColor = s.count >= 4 ? 'bg-red-100 text-red-600 border-red-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200';
+                    let iconStr = s.count >= 4 ? '<i class="fa-solid fa-fire animate-pulse"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    
+                    warningContainer.innerHTML += `
+                        <div class="p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 flex justify-between items-center hover:-translate-y-1 transition group cursor-pointer shadow-sm" onclick="document.getElementById('global-student-search').value='${s.name}'; searchStudentHistory();">
+                            <div class="min-w-0 pr-2">
+                                <p class="text-sm font-bold dark:text-white text-slate-700 group-hover:text-blue-500 transition truncate">${s.name}</p>
+                                <p class="text-[10px] dark:text-slate-400 text-slate-500 mt-0.5">Kelas ${s.kls}</p>
+                            </div>
+                            <div class="px-2 py-1 rounded text-[10px] font-bold border ${badgeColor} flex items-center gap-1 shrink-0">
+                                ${iconStr} ${s.count}x
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // B. AI Smart Insight Logic (Menganalisis dari Data Dashboard)
+            let insightMsg = "";
+            
+            if (totalLayanan === 0) {
+                insightMsg = "Sistem masih kosong. Mari mulai catat layanan pertamamu hari ini!";
+            } else if (topStudents.length > 0 && topStudents[0].count >= 4) {
+                insightMsg = `🚨 <strong>Perhatian:</strong> Siswa <strong>${topStudents[0].name}</strong> tercatat memiliki ${topStudents[0].count} riwayat layanan. Pertimbangkan untuk memanggil orang tua atau melakukan Konferensi Kasus.`;
+            } else if (pendingCount > 0) {
+                insightMsg = `📌 <strong>Pengingat:</strong> Ada <strong>${pendingCount} layanan</strong> yang berstatus belum selesai/dalam proses. Jangan lupa di-follow up ya!`;
+            } else {
+                insightMsg = "✨ <strong>Luar biasa!</strong> Semua catatan layanan siswa berstatus selesai/berhasil. Pertahankan kinerjamu!";
+            }
+
+            // Tampilkan Insight Box
+            const insightBox = document.getElementById('ai-smart-insight');
+            document.getElementById('ai-insight-text').innerHTML = insightMsg;
+            insightBox.classList.remove('hide');
+            // --- note+++ END LOGIKA ---
+
+            // 2. RENDER PREMIUM CHART (Sekarang menampung SEMUA 10 Layanan, tidak digabung lagi)
             const ctx = document.getElementById('statsChart').getContext('2d');
             if(window.myStatsChart) window.myStatsChart.destroy();
 
-            // Gradient Setup
-            const gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
-            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+            const allLabels = Object.values(labelsMap); // Mengambil 10 Nama Layanan
+            const allCounts = sheets.map(s => countsPerSheet[s]); // Mengambil 10 Angkanya
 
-            const gradientPurple = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientPurple.addColorStop(0, 'rgba(168, 85, 247, 0.8)');
-            gradientPurple.addColorStop(1, 'rgba(168, 85, 247, 0.1)');
+            // Kumpulan 10 Warna Estetik untuk tiap layanan
+            const chartColors = [
+                'rgba(59, 130, 246, 0.8)', 'rgba(34, 197, 94, 0.8)', 'rgba(168, 85, 247, 0.8)', 
+                'rgba(249, 115, 22, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(6, 182, 212, 0.8)',
+                'rgba(20, 184, 166, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(100, 116, 139, 0.8)'
+            ];
 
             window.myStatsChart = new Chart(ctx, {
                 type: chartType,
                 data: {
-                    labels: ['Individu', 'Kelompok', 'Bimbingan', 'Konsultasi', 'Klasikal', 'Layanan Khusus'],
+                    labels: allLabels,
                     datasets: [{
                         label: 'Total',
-                        data: [...mainCounts, specialCount],
-                        backgroundColor: [
-                            gradientBlue, 
-                            'rgba(34, 197, 94, 0.7)',
-                            gradientPurple,
-                            'rgba(249, 115, 22, 0.7)',
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(6, 182, 212, 0.7)'
-                        ],
+                        data: allCounts,
+                        backgroundColor: chartColors,
                         borderColor: 'transparent',
                         borderWidth: 0,
-                        borderRadius: chartType === 'bar' ? 8 : 0,
+                        borderRadius: chartType === 'bar' ? 4 : 0,
                         hoverOffset: 10
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeOutQuart'
-                    },
+                    responsive: true, maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: chartType === 'doughnut', position: 'right', labels: { color: '#94a3b8' } },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleColor: '#fff',
-                            bodyColor: '#cbd5e1',
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: false
-                        }
+                        legend: { display: chartType === 'doughnut', position: 'right', labels: { color: '#94a3b8', font: {size: 10} } },
                     },
                     scales: chartType === 'bar' ? {
                         y: { beginAtZero: true, grid: { display: false }, ticks: { color: '#94a3b8' }, border: { display: false } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' }, border: { display: false } }
-                    } : {
-                        y: { display: false }, x: { display: false }
-                    }
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: {size: 9}, maxRotation: 45, minRotation: 45 }, border: { display: false } }
+                    } : { y: { display: false }, x: { display: false } }
                 }
             });
-        }
+
+            // --- note+++ LOGIKA DAFTAR SISWA TERBANTU & RINCIAN LAYANAN ---
+            
+            // A. Rincian 10 Layanan (Diurutkan dari yang terbanyak)
+            const serviceListEl = document.getElementById('all-services-list');
+            serviceListEl.innerHTML = '';
+            
+            const sortedServices = Object.entries(countsPerSheet).sort((a,b) => b[1] - a[1]);
+            let colorIndex = 0;
+            
+            sortedServices.forEach(([sheetKey, count]) => {
+                const label = labelsMap[sheetKey];
+                const bg = chartColors[colorIndex % chartColors.length];
+                serviceListEl.innerHTML += `
+                    <div class="flex justify-between items-center p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer" onclick="openService('${sheetKey}', '${label}')">
+                        <div class="flex items-center gap-3">
+                            <span class="w-3 h-3 rounded-full shadow" style="background-color: ${bg};"></span>
+                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">${label}</span>
+                        </div>
+                        <span class="font-bold text-slate-800 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full text-xs">${count}</span>
+                    </div>
+                `;
+                colorIndex++;
+            });
+
+            // B. Daftar Siswa Terbantu
+            let allHelpedStudents = [];
+            sheets.forEach((sheet, idx) => {
+                if(sheet === '16_Dukungan_Sistem' || sheet === '10_Konsultasi') return; 
+                
+                results[idx].forEach(item => {
+                    const dateStr = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'] || '1970-01-01';
+                    const pushStudent = (name, kls) => {
+                        if(name) allHelpedStudents.push({ name, kls: kls || '-', service: labelsMap[sheet], date: new Date(dateStr) });
+                    };
+                    if(item.Nama_Siswa) pushStudent(item.Nama_Siswa, item.Kelas);
+                    if(item.Nama_Siswa_1) pushStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
+                    if(item.Nama_Siswa_2) pushStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                });
+            });
+
+            // Urutkan berdasarkan tanggal terbaru
+            allHelpedStudents.sort((a, b) => b.date - a.date);
+
+            // Filter agar satu siswa hanya muncul 1 kali
+            let uniqueHelped = [];
+            let seenNames = new Set();
+            allHelpedStudents.forEach(s => {
+                const lowerName = s.name.toLowerCase();
+                if(!seenNames.has(lowerName)) {
+                    seenNames.add(lowerName);
+                    uniqueHelped.push(s);
+                }
+            });
+
+            // Render ke UI
+            const studentListEl = document.getElementById('helped-students-list');
+            document.getElementById('badge-total-siswa').innerText = `${uniqueHelped.length} Siswa`;
+            studentListEl.innerHTML = '';
+
+            if(uniqueHelped.length === 0) {
+                studentListEl.innerHTML = `<p class="text-xs text-center text-slate-400 mt-10">Belum ada siswa yang tercatat.</p>`;
+            } else {
+                uniqueHelped.forEach(s => {
+                    const dateFmt = s.date.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+                    studentListEl.innerHTML += `
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 hover:-translate-y-1 transition group cursor-pointer shadow-sm" onclick="document.getElementById('global-student-search').value='${s.name}'; searchStudentHistory();">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
+                                    ${s.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold dark:text-white text-slate-700 truncate group-hover:text-blue-500 transition">${s.name}</p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">Kls ${s.kls}</span>
+                                        <span class="text-[10px] text-blue-500 font-medium truncate">${s.service}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-400 shrink-0">${dateFmt}</span>
+                        </div>
+                    `;
+                });
+            }
+        } // Penutup dari fungsi loadDashboardStats()
 
         // --- TIMELINE SEARCH ---
         function searchStudentHistory() {
@@ -945,24 +1166,49 @@
 
             history.forEach(h => {
                 const dateFmt = new Date(h._date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                const detail = h['Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || h['Nama_Kegiatan'] || h['Topik_Layanan'] || 'Detail Layanan';
-                const status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || 'Selesai';
+                
+                // 1. Tentukan Judul
+                const detail = h['Topik_Layanan'] || h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || h['Nama_Kegiatan'] || 'Detail Layanan';
+                
+                // 2. Tentukan Isi Teks (Pintar: Cegah Duplikasi dengan Judul)
+                let textIsi = h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || '-';
+                
+                if (detail === textIsi) {
+                    // Kalau sama persis dengan judul, ganti isinya dengan info pendukung
+                    if (h['Pihak_Terlibat']) textIsi = `Pihak Terlibat: ${h['Pihak_Terlibat']}`;
+                    else if (h['Pihak_Penerima']) textIsi = `Dirujuk ke: ${h['Pihak_Penerima']}`;
+                    else if (h['Bidang_Bimbingan'] || h['Bidang_Layanan']) textIsi = `Bidang Layanan: ${h['Bidang_Bimbingan'] || h['Bidang_Layanan']}`;
+                    else textIsi = "Tindak Lanjut: " + (h['Tindak_Lanjut'] || h['Alternatif_Pemecahan'] || '-');
+                }
+
+                // 3. Ambil Hasil & Status
+                const hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Hasil_Advokasi'] || '-';
+                const status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || h['Status_Advokasi'] || h['Status_Rujukan'] || 'Selesai';
                 
                 container.innerHTML += `
                     <div class="relative pl-8 pb-8 group">
                         <div class="absolute left-[-5px] top-1 w-4 h-4 rounded-full bg-${h._type.color}-500 border-2 border-white dark:border-slate-800 shadow z-10"></div>
                         <div class="glass p-4 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                             <div class="flex justify-between items-start">
-                                <div><span class="text-xs font-bold text-${h._type.color}-500 uppercase tracking-wide mb-1 block">${h._type.label}</span><h4 class="font-bold dark:text-white text-slate-800 text-lg">${detail}</h4></div>
-                                <span class="text-xs dark:text-slate-400 text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">${dateFmt}</span>
+                                <div class="flex-1 pr-4">
+                                    <span class="text-xs font-bold text-${h._type.color}-500 uppercase tracking-wide mb-1 block">${h._type.label}</span>
+                                    <h4 class="font-bold dark:text-white text-slate-800 text-lg leading-snug">${detail}</h4>
+                                </div>
+                                <span class="text-xs dark:text-slate-400 text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded shrink-0">${dateFmt}</span>
                             </div>
-                            <p class="text-sm dark:text-slate-300 text-slate-600 mt-2 line-clamp-2">${h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || '-'}</p>
-							<p class="text-sm dark:text-slate-300 text-slate-600 mt-2 line-clamp-2">${h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || '-'}</p>
-                            <div class="mt-2 text-xs font-semibold">Status: <span class="${String(status).toLowerCase().includes('selesai') ? 'text-green-500' : 'text-yellow-500'}">${status}</span></div>
+                            <p class="text-sm dark:text-slate-300 text-slate-600 mt-3 leading-relaxed">${textIsi}</p>
+                            <p class="text-sm dark:text-slate-300 text-slate-600 mt-2 leading-relaxed"><span class="font-semibold opacity-70">Hasil:</span> ${hasil}</p>
+                            <div class="mt-3 text-xs font-semibold inline-block bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700">Status: <span class="${String(status).toLowerCase().includes('selesai') || String(status).toLowerCase().includes('berhasil') ? 'text-green-500' : 'text-yellow-500'}">${status}</span></div>
                         </div>
                     </div>`;
             });
             showSection('page-student-profile');
+			
+				// Tampilkan tombol cetak dan pasangkan fungsinya
+            const printBtn = document.getElementById('btn-print-profile');
+            printBtn.classList.remove('hidden');
+            printBtn.classList.add('flex');
+            printBtn.onclick = () => printStudentProfile(history, toProperCase(keyword));
         }
 
         // --- SERVICE LIST ---
@@ -1666,14 +1912,18 @@
 				const res = await apiCall(payload, 'POST', payload);
 
 				// 3. CEK HASIL
-				if(res && res.status === 'success') { 
-					showToast('Data berhasil disimpan!', 'success'); 
-					closeForm(); 
-					// Refresh data list agar data baru muncul
-					await openService(currentSheet, currentTitle); 
-				} else { 
-					Swal.fire("Gagal", res?.message || "Terjadi kesalahan saat menyimpan.", "error"); 
-				}
+                if(res && res.status === 'success') { 
+                    showToast('Data berhasil disimpan!', 'success'); 
+                    closeForm(); 
+                    
+                    // note+++ KOSONGKAN CACHE AGAR DASHBOARD TAHU ADA DATA BARU
+                    cachedAllServices = null; 
+                    
+                    // Refresh data list agar data baru muncul
+                    await openService(currentSheet, currentTitle); 
+                } else { 
+                    Swal.fire("Gagal", res?.message || "Terjadi kesalahan saat menyimpan.", "error"); 
+                }
 
 			} catch (error) {
 				console.error(error);
@@ -1688,9 +1938,207 @@
             if(confirm.isConfirmed) {
                 const payload = { action: 'deleteData', sheetName: currentSheet, id: id, username: currentUser.username };
                 const res = await apiCall(payload, 'POST', payload);
-                if(res.status === 'success') { showToast('Data berhasil dihapus', 'success'); openService(currentSheet, currentTitle); } else { Swal.fire("Gagal", res.message, "error"); }
+                if(res.status === 'success') { 
+                    showToast('Data berhasil dihapus', 'success'); 
+                    
+                    // note+++ KOSONGKAN CACHE AGAR GRAFIK DASHBOARD TURUN
+                    cachedAllServices = null;
+                    
+                    openService(currentSheet, currentTitle); 
+                } else { 
+                    Swal.fire("Gagal", res.message, "error"); 
+                }
             }
         }
+		
+		// --- FITUR PREMIUM: GENERATE PDF PROFIL PSIKOLOGIS SISWA ---
+        async function printStudentProfile(historyData, studentName) {
+            showToast("Menyiapkan Dokumen Profil...", "info");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] }); // F4
+            
+            // 1. BUAT KOP SURAT (Murni dari Backend)
+            const s = metaData.sekolah || {};
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const centerX = pageWidth / 2;
+            doc.setFont("times", "normal");
+            
+            // Memanggil data logo yang sudah diperbaiki di backend
+            const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
+            const urlKanan = s.logo_kanan || ""; 
+            
+            if (urlKiri) { 
+                const imgData = await getBase64FromUrl(urlKiri); 
+                if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); 
+            }
+            if (urlKanan) { 
+                const imgData2 = await getBase64FromUrl(urlKanan); 
+                if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); 
+            }
+            
+            let currentY = 15;
+            doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+            
+            currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+            
+            // 2. JUDUL DOKUMEN & BIODATA SISWA (Semua Font Times & Model Kotak Simpel)
+            currentY += 15;
+            doc.setFont("times", "bold"); doc.setFontSize(14); // note+++ Ubah helvetica jadi times
+            doc.text("LAPORAN PROFIL & RIWAYAT LAYANAN SISWA", centerX, currentY, { align: 'center' });
+            
+            currentY += 8; // Jarak dari judul ke kotak biodata
+            
+            // note+++ Membuat kotak biodata yang simpel dan elegan
+            doc.autoTable({
+                startY: currentY,
+                body: [
+                    ['Nama Siswa', studentName],
+                    ['Tahun Ajaran', `${s.tahun_ajar || '-'} (Semester ${s.semester || '-'})`],
+                    ['Total Kasus', `${historyData.length} Riwayat Layanan`],
+                    ['Tanggal Cetak', new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})]
+                ],
+                theme: 'grid',
+                styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                columnStyles: { 
+                    0: { cellWidth: 40, fontStyle: 'bold', fillColor: [245, 245, 245] }, // Latar abu-abu terang untuk label
+                    1: { cellWidth: 'auto', fillColor: 255 } 
+                },
+                margin: { left: 15, right: 15 }
+            });
+
+            // 3. TABEL RIWAYAT
+            currentY = doc.lastAutoTable.finalY + 10; // Mengatur posisi Y awal tabel riwayat agar pas di bawah kotak biodata
+            const tableData = historyData.map((h, i) => {
+                const tgl = new Date(h._date).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'});
+                const layanan = h._type.label;
+                const detail = h['Identifikasi_Masalah'] || h['Topik_Layanan'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || '-';
+                const hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Tindak_Lanjut'] || '-';
+                return [i+1, tgl, layanan, detail, hasil];
+            });
+
+            doc.autoTable({
+                startY: currentY,
+                head: [['No', 'Tanggal', 'Jenis Layanan', 'Deskripsi / Masalah', 'Hasil / Tindak Lanjut']],
+                body: tableData,
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 3, lineColor: 0, lineWidth: 0.1 },
+                headStyles: { fillColor: [168, 85, 247], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 0: {cellWidth: 10, halign: 'center'}, 1: {cellWidth: 25}, 2: {cellWidth: 35}, 3: {cellWidth: 'auto'}, 4: {cellWidth: 'auto'} },
+                margin: { left: 15, right: 15 }
+            });
+
+            // 4. TANDA TANGAN GURU BK
+            let finalY = doc.lastAutoTable.finalY + 20;
+            
+            doc.setFont("times", "normal");
+            doc.setFontSize(11); // Kunci ukuran 11 untuk tanggal dan jabatan
+            doc.text(`Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}`, doc.internal.pageSize.getWidth() - 60, finalY, { align: 'center' });
+            doc.text("Guru Bimbingan Konseling", doc.internal.pageSize.getWidth() - 60, finalY + 5, { align: 'center' });
+            
+            finalY += 25;
+            
+            doc.setFont("times", "bold"); 
+            doc.setFontSize(11); // note+++ KUNCI LAGI UKURAN 11 UNTUK NAMA (Agar tidak membengkak saat di-bold)
+            doc.text(currentUser.nama, doc.internal.pageSize.getWidth() - 60, finalY, { align: 'center' });
+            
+            // Garis bawah nama
+            const textWidth = doc.getTextWidth(currentUser.nama);
+            doc.setLineWidth(0.2); 
+            doc.line(doc.internal.pageSize.getWidth() - 60 - (textWidth / 2), finalY + 1, doc.internal.pageSize.getWidth() - 60 + (textWidth / 2), finalY + 1);
+            
+            doc.setFont("times", "normal"); 
+            doc.setFontSize(11); // note+++ KUNCI LAGI UKURAN 11 UNTUK NIP
+            doc.text(`NIP. ${currentUser.nip}`, doc.internal.pageSize.getWidth() - 60, finalY + 5, { align: 'center' });
+
+            // OUTPUT PDF
+            try { 
+                const blob = doc.output('blob'); 
+                const blobURL = URL.createObjectURL(blob); 
+                window.open(blobURL, '_blank'); 
+            } catch (e) { 
+                doc.save(`Profil_${studentName}.pdf`); 
+            }
+        }
+		
+		// --- 🔮 FITUR DEWA: AI FORECASTER (PREDIKSI TREN MASALAH) ---
+        async function runAiForecast() {
+            if(!cachedAllServices) {
+                Swal.fire("Tunggu", "Data sedang disinkronkan, silakan tunggu sebentar...", "info");
+                return;
+            }
+
+            // 1. Kumpulkan data mentah untuk bahan ramalan AI
+            let rawDataSummary = "";
+            for (const [sheet, data] of Object.entries(cachedAllServices)) {
+                if(data.length > 0) {
+                    rawDataSummary += `--- Layanan ${sheet} ---\n`;
+                    data.forEach(item => {
+                        const txt = item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || "";
+                        if(txt) rawDataSummary += `- ${txt}\n`;
+                    });
+                }
+            }
+
+            if(!rawDataSummary) {
+                Swal.fire("Kosong", "Belum ada data layanan yang cukup untuk dianalisis AI.", "warning");
+                return;
+            }
+
+            // 2. Tampilkan Loading Mewah
+            Swal.fire({
+                title: 'Membuka Mata Batin AI...',
+                html: 'AI sedang menganalisis pola masalah siswa dan menyusun strategi pencegahan...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                // 3. Siapkan Prompt "Peramal" yang sangat spesifik
+                const forecastPrompt = `
+                    TUGAS: Analisis Data Historis BK ini dan jadilah peramal preventif.
+                    DATA: \n${rawDataSummary}\n
+                    INSTRUKSI:
+                    1. Identifikasi 3 Tren Masalah Tersembunyi (misal: "Bullying Verbal meningkat di kelas 8").
+                    2. Prediksi apa yang akan terjadi bulan depan jika tidak diintervensi.
+                    3. Berikan 2 Saran Tindakan Preventif (Bimbingan Klasikal/Sosialisasi).
+                    
+                    Gunakan gaya bahasa profesional, tajam, dan waspada. Jawab langsung ke poinnya tanpa salam.
+                `;
+
+                // 4. Tembak ke Backend Action 'askAI'
+                const payload = { action: 'askAI', prompt: forecastPrompt, targetField: 'AI Forecaster Report' };
+                const res = await apiCall(payload, 'POST', payload);
+
+                if(res && res.status === 'success') {
+                    Swal.close();
+                    
+                    // 5. Tampilkan hasil ramalan dalam modal yang sangat mewah
+                    Swal.fire({
+                        title: '<span class="text-indigo-600">Laporan Prediksi Tren BK</span>',
+                        html: `
+                            <div class="text-left text-sm leading-relaxed p-2 space-y-4 max-h-[60vh] overflow-y-auto custom-scroll">
+                                ${res.data.replace(/\n/g, '<br>')}
+                            </div>
+                            <p class="mt-4 text-[10px] text-gray-400 italic font-light text-center border-t pt-2">Note: Analisis ini berdasarkan pola data historis yang tersimpan di sistem.</p>
+                        `,
+                        icon: 'info',
+                        width: '600px',
+                        confirmButtonText: 'Siap, Saya Akan Antisipasi!',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                } else {
+                    throw new Error("Gagal mendapatkan respons AI.");
+                }
+            } catch (err) {
+                Swal.fire("Error", "Sirkuit AI terputus. Cek internet Anda.", "error");
+            }
+        }
+		
         function editItem(id) { showForm(true, id); }
         function showAbout() {
             Swal.fire({ title: 'Tentang Aplikasi', html: `<div class="text-left text-sm"><p><strong>SIAP-BK Pro</strong></p><p class="mb-2">Sistem Informasi Administrasi Pelayanan BK.</p><ul class="list-disc pl-4 text-gray-600"><li>Fitur Cetak: Professional Report & Smart Recap</li><li>Database: Google Sheets</li><li>Keamanan: User Auth & Encrypted Traffic</li></ul><p class="mt-4 text-xs text-gray-400">Developed with ❤️ by Muhammad Hasratul</p></div>`, icon: 'info', confirmButtonColor: '#3b82f6' });
