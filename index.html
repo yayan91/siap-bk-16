@@ -526,7 +526,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbywHe4JLD_Vd9z-vYuhsvT78TLMEFM-cts6nBVAL9Ff_PTYUhjjlm3EXD59Au6lGhBO/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbxJLO0Koh8hXqbul3ILVkO-I7caseyH2KXZzcfYKqTGXn938t_YPBdQPiWV7D9Td-s/exec"; 
 
         // State
         let currentUser = null;
@@ -702,19 +702,30 @@
             })
         }
 
-        // --- API ---
+        // --- API CALL DENGAN PENYAMARAN CORS (ANTI BLOKIR) ---
         async function apiCall(params, method = 'GET', body = null) {
-            // Only show full loading overlay for login/init
             if(params.action === 'login' || params.action === 'getMetadata') document.getElementById('loading').classList.remove('hide');
             
             try {
                 let url = API_URL + "?";
                 for (const key in params) { url += `${key}=${encodeURIComponent(params[key])}&`; }
-                if(method === 'GET') { const response = await fetch(url); return await response.json(); } 
-                else { const response = await fetch(url, { method: "POST", body: JSON.stringify(body) }); return await response.json(); }
+                
+                let options = { method: method };
+                if (method === 'POST') {
+                    options.body = JSON.stringify(body);
+                    // Trik jitu melewati blokir keamanan Google
+                    options.headers = { "Content-Type": "text/plain;charset=utf-8" }; 
+                }
+                
+                const response = await fetch(url, options);
+                return await response.json();
             } catch (error) {
-                console.error(error); Swal.fire({ title: "Koneksi Gagal", text: "Cek internet Anda.", icon: "error" }); return null;
-            } finally { document.getElementById('loading').classList.add('hide'); }
+                console.error("Error Detail:", error); 
+                Swal.fire({ title: "Koneksi Gagal", text: "Cek internet Anda atau URL API.", icon: "error" }); 
+                return null;
+            } finally { 
+                document.getElementById('loading').classList.add('hide'); 
+            }
         }
 
         // --- AUTH ---
@@ -1269,15 +1280,40 @@
                 if(subTitle) { startY += 5; doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
                 
                 if(data.length > 0) {
-                    const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
                     const allKeys = Object.keys(data[0]);
-                    // Ambil 8 kolom pertama agar muat di kertas
-                    const relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
+                    let relevantKeys = [];
+                    
+                    // --- KUSTOMISASI KOLOM CETAK REKAP ---
+                    
+                    if (currentSheet === '7_Layanan_Individu') {
+                        // 1. Individu: Tambah Masalah, Hapus NISN
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Bidang_Bimbingan', 'Identifikasi_Masalah', 'Alternatif_Pemecahan', 'Hasil', 'Status_Konseling'];
+                        
+                    } else if (currentSheet === '8_Layanan_Kelompok') {
+                        // 2. Konseling Kelompok: Tambah Masalah, Hapus Komponen
+                        relevantKeys = ['Tanggal_Layanan', 'Anggota_Kelompok_Siswa', 'Bidang_Layanan', 'Identifikasi_Masalah', 'Hasil', 'Status_Proses'];
+                        
+                    } else if (currentSheet === '9_Bimbingan_Kelompok') {
+                        // 3. Bimbingan Kelompok: Tambah Masalah/Topik (Tujuan), Hapus Komponen
+                        relevantKeys = ['Tanggal_Layanan', 'Anggota_Kelompok_Siswa', 'Bidang_Layanan', 'Tujuan_Layanan', 'Identifikasi', 'Status_Proses'];
+                        
+                    } else if (currentSheet === '10_Konsultasi') {
+                        // 4. Konsultasi: Tambah Topik, Hapus Komponen & Nama Konsultan
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Konsulti', 'Status_Konsulti', 'Bidang_Bimbingan', 'Uraian_Topik', 'Hasil_Konsultasi', 'Tindak_Lanjut'];
+                        
+                    } else {
+                        // Default untuk layanan lainnya (Ambil 8 kolom pertama secara otomatis)
+                        const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
+                        relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
+                    }
+
+                    // Format Header
                     const headerDisplay = relevantKeys.map(h => toProperCase(h.replace(/_/g, ' ')));
                     
+                    // Format Isi Tabel
                     const body = data.map(row => relevantKeys.map(h => {
                          let val = row[h];
-                         if(h.includes('Tanggal')) val = formatTanggalIndo(val);
+                         if(h && h.includes('Tanggal')) val = formatTanggalIndo(val);
                          return val;
                     }));
 
@@ -1315,7 +1351,7 @@
                 });
             }
 
-            // 3. LOGIKA TANDA TANGAN (BAGIAN YANG DIMINTA)
+            // 3. LOGIKA TANDA TANGAN & 4. QR CODE (GABUNGAN)
             let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : startY + 50;
             const limitPage = pageHeight - 60; 
             if(finalY > limitPage) { doc.addPage(); finalY = 40; }
@@ -1328,79 +1364,73 @@
             const namaKepsek = (metaData.sekolah && metaData.sekolah.kepsek) ? metaData.sekolah.kepsek : "..............................";
             const nipKepsek = (metaData.sekolah && metaData.sekolah.nip_kepsek) ? metaData.sekolah.nip_kepsek : "..................";
 
+            // Siapkan text QR Code terlebih dahulu
+            let qrText = "";
             if (isRecap) {
-                // LOGIKA REKAP (Selalu Kepsek + Guru BK)
-                doc.text("Mengetahui,", 40, finalY, { align: 'center' });
-                doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
-                doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' });
-                doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
+                const periodText = subTitle ? subTitle : "Semua Periode";
+                qrText = `DOKUMEN SAH SIAP-BK.\nJenis: REKAP ${currentTitle}\nTotal: ${data.length}\nGuru BK: ${currentUser.nama}\nKepsek: ${namaKepsek}`;
+            } else {
+                const studentName = data[0]['Nama_Siswa'] || data[0]['Nama_Siswa_1'] || data[0]['Nama_Kegiatan'] || '-';
+                qrText = `DOKUMEN SAH SIAP-BK.\nJenis: ${currentTitle}\nSiswa: ${studentName}\nTgl: ${dateStr}\nGuru BK: ${currentUser.nama}`;
+            }
+
+            // Generate Image QR Code
+            let qrImage = null;
+            try {
+                const qr = new QRious({ value: qrText, size: 100, level: 'H' });
+                qrImage = qr.toDataURL();
+            } catch (qrErr) { console.warn("QR Error", qrErr); }
+
+            let sigTopY = finalY;
+
+            // KONDISI 1: JIKA REKAP ATAU LAYANAN YANG BUTUH 2 TANDA TANGAN (KEPSEK & GURU BK)
+            if (isRecap || ['12_Konferensi_Kasus', '13_Alih_Tangan_Kasus'].includes(currentSheet)) {
                 
+                doc.text("Mengetahui,", 40, sigTopY, { align: 'center' });
+                doc.text("Kepala Sekolah", 40, sigTopY + 5, { align: 'center' });
+                doc.text(`Makassar, ${dateStr}`, pageWidth - 40, sigTopY, { align: 'center' });
+                doc.text("Guru Bimbingan Konseling", pageWidth - 40, sigTopY + 5, { align: 'center' });
+                
+                // Print QR di TENGAH (antara Kepsek dan Guru BK)
+                if (qrImage) {
+                    doc.addImage(qrImage, 'PNG', centerX - 12.5, sigTopY - 2, 25, 25);
+                    doc.setFontSize(7); doc.text("Scan Validasi", centerX, sigTopY + 26, { align: 'center' });
+                    doc.setFontSize(11); // kembalikan ukuran font
+                }
+
                 finalY += 25;
                 
-                // Kepsek (Kiri)
+                // Tanda Tangan Kepsek (Kiri)
                 doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
                 const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
                 doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
                 
-                // Guru BK (Kanan)
+                // Tanda Tangan Guru BK (Kanan)
                 doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
                 const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
                 doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
 
-            } else {
-                // LOGIKA LAPORAN SATUAN (SESUAI PERMINTAAN)
+            } 
+            // KONDISI 2: HANYA GURU BK SAJA
+            else {
+                // Geser posisi teks Guru BK agak ke kanan sedikit agar seimbang dengan QR Code di kirinya
+                doc.text(`Makassar, ${dateStr}`, centerX + 25, sigTopY, { align: 'center' });
+                doc.text("Guru Bimbingan Konseling", centerX + 25, sigTopY + 5, { align: 'center' });
                 
-                // KELOMPOK 1: KEPSEK & GURU BK (Untuk Konferensi & Alih Tangan)
-                if (['12_Konferensi_Kasus', '13_Alih_Tangan_Kasus'].includes(currentSheet)) {
-                    
-                    doc.text("Mengetahui,", 40, finalY, { align: 'center' });
-                    doc.text("Kepala Sekolah", 40, finalY + 5, { align: 'center' });
-
-                    doc.text(`Makassar, ${dateStr}`, pageWidth - 40, finalY, { align: 'center' });
-                    doc.text("Guru Bimbingan Konseling", pageWidth - 40, finalY + 5, { align: 'center' });
-
-                    finalY += 25;
-
-                    // Nama Kepsek (Kiri)
-                    doc.setFont("times", "bold"); doc.text(namaKepsek, 40, finalY, { align: 'center' });
-                    const kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, finalY + 1, 40 + kWidth/2, finalY + 1);
-                    doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, finalY + 5, { align: 'center' });
-
-                    // Nama Guru BK (Kanan)
-                    doc.setFont("times", "bold"); doc.text(currentUser.nama, pageWidth - 40, finalY, { align: 'center' });
-                    const bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, finalY + 1, pageWidth - 40 + bWidth/2, finalY + 1);
-                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, finalY + 5, { align: 'center' });
-
-                } 
-                // KELOMPOK 2: HANYA GURU BK (Untuk Mediasi, Advokasi, dan sisanya)
-                else {
-                    doc.text(`Makassar, ${dateStr}`, centerX, finalY, { align: 'center' });
-                    doc.text("Guru Bimbingan Konseling", centerX, finalY + 5, { align: 'center' });
-                    
-                    finalY += 25;
-                    
-                    doc.setFont("times", "bold"); doc.text(currentUser.nama, centerX, finalY, { align: 'center' });
-                    const textWidth = doc.getTextWidth(currentUser.nama);
-                    doc.setLineWidth(0.2); doc.line(centerX - (textWidth / 2), finalY + 1, centerX + (textWidth / 2), finalY + 1);
-                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX, finalY + 5, { align: 'center' });
+                // Print QR di SAMPING KIRI Guru BK
+                if (qrImage) {
+                    doc.addImage(qrImage, 'PNG', centerX - 45, sigTopY - 2, 25, 25);
+                    doc.setFontSize(7); doc.text("Scan Validasi", centerX - 32.5, sigTopY + 26, { align: 'center' });
+                    doc.setFontSize(11); // kembalikan ukuran font
                 }
+
+                finalY += 25;
+                
+                doc.setFont("times", "bold"); doc.text(currentUser.nama, centerX + 25, finalY, { align: 'center' });
+                const textWidth = doc.getTextWidth(currentUser.nama);
+                doc.setLineWidth(0.2); doc.line(centerX + 25 - (textWidth / 2), finalY + 1, centerX + 25 + (textWidth / 2), finalY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX + 25, finalY + 5, { align: 'center' });
             }
-
-            // 4. QR CODE (VALIDASI)
-            try {
-                let qrText = "";
-                if (isRecap) {
-                    const periodText = subTitle ? subTitle : "Semua Periode";
-                    qrText = `DOKUMEN SAH SIAP-BK.\nJenis: REKAP ${currentTitle}\nTotal: ${data.length}\nGuru BK: ${currentUser.nama}\nKepsek: ${namaKepsek}`;
-                } else {
-                    const studentName = data[0]['Nama_Siswa'] || data[0]['Nama_Siswa_1'] || data[0]['Nama_Kegiatan'] || '-';
-                    qrText = `DOKUMEN SAH SIAP-BK.\nJenis: ${currentTitle}\nSiswa: ${studentName}\nTgl: ${dateStr}\nGuru BK: ${currentUser.nama}`;
-                }
-                const qr = new QRious({ value: qrText, size: 100, level: 'H' });
-                const qrData = qr.toDataURL();
-                doc.addImage(qrData, 'PNG', 10, pageHeight - 50, 25, 25);
-                doc.setFontSize(8); doc.text("Scan untuk validasi", 22.5, pageHeight - 22, { align: 'center' });
-            } catch (qrErr) { console.warn("QR Error", qrErr); }
 
             try { 
                 const blob = doc.output('blob'); 
@@ -1420,7 +1450,7 @@
             if(sheetName === '10_Konsultasi') return [...common, { key: 'Durasi', label: 'Durasi', type: 'text' }, { key: 'Nama_Konsulti', label: 'Nama Konsulti (Orang Tua/Guru)', type: 'text' }, { key: 'Status_Konsulti', label: 'Status Konsulti', type: 'select', options: ['Orang Tua', 'Guru Mapel', 'Wali Kelas', 'Lainnya'] }, { key: 'Nama_Konsultan_GuruBK', label: 'Nama Konsultan (Guru BK)', type: 'text', value: currentUser.nama }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Dukungan Sistem', 'Layanan Responsif'] }, { key: 'Bidang_Bimbingan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Uraian_Topik', label: 'Uraian Topik', type: 'textarea' }, { key: 'Hasil_Konsultasi', label: 'Hasil Konsultasi', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
             if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
             if(sheetName === '12_Konferensi_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa (Kasus)', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terlibat', label: 'Pihak Terlibat (Ortu/Kepsek)', type: 'text' }, { key: 'Tempat_Pertemuan', label: 'Tempat Pertemuan', type: 'text' }, { key: 'Deskripsi_Kasus', label: 'Deskripsi Kasus', type: 'textarea' }, { key: 'Hasil_Keputusan', label: 'Hasil Keputusan (Berita Acara)', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
-            if(sheetName === '13_Alih_Tangan_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Penerima', label: 'Dirujuk Kepada (Psikolog/Dokter/dll)', type: 'text' }, { key: 'Alamat_Penerima', label: 'Alamat Pihak Penerima', type: 'text' }, { key: 'Alasan_Rujukan', label: 'Alasan Rujukan', type: 'textarea' }, { key: 'Dokumen_Penyerta', label: 'Dokumen Penyerta (Rekam Medis dll)', type: 'text' }, { key: 'Hasil_Rujukan', label: 'Hasil (Umpan Balik)', type: 'textarea' }, { key: 'Status_Rujukan', label: 'Status', type: 'select', options: ['Dikirim', 'Diterima', 'Selesai'] }];
+            if(sheetName === '13_Alih_Tangan_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Penerima', label: 'Dirujuk Kepada (Psikolog/Dokter/dll)', type: 'text' }, { key: 'Alamat_Penerima', label: 'Alamat Pihak Penerima', type: 'text' }, { key: 'Alasan_Rujukan', label: 'Alasan Rujukan', type: 'textarea' }, { key: 'Dokumen_Penyerta', label: 'Dokumen Penyerta (Rekam Medis dll)', type: 'text' }, { key: 'Hasil_Rujukan', label: 'Hasil (Umpan Balik)', type: 'textarea' }, { key: 'Status_Rujukan', label: 'Status', type: 'select', options: ['Dikirim', 'Diterima', 'Selesai'] }];
             if(sheetName === '14_Mediasi') return [
 				...common, 
 				// Pihak 1
@@ -1435,8 +1465,8 @@
 				{ key: 'Hasil_Kesepakatan', label: 'Isi Perjanjian Damai', type: 'textarea' }, 
 				{ key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }
 			];
-            if(sheetName === '15_Advokasi') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
-            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'text' }];
+            if(sheetName === '15_Advokasi') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
+            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'text' }];
             return [];
         }
         function showForm(isEdit = false, id = null) {
@@ -1494,7 +1524,22 @@
                     input = document.createElement('input'); input.type = f.type || 'text'; input.className = baseClass + (f.type === 'readonly' ? " bg-gray-100 dark:bg-slate-700 text-gray-500 cursor-not-allowed" : ""); input.value = val; if(f.type === 'readonly') input.readOnly = true; input.placeholder = f.placeholder || '';
                 }
                 input.name = f.key; input.id = `field-${f.key}`;
-                div.appendChild(label); div.appendChild(input); form.appendChild(div);
+                div.appendChild(label); 
+                div.appendChild(input); 
+                
+                // note+++ TAMBAHAN TOMBOL AI UNTUK KOLOM TARGET
+                const aiTargets = ['Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Tujuan_Layanan', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan'];
+                if(aiTargets.includes(f.key)) {
+                    const aiBtn = document.createElement('button');
+                    aiBtn.type = "button";
+                    aiBtn.id = `btn-ai-${f.key}`;
+                    aiBtn.className = "mt-1 flex items-center gap-2 text-[11px] font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-3 py-1.5 rounded-lg shadow-md transition-all btn-press w-max";
+                    aiBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Susun Otomatis (AI)`;
+                    aiBtn.onclick = () => generateAIDraft(f.key);
+                    div.appendChild(aiBtn);
+                }
+                
+                form.appendChild(div);
             });
             document.getElementById('page-form').classList.remove('hide');
         }
@@ -1522,6 +1567,70 @@
 			const elNisn = document.getElementById(targetNisnId);
 			if(elNisn) elNisn.value = s.nisn;
 		}
+		// --- FITUR PREMIUM: GENERATE AI DRAFT ---
+        async function generateAIDraft(targetField) {
+            // 1. Kumpulkan konteks masalah dari form yang sedang diisi
+            let contextText = "";
+            const formElements = document.getElementById('dynamic-form').elements;
+            for(let el of formElements) {
+                // Cari kolom yang mengandung kata kunci masalah/topik
+                if((el.name.includes('Masalah') || el.name.includes('Topik') || el.name.includes('Alasan') || el.name.includes('Kronologi') || el.name.includes('Deskripsi')) && el.value.trim() !== "") {
+                    contextText += `${el.name.replace(/_/g, ' ')}: ${el.value}\n`;
+                }
+            }
+
+            if(!contextText) {
+                Swal.fire("Tunggu Dulu", "Tuliskan dulu Identifikasi Masalah / Kronologi / Topiknya di atas, agar AI paham apa yang harus diselesaikan.", "warning");
+                return;
+            }
+
+            const targetEl = document.getElementById(`field-${targetField}`);
+            const btnEl = document.getElementById(`btn-ai-${targetField}`);
+            
+            // 2. Ubah UI tombol jadi status Loading
+            const originalBtnText = btnEl.innerHTML;
+            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> AI Sedang Berpikir...`;
+            btnEl.disabled = true;
+            targetEl.value = "Meminta petunjuk AI...";
+
+            try {
+                // 3. Tembak ke Backend
+                // note+++ PERBAIKAN: Tambahkan targetField ke dalam payload yang dikirim ke backend
+                const payload = { action: 'askAI', prompt: contextText, targetField: targetField };
+                const res = await apiCall(payload, 'POST', payload);
+                
+                if(res && res.status === 'success') {
+                    // 4. Efek mengetik elegan (Typing effect)
+                    targetEl.value = "";
+                    let i = 0;
+                    const txt = res.data;
+                    const speed = 15; // Kecepatan ketik (ms)
+                    
+                    function typeWriter() {
+                        if (i < txt.length) {
+                            targetEl.value += txt.charAt(i);
+                            i++;
+                            targetEl.scrollTop = targetEl.scrollHeight; // Auto-scroll ke bawah saat ngetik
+                            setTimeout(typeWriter, speed);
+                        } else {
+                            btnEl.innerHTML = `<i class="fa-solid fa-check"></i> Selesai`;
+                            setTimeout(() => { btnEl.innerHTML = originalBtnText; btnEl.disabled = false; }, 2000);
+                        }
+                    }
+                    typeWriter();
+                } else {
+                    targetEl.value = "";
+                    Swal.fire("Gagal", res?.message || "AI sedang sibuk.", "error");
+                    btnEl.innerHTML = originalBtnText;
+                    btnEl.disabled = false;
+                }
+            } catch(e) {
+                targetEl.value = "";
+                Swal.fire("Error", "Koneksi ke AI gagal. Cek internet.", "error");
+                btnEl.innerHTML = originalBtnText;
+                btnEl.disabled = false;
+            }
+        }
         // --- LOGIKA SIMPAN DATA DENGAN LOADING ---
 		async function handleSave(e) {
 			e.preventDefault();
