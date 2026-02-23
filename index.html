@@ -234,15 +234,33 @@
         <section id="page-dashboard" class="hide flex-1 pb-10">
             
             <!-- HEADING & SEARCH -->
-            <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
-                <div class="text-center md:text-left w-full">
+            <div class="flex flex-col xl:flex-row justify-between items-end mb-6 gap-4">
+                <div class="text-center xl:text-left w-full xl:w-auto">
                     <h2 class="text-3xl font-bold dark:text-white text-slate-800 drop-shadow-sm">Dashboard</h2>
                     <p class="dark:text-blue-200 text-slate-500 font-light text-sm">Statistik & Menu Layanan</p>
                 </div>
                 
-                <div class="w-full md:w-96 relative">
+                <div class="flex flex-col md:flex-row items-center gap-2 bg-slate-200 dark:bg-slate-800 p-1.5 rounded-xl shadow-inner w-full xl:w-auto">
+                    
+                    <select id="dashboard-filter-type" onchange="toggleDateFilter()" class="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-blue-500 transition shadow-sm cursor-pointer">
+                        <option value="all">Semua Waktu</option>
+                        <option value="Ganjil">Semester Ganjil</option>
+                        <option value="Genap">Semester Genap</option>
+                        <option value="custom">Rentang Tanggal</option>
+                    </select>
+
+                    <div id="dashboard-custom-date" class="hidden items-center gap-2 animate-slide-in">
+                        <input type="date" id="dash-date-start" class="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-2 py-1.5 rounded-lg text-xs outline-none shadow-sm border border-transparent focus:ring-2 focus:ring-blue-500">
+                        <span class="text-slate-500 dark:text-slate-400 text-xs font-bold">-</span>
+                        <input type="date" id="dash-date-end" class="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-2 py-1.5 rounded-lg text-xs outline-none shadow-sm border border-transparent focus:ring-2 focus:ring-blue-500">
+                        <button onclick="applyDashboardFilter()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm btn-press" title="Terapkan Filter Tanggal"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+
+                </div>
+                
+                <div class="w-full xl:w-72 relative">
                     <div class="flex bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-                        <input type="text" id="global-student-search" placeholder="Cari Riwayat Siswa (Ketik Nama)..." class="w-full px-4 py-2 bg-transparent outline-none text-slate-700 dark:text-white">
+                        <input type="text" id="global-student-search" placeholder="Cari Siswa..." class="w-full px-4 py-2 bg-transparent outline-none text-slate-700 dark:text-white text-sm">
                         <button onclick="searchStudentHistory()" class="bg-blue-600 text-white px-4 hover:bg-blue-700 transition"><i class="fa-solid fa-search"></i></button>
                     </div>
                 </div>
@@ -870,6 +888,28 @@
             chartType = chartType === 'bar' ? 'doughnut' : 'bar';
             loadDashboardStats();
         }
+		
+		// --- PENGENDALI SMART FILTER DASHBOARD ---
+        function toggleDateFilter() {
+            const type = document.getElementById('dashboard-filter-type').value;
+            const dateContainer = document.getElementById('dashboard-custom-date');
+            
+            if (type === 'custom') {
+                // Munculkan kotak kalender
+                dateContainer.classList.remove('hidden');
+                dateContainer.classList.add('flex');
+            } else {
+                // Sembunyikan kotak kalender
+                dateContainer.classList.add('hidden');
+                dateContainer.classList.remove('flex');
+                // Langsung hitung ulang dashboard jika pilih Ganjil/Genap/Semua
+                applyDashboardFilter();
+            }
+        }
+
+        function applyDashboardFilter() {
+            loadDashboardStats(); // Refresh semua angka
+        }
 
         async function loadDashboardStats() {
             const sheets = [
@@ -887,6 +927,60 @@
                 cachedAllServices = {};
                 sheets.forEach((s, i) => cachedAllServices[s] = results[i]);
             }
+			
+			// ... (kode caching bapak sebelumnya: results = await Promise.all(promises); dll) ...
+
+            // ==========================================
+            // KODE BARU: FILTER SEMESTER & RENTANG TANGGAL
+            // ==========================================
+            const filterType = document.getElementById('dashboard-filter-type') ? document.getElementById('dashboard-filter-type').value : 'all';
+            const startDateVal = document.getElementById('dash-date-start') ? document.getElementById('dash-date-start').value : '';
+            const endDateVal = document.getElementById('dash-date-end') ? document.getElementById('dash-date-end').value : '';
+            
+            // Kita timpa sementara variabel 'results' khusus untuk hitungan dashboard ini
+            results = results.map(sheetData => {
+                return sheetData.filter(item => {
+                    // 1. Jika Semua Waktu, loloskan
+                    if (filterType === 'all') return true; 
+
+                    // 2. Jika filter berdasarkan SEMESTER
+                    if (filterType === 'Ganjil' || filterType === 'Genap') {
+                        // Membaca langsung dari kolom 'Semester' yang Bapak buat di backend!
+                        return item['Semester'] === filterType; 
+                    }
+
+                    // 3. Jika filter berdasarkan RENTANG TANGGAL (Custom)
+                    if (filterType === 'custom') {
+                        const dateStr = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                        if (!dateStr) return false; 
+                        
+                        const itemDate = new Date(dateStr);
+                        if (isNaN(itemDate.getTime())) return false;
+                        
+                        // Nol-kan jam agar perbandingan tangal lebih akurat
+                        itemDate.setHours(0,0,0,0);
+                        let pass = true;
+                        
+                        if (startDateVal) {
+                            let sDate = new Date(startDateVal); sDate.setHours(0,0,0,0);
+                            if (itemDate < sDate) pass = false;
+                        }
+                        if (endDateVal) {
+                            let eDate = new Date(endDateVal); eDate.setHours(23,59,59,999); // Akhir hari
+                            if (itemDate > eDate) pass = false;
+                        }
+                        return pass;
+                    }
+                    
+                    return true;
+                });
+            });
+            // ==========================================
+            // AKHIR KODE FILTER
+            // ==========================================
+
+            // 1. CALCULATE SUMMARY STATS
+            // ... (KODE LAMA BAPAK BERLANJUT KE BAWAH) ...
 
             // 1. CALCULATE SUMMARY STATS
             let totalLayanan = 0;
