@@ -211,8 +211,8 @@
                     <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
                     
                     <div class="relative z-10">
-                        <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 shadow-inner border border-white/30">
-                            <i class="fa-solid fa-shield-halved text-3xl text-blue-100"></i>
+                        <div class="w-24 h-25 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 shadow-inner border border-white/30 p-2">
+                            <img src="https://lh3.googleusercontent.com/u/0/d/1Wr_uC9C32tjzN19PZXLsk3tyBNrzO1wy" class="w-full h-full object-contain drop-shadow-md" alt="Logo Sekolah">
                         </div>
                         <h1 class="text-4xl font-extrabold mb-2 tracking-tight leading-tight">SIAP-BK <span class="text-yellow-400">PRO</span></h1>
                         <h2 class="text-lg font-medium text-blue-100 mb-6 tracking-wide uppercase">UPT SPF SMP Negeri 16 Makassar</h2>
@@ -868,18 +868,58 @@
 
         function logout() {
             Swal.fire({
-                title: 'Keluar Aplikasi?',
+                title: '<span class="text-2xl font-bold dark:text-white text-slate-800">Akhiri Sesi?</span>',
+                html: '<p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Pastikan semua laporan layanan siswa hari ini sudah Anda simpan.</p>',
                 icon: 'question',
+                iconColor: '#3b82f6',
                 showCancelButton: true,
-                confirmButtonColor: '#3b82f6', cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Keluar'
+                confirmButtonText: '<i class="fa-solid fa-power-off mr-2"></i>Ya, Keluar',
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
+                    confirmButton: 'px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-xl shadow-lg hover:shadow-red-500/30 transition-all hover:-translate-y-1 mx-2 btn-press',
+                    cancelButton: 'px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl transition-all hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 mx-2 btn-press'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     currentUser = null;
                     localStorage.removeItem('bk_user');
                     showSection('page-login');
+                    
+                    // Alert Dadah!
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<span class="text-lg font-bold dark:text-white text-slate-800">Sampai Jumpa!</span>',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-lg w-auto' }
+                    });
                 }
             })
+        }
+		
+		// --- POPUP INFO LOGIN (KHUSUS MOBILE) ---
+        function showMobileInfo() {
+            Swal.fire({
+                title: '<span class="text-indigo-600 font-bold">SIAP-BK PRO</span>',
+                html: `
+                    <div class="text-left text-sm text-slate-600 dark:text-slate-300">
+                        <p class="font-bold text-slate-800 dark:text-white mb-2 border-b pb-2">UPT SPF SMP Negeri 16 Makassar</p>
+                        <p class="mb-3">Sistem Informasi Administrasi & Pelayanan Bimbingan Konseling. Platform digital modern dengan dukungan Kecerdasan Buatan (AI).</p>
+                        <ul class="space-y-2">
+                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> AI Smart Analytics</li>
+                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> Automated Reporting</li>
+                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> Secure Database</li>
+                        </ul>
+                        <p class="mt-4 text-[10px] text-slate-400 text-center">Build 2026 &copy; Developed by Muhammad Hasratul</p>
+                    </div>
+                `,
+                iconHtml: '<i class="fa-solid fa-shield-halved text-blue-500"></i>',
+                customClass: { icon: 'border-none' },
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: 'Tutup'
+            });
         }
 
         // --- API CALL DENGAN PENYAMARAN CORS (ANTI BLOKIR) ---
@@ -914,12 +954,40 @@
             const u = document.getElementById('login-username').value;
             const p = document.getElementById('login-password').value;
             if(!u || !p) return;
+            
             const res = await apiCall({ action: 'login', username: u, password: p });
+            
             if (res && res.status === 'success') {
                 currentUser = res.data;
                 localStorage.setItem('bk_user', JSON.stringify(currentUser));
-                initApp();
-            } else { Swal.fire("Login Gagal", res?.message || "Error", "error"); }
+                
+                // 🌟 Alert Mewah Masuk Sukses
+                Swal.fire({
+                    icon: 'success',
+                    iconColor: '#10b981',
+                    title: '<span class="text-xl font-bold dark:text-white text-slate-800">Akses Diberikan!</span>',
+                    html: `<p class="text-sm text-slate-500 dark:text-slate-400">Selamat bekerja kembali, <strong>${currentUser.nama.split(',')[0]}</strong>.</p>`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl' }
+                }).then(() => {
+                    initApp();
+                });
+            } else { 
+                // 🌟 Alert Mewah Gagal Masuk
+                Swal.fire({
+                    icon: 'error',
+                    iconColor: '#ef4444',
+                    title: '<span class="text-xl font-bold dark:text-white text-slate-800">Akses Ditolak</span>',
+                    html: `<p class="text-sm text-slate-500 dark:text-slate-400 mt-2">${res?.message || "Username atau password Anda salah."}</p>`,
+                    confirmButtonText: '<i class="fa-solid fa-rotate-right mr-2"></i>Coba Lagi',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
+                        confirmButton: 'px-8 py-3 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl shadow-lg transition-all hover:-translate-y-1 mt-4 btn-press'
+                    }
+                }); 
+            }
         }
 
         async function initApp() {
@@ -1913,7 +1981,7 @@
             generatePDF([item], `Laporan_${currentTitle}`, false);
         }
 
-        // --- PDF FUNCTION (UPDATED) ---
+        // --- PDF FUNCTION (UPDATED - BACK TO ORIGINAL WITH PRO STYLING) ---
         async function generatePDF(data, filename, isRecap, subTitle = "") {
             const { jsPDF } = window.jspdf;
             const orientation = isRecap ? 'landscape' : 'portrait';
@@ -1927,10 +1995,10 @@
             // 1. HEADER KOP SURAT
             const addHeader = async () => {
                 doc.setFont("times", "normal");
-                const defaultLogoKiri = "https://lh3.googleusercontent.com/u/0/d/1lxB2aQC5H-bnz7OlwnpmC9dl2Z3RERwI";
-                const defaultLogoKanan = "https://lh3.googleusercontent.com/d/1jA8C9RLNHSxlumS1NfyIrNTi3VHv7N-u"; 
+                const defaultLogoKiri = "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L";
+                const defaultLogoKanan = ""; 
                 
-                const urlKiri = s.logo_kiri || defaultLogoKiri;
+                const urlKiri = s.logo_kiri || s.logo_url || defaultLogoKiri;
                 const urlKanan = s.logo_kanan || defaultLogoKanan; 
                 
                 if (urlKiri) { 
@@ -1943,11 +2011,14 @@
                 }
 
                 let currentY = 15;
+                // Semua Kop Surat ukuran 12, KECUALI NAMA SEKOLAH ukuran 14
                 doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
                 currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+                
                 currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+                
                 currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-                currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+                currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(12); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
                 
                 // Garis Kop
                 currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
@@ -1960,34 +2031,24 @@
             // 2. ISI TABEL
             if (isRecap) {
                 // === MODE REKAP ===
-                doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+                doc.setFont("times", "bold"); doc.setFontSize(12);
                 doc.text(`REKAPITULASI ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
-                if(subTitle) { startY += 5; doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
+                if(subTitle) { startY += 5; doc.setFontSize(11); doc.setFont("times", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
                 
                 if(data.length > 0) {
                     const allKeys = Object.keys(data[0]);
                     let relevantKeys = [];
                     
                     // --- KUSTOMISASI KOLOM CETAK REKAP ---
-                    
                     if (currentSheet === '7_Layanan_Individu') {
-                        // 1. Individu: Tambah Masalah, Hapus NISN
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Bidang_Bimbingan', 'Identifikasi_Masalah', 'Alternatif_Pemecahan', 'Hasil', 'Status_Konseling'];
-                        
                     } else if (currentSheet === '8_Layanan_Kelompok') {
-                        // 2. Konseling Kelompok: Tambah Masalah, Hapus Komponen
                         relevantKeys = ['Tanggal_Layanan', 'Anggota_Kelompok_Siswa', 'Bidang_Layanan', 'Identifikasi_Masalah', 'Hasil', 'Status_Proses'];
-                        
                     } else if (currentSheet === '9_Bimbingan_Kelompok') {
-                        // 3. Bimbingan Kelompok: Tambah Masalah/Topik (Tujuan), Hapus Komponen
                         relevantKeys = ['Tanggal_Layanan', 'Anggota_Kelompok_Siswa', 'Bidang_Layanan', 'Tujuan_Layanan', 'Identifikasi', 'Status_Proses'];
-                        
                     } else if (currentSheet === '10_Konsultasi') {
-                        // 4. Konsultasi: Tambah Topik, Hapus Komponen & Nama Konsultan
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Konsulti', 'Status_Konsulti', 'Bidang_Bimbingan', 'Uraian_Topik', 'Hasil_Konsultasi', 'Tindak_Lanjut'];
-                        
                     } else {
-                        // Default untuk layanan lainnya (Ambil 8 kolom pertama secara otomatis)
                         const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
                         relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
                     }
@@ -2004,8 +2065,9 @@
 
                     doc.autoTable({
                         startY: startY + 5, head: [headerDisplay], body: body, theme: 'grid',
-                        styles: { font: "helvetica", fontSize: 9, cellPadding: 2, lineWidth: 0.1, lineColor: 0 },
-                        headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', lineWidth: 0.1 },
+                        // Font Times 11 untuk Rekap
+                        styles: { font: "times", fontSize: 11, cellPadding: 1.5, lineWidth: 0.1, lineColor: 0 },
+                        headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', lineWidth: 0.1 },
                         margin: { top: 10, left: 10, right: 10, bottom: 20 }
                     });
                 }
@@ -2014,8 +2076,8 @@
                 const item = data[0]; 
                 // Kotak Judul
                 doc.setFillColor(240, 240, 240); doc.rect(centerX - 60, startY - 5, 120, 10, 'F');
-                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(0, 0, 0); 
-                doc.text(`LAPORAN ${currentTitle.toUpperCase()}`, centerX, startY + 2, { align: 'center' });
+                doc.setFont("times", "bold"); doc.setFontSize(12); doc.setTextColor(0, 0, 0); 
+                doc.text(`LAPORAN ${currentTitle.toUpperCase()}`, centerX, startY + 1.5, { align: 'center' });
                 
                 let currentY = startY + 15;
                 const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
@@ -2029,9 +2091,12 @@
 
                 doc.autoTable({
                     startY: currentY, head: [['DATA / INFORMASI', 'KETERANGAN']], body: bodyData, theme: 'grid', 
-                    styles: { font: "times", fontSize: 11, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1, valign: 'middle', overflow: 'linebreak' },
-                    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold', halign: 'center', cellPadding: 3 },
-                    columnStyles: { 0: { cellWidth: 60, fillColor: [245, 245, 245], fontStyle: 'bold', textColor: [50, 50, 50] }, 1: { cellWidth: 'auto', fillColor: 255, textColor: 0 } },
+                    // Font Times 11 & Padding diperkecil jadi 1.5 (agar baris lebih rapat)
+                    styles: { font: "times", fontSize: 11, cellPadding: 1.5, lineColor: [0, 0, 0], lineWidth: 0.1, valign: 'middle', overflow: 'linebreak' },
+                    // Background biru dibuang, diganti abu-abu terang elegan
+                    headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center', cellPadding: 2 },
+                    // Lebar kolom DATA diperkecil jadi 45 agar kolom KETERANGAN lebih dekat
+                    columnStyles: { 0: { cellWidth: 45, fillColor: 255, fontStyle: 'bold', textColor: [0, 0, 0] }, 1: { cellWidth: 'auto', fillColor: 255, textColor: 0 } },
                     margin: { left: 15, right: 15 }
                 });
             }
@@ -2151,7 +2216,7 @@
 				{ key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }
 			];
             if(sheetName === '15_Advokasi') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
-            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'text' }];
+            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'textarea' }];
             return [];
         }
         function showForm(isEdit = false, id = null) {
@@ -2309,6 +2374,22 @@
                 div.appendChild(label); 
                 div.appendChild(input); 
                 
+				// 🎤 AUTO-INJECT MIC (Hanya untuk tipe text dan textarea)
+                if (f.type === 'text' || f.type === 'textarea' || f.type === 'number') {
+                    const micBtn = document.createElement('button');
+                    micBtn.type = "button";
+                    micBtn.id = `btn-mic-${f.key}`;
+                    // Posisi mic di kanan bawah isian agar estetik
+                    micBtn.className = "absolute right-3 bottom-3 text-slate-400 hover:text-blue-500 transition-all z-20 p-1";
+                    micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.title = "Dikte Suara (Jarvis Mode)";
+                    micBtn.onclick = () => startDictation(f.key);
+                    div.appendChild(micBtn);
+                    
+                    // Beri padding kanan sedikit agar teks tidak tertabrak ikon mic
+                    input.classList.add('pr-10');
+                }
+				
                 // 🌟 TOMBOL AI MELAYANG ESTETIK
                 const btnContainer = document.createElement('div');
                 btnContainer.className = "flex gap-2 absolute right-2 -top-1 z-10"; 
@@ -2494,6 +2575,48 @@
             }
         }
 		
+		// --- JARVIS MODE: SPEECH TO TEXT ENGINE ---
+        function startDictation(fieldId) {
+            const btn = document.getElementById(`btn-mic-${fieldId}`);
+            const input = document.getElementById(`field-${fieldId}`);
+            
+            // Cek apakah browser mendukung Speech Recognition
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!window.SpeechRecognition) {
+                showToast("Maaf, Browser Anda tidak mendukung perintah suara.", "error");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID'; // Set Bahasa Indonesia
+            recognition.interimResults = false;
+
+            // Efek Visual saat merekam
+            btn.classList.add('animate-pulse', 'text-red-500', 'scale-125');
+            btn.innerHTML = '<i class="fa-solid fa-microphone-lines"></i>';
+            showToast("Sistem Mendengarkan... Silakan bicara.", "info");
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                // Masukkan hasil suara ke input/textarea (ditambah spasi jika sudah ada teks)
+                input.value = input.value ? input.value + " " + transcript : transcript;
+                showToast("Suara berhasil direkam!", "success");
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech error:", event.error);
+                showToast("Gagal merekam: " + event.error, "error");
+            };
+
+            recognition.onend = () => {
+                btn.classList.remove('animate-pulse', 'text-red-500', 'scale-125');
+                btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            };
+        }
+		
         // --- LOGIKA SIMPAN DATA DENGAN LOADING ---
 		async function handleSave(e) {
 			e.preventDefault();
@@ -2530,16 +2653,32 @@
 
 				// 3. CEK HASIL
                 if(res && res.status === 'success') { 
-                    showToast('Data berhasil disimpan!', 'success'); 
+                    // 🌟 Alert Mewah Simpan/Edit
+                    Swal.fire({
+                        icon: 'success',
+                        iconColor: '#10b981',
+                        title: `<span class="text-2xl font-bold dark:text-white text-slate-800">${editMode ? 'Pembaruan Berhasil!' : 'Tersimpan!'}</span>`,
+                        html: `<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Data layanan <strong>${currentTitle}</strong> telah tercatat di server.</p>`,
+                        showConfirmButton: false,
+                        timer: 2500,
+                        customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl' }
+                    });
+                    
                     closeForm(); 
-                    
-                    // note+++ KOSONGKAN CACHE AGAR DASHBOARD TAHU ADA DATA BARU
                     cachedAllServices = null; 
-                    
-                    // Refresh data list agar data baru muncul
                     await openService(currentSheet, currentTitle); 
                 } else { 
-                    Swal.fire("Gagal", res?.message || "Terjadi kesalahan saat menyimpan.", "error"); 
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-xl font-bold dark:text-white text-slate-800">Oops! Gagal</span>',
+                        html: `<p class="text-sm text-slate-500 dark:text-slate-400">${res?.message || "Terjadi kesalahan saat menyinkronkan data."}</p>`,
+                        confirmButtonText: 'Tutup',
+                        buttonsStyling: false,
+                        customClass: { 
+                            popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
+                            confirmButton: 'px-8 py-2.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl shadow-md mt-4 btn-press'
+                        }
+                    }); 
                 }
 
 			} catch (error) {
@@ -2551,19 +2690,56 @@
 			}
 		}
         async function deleteItem(id) {
-            const confirm = await Swal.fire({ title: 'Hapus Data?', text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Ya, Hapus Data', cancelButtonText: 'Batal' });
+            // 🌟 Alert Mewah Konfirmasi Hapus
+            const confirm = await Swal.fire({ 
+                title: '<span class="text-2xl font-bold dark:text-white text-slate-800">Hapus Riwayat?</span>', 
+                html: '<div class="mt-2 text-sm text-slate-500 dark:text-slate-400"><p>Data yang dihapus akan musnah dari sistem.</p><p class="mt-1 font-semibold text-red-500">Tindakan ini tidak bisa dibatalkan!</p></div>', 
+                icon: 'warning', 
+                iconColor: '#ef4444',
+                showCancelButton: true, 
+                confirmButtonText: '<i class="fa-solid fa-trash-can mr-2"></i>Ya, Musnahkan', 
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
+                    confirmButton: 'px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition-all hover:-translate-y-1 mx-2 btn-press',
+                    cancelButton: 'px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl transition-all hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 mx-2 btn-press'
+                }
+            });
+            
             if(confirm.isConfirmed) {
+                // Tampilkan Loading Animasi
+                Swal.fire({
+                    title: '<span class="text-lg font-bold dark:text-white text-slate-800">Melenyapkan Data...</span>',
+                    html: '<p class="text-sm text-slate-500">Menyinkronkan dengan database pusat.</p>',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-xl' }
+                });
+
                 const payload = { action: 'deleteData', sheetName: currentSheet, id: id, username: currentUser.username };
                 const res = await apiCall(payload, 'POST', payload);
+                
                 if(res.status === 'success') { 
-                    showToast('Data berhasil dihapus', 'success'); 
+                    // 🌟 Alert Mewah Sukses Hapus
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<span class="text-xl font-bold dark:text-white text-slate-800">Dilenyapkan!</span>',
+                        html: '<p class="text-sm text-slate-500 dark:text-slate-400">Data tersebut sudah tidak ada lagi di sistem.</p>',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl' }
+                    });
                     
-                    // note+++ KOSONGKAN CACHE AGAR GRAFIK DASHBOARD TURUN
                     cachedAllServices = null;
-                    
                     openService(currentSheet, currentTitle); 
                 } else { 
-                    Swal.fire("Gagal", res.message, "error"); 
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span class="text-xl font-bold dark:text-white text-slate-800">Gagal</span>',
+                        text: res.message,
+                        customClass: { popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl' }
+                    }); 
                 }
             }
         }
@@ -2758,7 +2934,79 @@
 		
         function editItem(id) { showForm(true, id); }
         function showAbout() {
-            Swal.fire({ title: 'Tentang Aplikasi', html: `<div class="text-left text-sm"><p><strong>SIAP-BK Pro</strong></p><p class="mb-2">Sistem Informasi Administrasi Pelayanan BK.</p><ul class="list-disc pl-4 text-gray-600"><li>Fitur Cetak: Professional Report & Smart Recap</li><li>Database: Google Sheets</li><li>Keamanan: User Auth & Encrypted Traffic</li></ul><p class="mt-4 text-xs text-gray-400">Developed with ❤️ by Muhammad Hasratul</p></div>`, icon: 'info', confirmButtonColor: '#3b82f6' });
+            Swal.fire({
+                html: `
+                    <div class="relative overflow-hidden p-2">
+                        <div class="absolute -top-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                        
+                        <div class="relative z-10 flex flex-col items-center text-center">
+                            <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-xl flex items-center justify-center mb-5 border border-slate-100 dark:border-slate-700 p-2">
+                                <img src="https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L" class="w-full h-full object-contain drop-shadow-md" alt="Logo">
+                            </div>
+                            
+                            <h2 class="text-3xl font-black tracking-tight dark:text-white text-slate-800 mb-1">
+                                SIAP-BK <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">PRO</span>
+                            </h2>
+                            <div class="inline-block px-4 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold tracking-widest rounded-full mb-5 border border-blue-100 dark:border-blue-800">
+                                MAPPAGURU ONLINE &bull; BUILD 2026
+                            </div>
+                            
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 px-2 leading-relaxed">
+                                Sistem Informasi Administrasi & Pelayanan Bimbingan Konseling <strong class="text-slate-700 dark:text-slate-200">UPT SPF SMP Negeri 16 Makassar</strong>.
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-3 w-full text-left mb-8">
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:-translate-y-1 transition-transform">
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-3">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600 dark:text-purple-400 text-sm"></i>
+                                    </div>
+                                    <h4 class="text-xs font-bold dark:text-white text-slate-800">AI Analytics</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Prediksi Tren & Smart Insight</p>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:-translate-y-1 transition-transform">
+                                    <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center mb-3">
+                                        <i class="fa-solid fa-file-pdf text-red-600 dark:text-red-400 text-sm"></i>
+                                    </div>
+                                    <h4 class="text-xs font-bold dark:text-white text-slate-800">Pro Reports</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Cetak PDF & Validasi QR</p>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:-translate-y-1 transition-transform">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mb-3">
+                                        <i class="fa-solid fa-cloud text-green-600 dark:text-green-400 text-sm"></i>
+                                    </div>
+                                    <h4 class="text-xs font-bold dark:text-white text-slate-800">Cloud Sync</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Google Sheets Database</p>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:-translate-y-1 transition-transform">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-3">
+                                        <i class="fa-solid fa-shield-halved text-blue-600 dark:text-blue-400 text-sm"></i>
+                                    </div>
+                                    <h4 class="text-xs font-bold dark:text-white text-slate-800">Secure Data</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Encrypted Traffic System</p>
+                                </div>
+                            </div>
+                            
+                            <div class="w-full pt-4">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1.5">
+                                    Developed with <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> by 
+                                    <span class="font-bold text-slate-800 dark:text-white">Muhammad Hasratul</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check mr-2"></i> Tutup',
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-2xl',
+                    htmlContainer: 'p-2 m-0',
+                    confirmButton: 'rounded-xl font-bold shadow-lg shadow-indigo-500/30 w-[80%] mx-auto mb-4 hover:scale-105 transition-transform'
+                },
+                width: '450px',
+                padding: '1rem'
+            });
         }
     </script>
 </body>
