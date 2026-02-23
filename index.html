@@ -293,6 +293,30 @@
                     <p id="ai-insight-text" class="text-sm font-medium mt-0.5">Menganalisis pola layanan siswa...</p>
                 </div>
             </div>
+			
+			<div id="hot-zone-klasemen" class="glass rounded-2xl p-5 mb-6 shadow-lg border-l-4 border-orange-500 hide animate-slide-in">
+                <div class="flex justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4">
+                    <h3 class="text-sm md:text-base font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-fire-flame-curved animate-pulse"></i> Klasemen Kerawanan Kelas
+                    </h3>
+                    <span class="text-[10px] bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-1 rounded font-bold border border-orange-200 dark:border-orange-800 shadow-sm">Top Kelas</span>
+                </div>
+                <div id="klasemen-list" class="space-y-3 max-h-[250px] overflow-y-auto custom-scroll pr-2">
+                    <p class="text-xs text-center text-slate-400">Menganalisis data kelas...</p>
+                </div>
+            </div>
+
+            <div id="bidang-layanan-klasemen" class="glass rounded-2xl p-5 mb-8 shadow-lg border-l-4 border-purple-500 hide animate-slide-in">
+                <div class="flex justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4">
+                    <h3 class="text-sm md:text-base font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie animate-pulse"></i> Klasemen Bidang Masalah
+                    </h3>
+                    <span class="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-1 rounded font-bold border border-purple-200 dark:border-purple-800 shadow-sm">Distribusi Bidang</span>
+                </div>
+                <div id="bidang-list" class="space-y-3 max-h-[250px] overflow-y-auto custom-scroll pr-2">
+                    <p class="text-xs text-center text-slate-400">Menganalisis data bidang...</p>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 
@@ -1064,34 +1088,76 @@
                 colorIndex++;
             });
 
-            // B. Daftar Siswa Terbantu
-            let allHelpedStudents = [];
+            // B. Daftar Siswa Terbantu (Revisi Super Cerdas: Hitung Frekuensi + Ekstrak Nama dari Tag Input)
+            let studentStats = {};
+            
             sheets.forEach((sheet, idx) => {
                 if(sheet === '16_Dukungan_Sistem' || sheet === '10_Konsultasi') return; 
                 
                 results[idx].forEach(item => {
-                    const dateStr = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'] || '1970-01-01';
-                    const pushStudent = (name, kls) => {
-                        if(name) allHelpedStudents.push({ name, kls: kls || '-', service: labelsMap[sheet], date: new Date(dateStr) });
+                    // Ambil tanggal dengan aman
+                    const dateStr = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                    let itemDate = new Date(dateStr);
+                    if (isNaN(itemDate.getTime())) itemDate = new Date(0); 
+                    
+                    const processStudent = (rawName, kls) => {
+                        if(!rawName || typeof rawName !== 'string') return;
+                        
+                        // Pecah nama jika dipisah koma (sangat berguna untuk Layanan Kelompok)
+                        const namesArray = rawName.split(',');
+                        
+                        namesArray.forEach(n => {
+                            let cleanName = n.trim(); // Contoh awal: "Andi (8A)"
+                            if(!cleanName) return;
+                            
+                            let finalClass = kls || '-';
+
+                            // note+++ LOGIKA BARU: EKSTRAK NAMA & KELAS DARI TAG INPUT ---
+                            // Jika namanya mengandung tanda kurung, kita pisahkan namanya dengan kelasnya!
+                            if (cleanName.includes('(') && cleanName.includes(')')) {
+                                let parts = cleanName.split('(');
+                                cleanName = parts[0].trim(); // Ambil namanya saja: "Andi"
+                                finalClass = parts[1].replace(')', '').trim(); // Ambil kelasnya saja: "8A"
+                            }
+                            
+                            const lowerName = cleanName.toLowerCase();
+                            
+                            // Jika siswa belum ada di objek, buat slot baru
+                            if(!studentStats[lowerName]) {
+                                studentStats[lowerName] = { 
+                                    name: cleanName, // Simpan hanya namanya (Andi)
+                                    kls: finalClass, 
+                                    service: labelsMap[sheet], 
+                                    date: itemDate,
+                                    count: 0 
+                                };
+                            }
+                            
+                            // Tambah hitungan layanannya
+                            studentStats[lowerName].count++;
+                            
+                            // Update ke layanan & tanggal terbaru jika data ini lebih baru
+                            if(itemDate > studentStats[lowerName].date) {
+                                studentStats[lowerName].date = itemDate;
+                                studentStats[lowerName].service = labelsMap[sheet];
+                                if(finalClass !== '-') studentStats[lowerName].kls = finalClass; 
+                            }
+                        });
                     };
-                    if(item.Nama_Siswa) pushStudent(item.Nama_Siswa, item.Kelas);
-                    if(item.Nama_Siswa_1) pushStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
-                    if(item.Nama_Siswa_2) pushStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+
+                    // Lempar semua kemungkinan field nama siswa ke fungsi pemroses
+                    if(item.Nama_Siswa) processStudent(item.Nama_Siswa, item.Kelas);
+                    if(item.Nama_Siswa_1) processStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
+                    if(item.Nama_Siswa_2) processStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                    if(item.Anggota_Kelompok_Siswa) processStudent(item.Anggota_Kelompok_Siswa, item.Kelas); 
                 });
             });
 
-            // Urutkan berdasarkan tanggal terbaru
-            allHelpedStudents.sort((a, b) => b.date - a.date);
-
-            // Filter agar satu siswa hanya muncul 1 kali
-            let uniqueHelped = [];
-            let seenNames = new Set();
-            allHelpedStudents.forEach(s => {
-                const lowerName = s.name.toLowerCase();
-                if(!seenNames.has(lowerName)) {
-                    seenNames.add(lowerName);
-                    uniqueHelped.push(s);
-                }
+            // Ubah object ke array dan urutkan (Prioritas 1: Jumlah Terbanyak, Prioritas 2: Terkini)
+            let uniqueHelped = Object.values(studentStats);
+            uniqueHelped.sort((a, b) => {
+                if (b.count !== a.count) return b.count - a.count; 
+                return b.date - a.date; 
             });
 
             // Render ke UI
@@ -1103,26 +1169,237 @@
                 studentListEl.innerHTML = `<p class="text-xs text-center text-slate-400 mt-10">Belum ada siswa yang tercatat.</p>`;
             } else {
                 uniqueHelped.forEach(s => {
-                    const dateFmt = s.date.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
                     studentListEl.innerHTML += `
                         <div class="flex justify-between items-center p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 hover:-translate-y-1 transition group cursor-pointer shadow-sm" onclick="document.getElementById('global-student-search').value='${s.name}'; searchStudentHistory();">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
-                                    ${s.name.charAt(0).toUpperCase()}
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md uppercase">
+                                    ${s.name.charAt(0)}
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-bold dark:text-white text-slate-700 truncate group-hover:text-blue-500 transition">${s.name}</p>
                                     <div class="flex items-center gap-2 mt-0.5">
                                         <span class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">Kls ${s.kls}</span>
-                                        <span class="text-[10px] text-blue-500 font-medium truncate">${s.service}</span>
+                                        <span class="text-[10px] text-blue-500 font-medium truncate">Terakhir: ${s.service}</span>
                                     </div>
                                 </div>
                             </div>
-                            <span class="text-[10px] text-slate-400 shrink-0">${dateFmt}</span>
+                            <span class="text-[10px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-1 rounded-lg shrink-0 border border-blue-200 dark:border-blue-800">${s.count}x Layanan</span>
                         </div>
                     `;
                 });
             }
+			
+			// --- FITUR BARU: KLASEMEN HOT-ZONE KELAS & SISWA DOMINAN (TAMPIL SEMUA) ---
+            let classDataMap = {}; 
+            
+            // 1. PRE-FILL KELAS dari database siswa
+            if (metaData && metaData.siswa) {
+                metaData.siswa.forEach(s => {
+                    let c = s.kelas ? String(s.kelas).replace(/\s+/g, '').toUpperCase() : '';
+                    if (c && c !== '-' && c !== 'NULL' && !classDataMap[c]) {
+                        classDataMap[c] = { total: 0, students: {} };
+                    }
+                });
+            }
+
+            // 2. PRE-FILL BIDANG LAYANAN
+            let bidangDataMap = {
+                "Pribadi": { total: 0, students: {} },
+                "Sosial": { total: 0, students: {} },
+                "Belajar": { total: 0, students: {} },
+                "Karir": { total: 0, students: {} }
+            };
+
+            // Loop seluruh data layanan
+            sheets.forEach((sheet, idx) => {
+                results[idx].forEach(item => {
+                    
+                    // ==========================================
+                    // A. LOGIKA KELAS (Hanya Layanan Langsung ke Siswa)
+                    // ==========================================
+                    if(sheet !== '16_Dukungan_Sistem' && sheet !== '10_Konsultasi') {
+                        const addClassData = (rawName, rawClass) => {
+                            if(!rawName || typeof rawName !== 'string') return;
+                            let c = rawClass ? String(rawClass).replace(/\s+/g, '').toUpperCase() : '';
+                            let name = rawName.trim();
+                            
+                            if (name.includes('(') && name.includes(')')) {
+                                let parts = name.split('(');
+                                name = parts[0].trim();
+                                c = parts[1].replace(')', '').replace(/\s+/g, '').toUpperCase();
+                            }
+                            if(!c || c === '-' || c === 'NULL') return; 
+                            
+                            if(!classDataMap[c]) classDataMap[c] = { total: 0, students: {} };
+                            classDataMap[c].total++; 
+                            
+                            const lowerName = name.toLowerCase();
+                            if(!classDataMap[c].students[lowerName]) classDataMap[c].students[lowerName] = { name: name, count: 0 };
+                            classDataMap[c].students[lowerName].count++;
+                        };
+
+                        if(item.Nama_Siswa) addClassData(item.Nama_Siswa, item.Kelas);
+                        if(item.Nama_Siswa_1) addClassData(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
+                        if(item.Nama_Siswa_2) addClassData(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                        if(item.Anggota_Kelompok_Siswa) {
+                            item.Anggota_Kelompok_Siswa.split(',').forEach(m => addClassData(m, item.Kelas));
+                        }
+                    }
+
+                    // ==========================================
+                    // B. LOGIKA BIDANG (BACA SEMUA LAYANAN TERMASUK KONSULTASI)
+                    // ==========================================
+                    let bidang = item['Bidang_Bimbingan'] || item['Bidang_Layanan'];
+                    if(bidang && bidang !== '-') {
+                        let b = bidang.trim();
+                        if(b.toLowerCase().includes('pibadi')) b = 'Pribadi'; // Auto-koreksi typo lama
+                        
+                        if(!bidangDataMap[b]) bidangDataMap[b] = { total: 0, students: {} };
+                        
+                        // 1. Selalu tambahkan total kasus di bidang ini (Meski tanpa siswa)
+                        bidangDataMap[b].total++;
+                        
+                        // 2. Fungsi merekap siswa JIKA ADA
+                        const addStudentToBidang = (rawName) => {
+                            if(!rawName || typeof rawName !== 'string') return;
+                            let name = rawName.trim();
+                            if (name.includes('(') && name.includes(')')) name = name.split('(')[0].trim();
+                            if(!name || name.toLowerCase() === 'null' || name === '-') return;
+                            
+                            const lowerName = name.toLowerCase();
+                            if(!bidangDataMap[b].students[lowerName]) bidangDataMap[b].students[lowerName] = { name: name, count: 0 };
+                            bidangDataMap[b].students[lowerName].count++;
+                        };
+
+                        // Hanya jalankan fungsi jika field namanya tidak kosong
+                        if(item.Nama_Siswa) addStudentToBidang(item.Nama_Siswa);
+                        if(item.Nama_Siswa_1) addStudentToBidang(item.Nama_Siswa_1);
+                        if(item.Nama_Siswa_2) addStudentToBidang(item.Nama_Siswa_2);
+                        if(item.Anggota_Kelompok_Siswa) item.Anggota_Kelompok_Siswa.split(',').forEach(m => addStudentToBidang(m));
+                    }
+                });
+            });
+
+            // --- RENDER KLASEMEN KELAS ---
+            const sortedClasses = Object.entries(classDataMap)
+                .map(([className, data]) => ({ className, total: data.total, students: data.students }))
+                .sort((a, b) => b.total - a.total); 
+
+            const klasemenContainer = document.getElementById('hot-zone-klasemen');
+            const klasemenList = document.getElementById('klasemen-list');
+            if (klasemenList) klasemenList.innerHTML = '';
+
+            if(sortedClasses.length > 0 && klasemenContainer) {
+                klasemenContainer.classList.remove('hide');
+                sortedClasses.forEach((cls, index) => {
+                    
+                    // PERUBAHAN DI SINI: Hapus .slice(0, 3) agar SEMUA siswa yang terlibat tampil
+                    const topStudents = Object.values(cls.students).sort((a, b) => b.count - a.count); 
+                    
+                    let studentText = topStudents.length > 0 
+                        ? topStudents.map(s => `<span class="font-bold text-slate-700 dark:text-slate-200">${s.name}</span> <span class="text-[10px] opacity-70 border border-gray-300 dark:border-gray-600 rounded px-1">${s.count}x</span>`).join(', ')
+                        : `<span class="text-green-500 font-bold italic">Nihil / Aman</span>`;
+                    
+                    let rankColors = "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"; 
+                    let rankIcon = `<span class="font-black text-sm">${index + 1}</span>`;
+                    let badgeClass = cls.total > 0 ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800" : "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400 border border-green-200 dark:border-green-800";
+                    let pulseEffect = cls.total > 0 ? "animate-pulse shadow-sm" : "";
+                    
+                    if(cls.total > 0 && index === 0) { 
+                        rankColors = "bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/40 ring-2 ring-red-300 dark:ring-red-800";
+                        rankIcon = `<i class="fa-solid fa-triangle-exclamation fa-beat-fade"></i>`; 
+                    } else if(cls.total > 0 && index === 1) { 
+                        rankColors = "bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md shadow-orange-500/30";
+                        rankIcon = `<i class="fa-solid fa-circle-exclamation"></i>`; 
+                    } else if(cls.total > 0 && index === 2) { 
+                        rankColors = "bg-gradient-to-br from-amber-500 to-yellow-400 text-white shadow-md";
+                        rankIcon = `<i class="fa-solid fa-bell"></i>`; 
+                    } else if(cls.total === 0) {
+                        rankColors = "bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400";
+                        rankIcon = `<i class="fa-solid fa-check"></i>`;
+                    }
+
+                    klasemenList.innerHTML += `
+                        <div class="flex items-center gap-4 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700 hover:shadow-md hover:bg-orange-50 dark:hover:bg-slate-700/80 hover:-translate-y-1 transition-all duration-300 cursor-default">
+                            <div class="w-11 h-11 rounded-full flex justify-center items-center shrink-0 ${rankColors} border-2 border-white dark:border-slate-800">
+                                ${rankIcon}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-base">Kelas ${cls.className}</h4>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass} shrink-0 ${pulseEffect}">${cls.total} Layanan</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                                    <i class="fa-solid ${cls.total > 0 ? 'fa-users-viewfinder text-orange-400' : 'fa-shield text-green-500'} mr-1"></i> Terlibat: ${studentText}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // --- RENDER KLASEMEN BIDANG ---
+            const sortedBidang = Object.entries(bidangDataMap)
+                .map(([bidangName, data]) => ({ bidangName, total: data.total, students: data.students }))
+                .sort((a, b) => b.total - a.total);
+
+            const bidangContainer = document.getElementById('bidang-layanan-klasemen');
+            const bidangList = document.getElementById('bidang-list');
+            if (bidangList) bidangList.innerHTML = '';
+
+            if(sortedBidang.length > 0 && bidangContainer) {
+                bidangContainer.classList.remove('hide');
+                sortedBidang.forEach((bdg, index) => {
+                    const topStudents = Object.values(bdg.students).sort((a, b) => b.count - a.count).slice(0, 5); 
+                    
+                    // Logika Cerdas: Cek apakah ada layanan tapi tidak ada siswanya
+                    let studentText = "";
+                    if (bdg.total > 0) {
+                        if (topStudents.length > 0) {
+                            studentText = topStudents.map(s => `<span class="font-bold text-slate-700 dark:text-slate-200">${s.name}</span> <span class="text-[10px] opacity-70 border border-gray-300 dark:border-gray-600 rounded px-1">${s.count}x</span>`).join(', ');
+                            if (Object.keys(bdg.students).length > 5) studentText += ` <span class="text-[10px] text-purple-500 italic font-bold">+ lainnya</span>`;
+                        } else {
+                            // Kasus ada, tapi tidak ada siswanya (Cth: Konsultasi dgn Guru, Rapat, dll)
+                            studentText = `<span class="italic text-slate-400 font-medium">Layanan Umum / Non-Siswa</span>`;
+                        }
+                    } else {
+                        studentText = `<span class="text-green-500 font-bold italic">Nihil / Aman</span>`;
+                    }
+                    
+                    let rankColors = "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400";
+                    let rankIcon = `<span class="font-black text-sm">${index + 1}</span>`;
+                    let badgeClassBdg = bdg.total > 0 ? "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800" : "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400 border-green-200 dark:border-green-800";
+
+                    if(bdg.total > 0 && index === 0) { 
+                        rankColors = "bg-gradient-to-br from-purple-600 to-indigo-500 text-white shadow-lg shadow-purple-500/40 ring-2 ring-purple-300 dark:ring-purple-800";
+                        rankIcon = `<i class="fa-solid fa-chart-pie"></i>`;
+                    } else if(bdg.total > 0 && index === 1) { 
+                        rankColors = "bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white shadow-md";
+                        rankIcon = `<i class="fa-solid fa-layer-group"></i>`;
+                    } else if(bdg.total === 0) {
+                        rankColors = "bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400";
+                        rankIcon = `<i class="fa-solid fa-check"></i>`;
+                    }
+
+                    bidangList.innerHTML += `
+                        <div class="flex items-center gap-4 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700 hover:shadow-md hover:bg-purple-50 dark:hover:bg-slate-700/80 hover:-translate-y-1 transition-all duration-300 cursor-default">
+                            <div class="w-11 h-11 rounded-full flex justify-center items-center shrink-0 ${rankColors} border-2 border-white dark:border-slate-800">
+                                ${rankIcon}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-base">Bidang ${bdg.bidangName}</h4>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClassBdg} border shrink-0 shadow-sm">${bdg.total} Layanan</span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                                    <i class="fa-solid ${bdg.total > 0 && topStudents.length > 0 ? 'fa-users text-purple-400' : 'fa-shield text-green-500'} mr-1"></i> Terlibat: ${studentText}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+			
         } // Penutup dari fungsi loadDashboardStats()
 
         // --- TIMELINE SEARCH ---
@@ -1691,8 +1968,8 @@
         function getFieldsConfig(sheetName) { /* ... unchanged ... */ 
             const common = [{ key: 'Tanggal_Layanan', label: 'Tanggal Layanan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }];
             if(sheetName === '7_Layanan_Individu') return [...common, { key: 'Konseling_Ke', label: 'Konseling Ke-', type: 'number' }, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Ruang', label: 'Ruang', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan', 'Layanan Responsif', 'Dukungan Sistem'] }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Penjelasan_Masalah', label: 'Penjelasan Masalah', type: 'textarea' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik Konseling', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek Layanan', type: 'select', options: 'aspek' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Konseling', type: 'textarea' }, { key: 'Status_Konseling', label: 'Status', type: 'select', options: ['Proses', 'Selesai', 'Rujuk', 'Drop Out'] }];
-            if(sheetName === '8_Layanan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok (Siswa)', type: 'textarea', placeholder: 'Tuliskan nama-nama siswa...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Responsif', 'Layanan Dasar'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Penyebab_Masalah', label: 'Penyebab Masalah', type: 'textarea' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Layanan', type: 'textarea' }, { key: 'Status_Proses', label: 'Status Proses', type: 'select', options: ['Aktif', 'Selesai'] }];
-            if(sheetName === '9_Bimbingan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok', type: 'textarea' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Tujuan_Layanan', label: 'Tujuan Layanan', type: 'textarea' }, { key: 'Eksperientasi_Awal', label: 'Tahap Awal', type: 'textarea' }, { key: 'Identifikasi', label: 'Tahap Identifikasi', type: 'textarea' }, { key: 'Analisis', label: 'Tahap Analisis', type: 'textarea' }, { key: 'Generalisasi', label: 'Tahap Generalisasi', type: 'textarea' }, { key: 'Status_Proses', label: 'Status', type: 'select', options: ['Selesai', 'Berlanjut'] }];
+            if(sheetName === '8_Layanan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok (Siswa)', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa lalu pilih...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Responsif', 'Layanan Dasar'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Penyebab_Masalah', label: 'Penyebab Masalah', type: 'textarea' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Layanan', type: 'textarea' }, { key: 'Status_Proses', label: 'Status Proses', type: 'select', options: ['Aktif', 'Selesai'] }];
+            if(sheetName === '9_Bimbingan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa lalu pilih...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text', placeholder: 'Contoh: Bahaya Cyberbullying' }, { key: 'Tujuan_Layanan', label: 'Tujuan Layanan', type: 'textarea' }, { key: 'Eksperientasi_Awal', label: 'Tahap Awal', type: 'textarea' }, { key: 'Identifikasi', label: 'Tahap Identifikasi', type: 'textarea' }, { key: 'Analisis', label: 'Tahap Analisis', type: 'textarea' }, { key: 'Generalisasi', label: 'Tahap Generalisasi', type: 'textarea' }, { key: 'Status_Proses', label: 'Status', type: 'select', options: ['Selesai', 'Berlanjut'] }];
             if(sheetName === '10_Konsultasi') return [...common, { key: 'Durasi', label: 'Durasi', type: 'text' }, { key: 'Nama_Konsulti', label: 'Nama Konsulti (Orang Tua/Guru)', type: 'text' }, { key: 'Status_Konsulti', label: 'Status Konsulti', type: 'select', options: ['Orang Tua', 'Guru Mapel', 'Wali Kelas', 'Lainnya'] }, { key: 'Nama_Konsultan_GuruBK', label: 'Nama Konsultan (Guru BK)', type: 'text', value: currentUser.nama }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Dukungan Sistem', 'Layanan Responsif'] }, { key: 'Bidang_Bimbingan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Uraian_Topik', label: 'Uraian Topik', type: 'textarea' }, { key: 'Hasil_Konsultasi', label: 'Hasil Konsultasi', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
             if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
             if(sheetName === '12_Konferensi_Kasus') return [...common, { key: 'Nama_Siswa', label: 'Nama Siswa (Kasus)', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terlibat', label: 'Pihak Terlibat (Ortu/Kepsek)', type: 'text' }, { key: 'Tempat_Pertemuan', label: 'Tempat Pertemuan', type: 'text' }, { key: 'Deskripsi_Kasus', label: 'Deskripsi Kasus', type: 'textarea' }, { key: 'Hasil_Keputusan', label: 'Hasil Keputusan (Berita Acara)', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
@@ -1766,6 +2043,114 @@
                 } else if (f.type === 'date') {
                     input = document.createElement('input'); input.type = 'date'; input.className = baseClass;
                     if(val) { let d = new Date(val); if(!isNaN(d)) input.value = d.toISOString().split('T')[0]; }
+				// ==========================================
+                // PASTE KODE BARU DI SINI (AWAL)
+                // ==========================================
+                } else if (f.type === 'multi-select-siswa') {
+                    // Jadikan 'input' sebagai wadah utama (div)
+                    input = document.createElement('div');
+                    input.className = "relative w-full";
+                    
+                    // 1. Hidden input (Ini yang akan dikirim ke Google Sheets)
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = f.key;
+                    hiddenInput.id = `field-${f.key}`;
+                    hiddenInput.value = val;
+                    
+                    // 2. Kotak visual tempat tag nama berada
+                    const tagsContainer = document.createElement('div');
+                    tagsContainer.className = baseClass + " min-h-[50px] flex flex-wrap gap-2 items-center p-2 cursor-text";
+                    
+                    // 3. Input untuk mengetik pencarian nama
+                    const searchInput = document.createElement('input');
+                    searchInput.type = "text";
+                    searchInput.className = "flex-1 outline-none bg-transparent min-w-[150px] text-sm dark:text-white";
+                    searchInput.placeholder = f.placeholder || "Ketik nama...";
+                    
+                    // 4. Kotak Dropdown hasil pencarian (Saran AI)
+                    const dropdown = document.createElement('div');
+                    dropdown.className = "absolute z-50 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden custom-scroll";
+                    
+                    tagsContainer.appendChild(searchInput);
+                    input.appendChild(tagsContainer);
+                    input.appendChild(dropdown);
+                    input.appendChild(hiddenInput);
+                    
+                    // Inisialisasi data tag (berguna jika Bapak sedang Edit Data)
+                    let tagsArray = val ? val.split(',').map(t => t.trim()).filter(Boolean) : [];
+                    
+                    // Fungsi untuk menggambar ulang tag
+                    const renderTags = () => {
+                        // Bersihkan tag lama
+                        Array.from(tagsContainer.children).forEach(child => {
+                            if(child !== searchInput) tagsContainer.removeChild(child);
+                        });
+                        
+                        tagsArray.forEach((tag, index) => {
+                            const tagEl = document.createElement('span');
+                            tagEl.className = "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-2 border border-blue-200 dark:border-blue-800 shadow-sm font-semibold";
+                            tagEl.innerHTML = `<span>${tag}</span> <i class="fa-solid fa-xmark cursor-pointer hover:text-red-500 transition-colors"></i>`;
+                            
+                            // Fungsi hapus tag saat ikon (X) diklik
+                            tagEl.querySelector('i').onclick = (e) => {
+                                e.stopPropagation(); // Mencegah klik tembus
+                                tagsArray.splice(index, 1);
+                                renderTags();
+                            };
+                            tagsContainer.insertBefore(tagEl, searchInput);
+                        });
+                        // Update nilai hidden input agar tersimpan di backend
+                        hiddenInput.value = tagsArray.join(', ');
+                    };
+
+                    // Klik kotak untuk fokus ke input pencarian
+                    tagsContainer.onclick = () => searchInput.focus();
+
+                    // Logika pencarian cerdas saat ngetik
+                    searchInput.onkeyup = (e) => {
+                        const keyword = e.target.value.toLowerCase();
+                        dropdown.innerHTML = '';
+                        
+                        if(!keyword) { dropdown.classList.add('hidden'); return; }
+                        
+                        // Cari dari variabel metaData.siswa (Filter nama)
+                        const matches = metaData.siswa.filter(s => s.nama.toLowerCase().includes(keyword)).slice(0, 10);
+                        
+                        if(matches.length === 0) {
+                            dropdown.innerHTML = `<div class="p-3 text-xs text-gray-500 dark:text-gray-400 text-center">Nama tidak ditemukan</div>`;
+                            dropdown.classList.remove('hidden');
+                            return;
+                        }
+                        
+                        matches.forEach(s => {
+                            const opt = document.createElement('div');
+                            opt.className = "p-2.5 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm border-b dark:border-slate-700/50 last:border-0 transition-colors";
+                            opt.innerHTML = `<div class="font-bold dark:text-white text-slate-700">${s.nama}</div><div class="text-[10px] text-blue-500 font-medium mt-0.5">Kelas: ${s.kelas}</div>`;
+                            
+                            opt.onclick = () => {
+                                const finalName = `${s.nama} (${s.kelas})`;
+                                if(!tagsArray.includes(finalName)) {
+                                    tagsArray.push(finalName); 
+                                } else {
+                                    showToast('Siswa sudah ada di dalam grup!', 'error'); // Mencegah nama ganda
+                                }
+                                searchInput.value = ''; 
+                                dropdown.classList.add('hidden');
+                                renderTags(); 
+                                searchInput.focus(); // Kembali fokus agar bisa ngetik nama selanjutnya
+                            };
+                            dropdown.appendChild(opt);
+                        });
+                        dropdown.classList.remove('hidden');
+                    };
+
+                    // Tutup dropdown kalau klik di luar area
+                    document.addEventListener('click', (e) => {
+                        if(!input.contains(e.target)) dropdown.classList.add('hidden');
+                    });
+
+                    renderTags();
                 } else {
                     input = document.createElement('input'); input.type = f.type || 'text'; input.className = baseClass + (f.type === 'readonly' ? " bg-gray-100 dark:bg-slate-700 text-gray-500 cursor-not-allowed" : ""); input.value = val; if(f.type === 'readonly') input.readOnly = true; input.placeholder = f.placeholder || '';
                 }
@@ -1773,8 +2158,9 @@
                 div.appendChild(label); 
                 div.appendChild(input); 
                 
-                // note+++ TAMBAHAN TOMBOL AI UNTUK KOLOM TARGET
-                const aiTargets = ['Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Tujuan_Layanan', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan'];
+                /// note+++ TAMBAHAN TOMBOL AI UNTUK KOLOM TARGET
+                // 1. Target untuk AI Pemecah Masalah (Membuat Solusi)
+                const aiTargets = ['Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan', 'Evaluasi_Tindak_Lanjut'];
                 if(aiTargets.includes(f.key)) {
                     const aiBtn = document.createElement('button');
                     aiBtn.type = "button";
@@ -1783,6 +2169,30 @@
                     aiBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Susun Otomatis (AI)`;
                     aiBtn.onclick = () => generateAIDraft(f.key);
                     div.appendChild(aiBtn);
+                }
+
+                // 2. Target BARU untuk AI Penyihir Bahasa (Rapihkan Teks) - VERSI LENGKAP SEMUA LAYANAN
+                const aiRewriters = [
+                    // Layanan Individu & Kelompok
+                    'Identifikasi_Masalah', 'Penjelasan_Masalah', 'Penyebab_Masalah', 
+                    // Bimbingan Kelompok & Klasikal
+                    'Tujuan_Layanan', 'Eksperientasi_Awal', 'Identifikasi', 'Analisis', 'Generalisasi', 'Topik_Layanan',
+                    // Konsultasi & Konferensi Kasus
+                    'Uraian_Topik', 'Deskripsi_Kasus', 
+                    // Alih Tangan, Mediasi, Advokasi
+                    'Alasan_Rujukan', 'Pokok_Masalah', 'Kronologi_Masalah', 'Bentuk_Advokasi', 
+                    // Dukungan Sistem
+                    'Deskripsi_Kegiatan'
+                ];
+                
+                if(aiRewriters.includes(f.key)) {
+                    const rewriteBtn = document.createElement('button');
+                    rewriteBtn.type = "button";
+                    rewriteBtn.id = `btn-rewrite-${f.key}`;
+                    rewriteBtn.className = "mt-1 flex items-center gap-2 text-[11px] font-bold text-slate-700 dark:text-white bg-gradient-to-r from-amber-200 to-yellow-400 hover:from-amber-300 hover:to-yellow-500 px-3 py-1.5 rounded-lg shadow-md transition-all btn-press w-max border border-yellow-300 dark:border-yellow-600";
+                    rewriteBtn.innerHTML = `<i class="fa-solid fa-pen-nib"></i> Rapihkan Bahasa (AI)`;
+                    rewriteBtn.onclick = () => rewriteTextAI(f.key);
+                    div.appendChild(rewriteBtn);
                 }
                 
                 form.appendChild(div);
@@ -1877,6 +2287,61 @@
                 btnEl.disabled = false;
             }
         }
+		
+		// --- FITUR BARU: AI PENYIHIR BAHASA (REWRITER) ---
+        async function rewriteTextAI(targetField) {
+            const targetEl = document.getElementById(`field-${targetField}`);
+            const btnEl = document.getElementById(`btn-rewrite-${targetField}`);
+            const rawText = targetEl.value.trim();
+
+            // Cek apakah Bapak sudah mengetik sesuatu
+            if(rawText.length < 5) {
+                Swal.fire("Ketik Dulu", "Ketikkan dulu inti masalahnya (minimal beberapa kata), biar AI punya bahan untuk dirapihkan bahasanya.", "warning");
+                return;
+            }
+
+            const originalBtnText = btnEl.innerHTML;
+            btnEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Menyihir Bahasa...`;
+            btnEl.disabled = true;
+
+            try {
+                // Kita "selipkan" instruksi tambahan di prompt agar backend Bapak paham ini tugas merapihkan teks
+                const specialPrompt = `TOLONG PERBAIKI, RAPIHKAN, DAN FORMALKAN catatan mentah berikut menjadi kalimat baku laporan administrasi Bimbingan Konseling yang profesional, empatik, dan mudah dipahami. \n\nCatatan Mentah Guru BK: "${rawText}"`;
+                
+                const payload = { action: 'askAI', prompt: specialPrompt, targetField: targetField };
+                const res = await apiCall(payload, 'POST', payload);
+                
+                if(res && res.status === 'success') {
+                    targetEl.value = ""; // Kosongkan yang lama
+                    let i = 0;
+                    const txt = res.data;
+                    const speed = 10; 
+                    
+                    // Efek mengetik otomatis
+                    function typeWriter() {
+                        if (i < txt.length) {
+                            targetEl.value += txt.charAt(i);
+                            i++;
+                            targetEl.scrollTop = targetEl.scrollHeight;
+                            setTimeout(typeWriter, speed);
+                        } else {
+                            btnEl.innerHTML = `<i class="fa-solid fa-check text-green-700"></i> Selesai`;
+                            setTimeout(() => { btnEl.innerHTML = originalBtnText; btnEl.disabled = false; }, 2000);
+                        }
+                    }
+                    typeWriter();
+                } else {
+                    Swal.fire("Gagal", res?.message || "AI sedang sibuk.", "error");
+                    btnEl.innerHTML = originalBtnText;
+                    btnEl.disabled = false;
+                }
+            } catch(e) {
+                Swal.fire("Error", "Sirkuit AI terputus. Cek internet Anda.", "error");
+                btnEl.innerHTML = originalBtnText;
+                btnEl.disabled = false;
+            }
+        }
+		
         // --- LOGIKA SIMPAN DATA DENGAN LOADING ---
 		async function handleSave(e) {
 			e.preventDefault();
