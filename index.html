@@ -198,36 +198,88 @@
         </button>
 
         <!-- 1. LOGIN PAGE -->
-        <section id="page-login" class="flex-1 flex flex-col justify-center items-center min-h-[80vh]">
-            <div class="glass p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-sm text-center transform transition duration-500 relative overflow-hidden border border-white/40 dark:border-white/10">
-                <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/30 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl"></div>
+        <section id="page-login" class="flex-1 flex items-center justify-center min-h-[85vh]">
+            <div class="w-full max-w-5xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-white/50 dark:border-slate-700/50 relative">
                 
-                <img src="https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L" 
-                     class="w-24 h-24 mx-auto mb-6 drop-shadow-2xl float-anim object-contain relative z-10" 
-                     alt="Logo Sekolah">
+                <button onclick="showMobileInfo()" class="lg:hidden absolute top-6 right-6 w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-blue-500 z-30 transition hover:scale-110 border border-gray-100 dark:border-slate-700">
+                    <i class="fa-solid fa-circle-info text-xl animate-pulse-fast"></i>
+                </button>
 
-                <h2 class="text-2xl font-bold dark:text-white text-slate-800 mb-1 relative z-10">SIAP-BK</h2>
-                <p class="dark:text-slate-300 text-slate-500 text-sm mb-8 relative z-10">UPT SPF SMP NEGERI 16 MAKASSAR</p>
+                <div class="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 p-12 flex-col justify-between relative overflow-hidden text-white">
+                    <div class="absolute -top-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-10 -right-10 w-48 h-48 bg-blue-400/20 rounded-full blur-2xl"></div>
+                    <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 shadow-inner border border-white/30">
+                            <i class="fa-solid fa-shield-halved text-3xl text-blue-100"></i>
+                        </div>
+                        <h1 class="text-4xl font-extrabold mb-2 tracking-tight leading-tight">SIAP-BK <span class="text-yellow-400">PRO</span></h1>
+                        <h2 class="text-lg font-medium text-blue-100 mb-6 tracking-wide uppercase">UPT SPF SMP Negeri 16 Makassar</h2>
+                        
+                        <div class="h-1 w-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-6"></div>
+                        
+                        <p class="text-blue-50/90 leading-relaxed mb-8 font-light text-sm">
+                            Sistem Informasi Administrasi & Pelayanan Bimbingan Konseling. Platform digital modern untuk mencatat, menganalisis, dan memprediksi tren perkembangan siswa secara komprehensif dengan dukungan Kecerdasan Buatan (AI).
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 text-sm text-blue-50">
+                                <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-solid fa-check text-green-400 text-xs"></i></div>
+                                <span class="font-medium">AI Smart Analytics & Forecasting</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-blue-50">
+                                <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-solid fa-check text-green-400 text-xs"></i></div>
+                                <span class="font-medium">Automated Reporting & QR Validation</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-blue-50">
+                                <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-solid fa-check text-green-400 text-xs"></i></div>
+                                <span class="font-medium">Secure Google Cloud Database</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative z-10 text-xs text-blue-200/60 font-light mt-10">
+                        Build 2026 &copy; Developed by Muhammad Hasratul
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative bg-white/60 dark:bg-slate-900/60">
+                    <div class="w-full max-w-sm mx-auto">
+                        
+                        <div class="text-center mb-8">
+                            <img src="https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L" 
+                                 class="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-4 drop-shadow-xl float-anim object-contain" 
+                                 alt="Logo Sekolah">
+                            <h2 class="text-2xl font-bold dark:text-white text-slate-800 lg:hidden">SIAP-BK PRO</h2>
+                            <p class="dark:text-slate-400 text-slate-500 text-xs mt-1 lg:hidden">UPT SPF SMP NEGERI 16 MAKASSAR</p>
+                            
+                            <h2 class="text-2xl md:text-3xl font-bold dark:text-white text-slate-800 hidden lg:block">Selamat Datang</h2>
+                            <p class="dark:text-slate-400 text-slate-500 text-sm mt-2 hidden lg:block">Silakan masuk ke akun Anda</p>
+                        </div>
+                        
+                        <form onsubmit="handleLogin(event)" class="space-y-5 relative z-10">
+                            <div class="text-left relative group">
+                                <i class="fa-solid fa-user absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
+                                <input type="text" id="login-username" class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 dark:text-white transition-all shadow-sm" placeholder="Username" required>
+                            </div>
+                            <div class="text-left relative group">
+                                <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
+                                <input type="password" id="login-password" class="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 dark:text-white transition-all shadow-sm" placeholder="Password" required>
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-3.5 text-gray-400 hover:text-blue-500 transition z-20 focus:outline-none" title="Lihat Password">
+                                    <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+                                </button>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1 transition-all duration-300 btn-press mt-4">
+                                MASUK APLIKASI <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
+                            </button>
+                        </form>
+                        
+                    </div>
+                </div>
                 
-                <form onsubmit="handleLogin(event)" class="space-y-5 relative z-10">
-                    <div class="text-left relative group">
-                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
-                        <input type="text" id="login-username" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 transition-all shadow-sm" placeholder="Username" required>
-                    </div>
-                    <div class="text-left relative group">
-                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition z-20"></i>
-                        <input type="password" id="login-password" class="w-full pl-10 pr-12 py-3 rounded-xl border border-gray-200 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 transition-all shadow-sm" placeholder="Password" required>
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-3.5 text-gray-400 hover:text-blue-500 transition z-20 focus:outline-none" title="Lihat Password">
-                            <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
-                        </button>
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 btn-press">
-                        MASUK APLIKASI
-                    </button>
-                </form>
             </div>
-            <p class="mt-8 dark:text-slate-400 text-slate-500 text-xs text-center font-light tracking-wide">© 2026 SIAP-BK<br>Mappaguru Online.</p>
         </section>
 
         <!-- 2. DASHBOARD GRID (PREMIUM DASHBOARD) -->
@@ -596,26 +648,42 @@
         </section>
 
         <!-- 4. MODAL FORM -->
-        <section id="page-form" class="hide fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] overflow-y-auto p-4 md:p-8 flex justify-center items-start">
-            <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl my-8 overflow-hidden transform transition-all animate-fade-in-up border border-slate-200 dark:border-slate-700">
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 flex justify-between items-center text-white shadow-md">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-pen-to-square"></i></div>
-                        <h3 class="font-bold text-lg tracking-wide" id="form-header">Input Data</h3>
+        <section id="page-form" class="hide flex-1 pb-10 flex flex-col h-full animate-fade-in-up relative z-10">
+            <div class="flex-none mb-4">
+                <button type="button" onclick="closeForm()" class="text-sm font-bold text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 transition flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800/50 w-max">
+                    <i class="fa-solid fa-arrow-left"></i> Batal & Kembali
+                </button>
+            </div>
+
+            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md w-full rounded-3xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700 flex-1 flex flex-col">
+                
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 flex justify-between items-center text-white shadow-md relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm shadow-inner"><i class="fa-solid fa-file-signature text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-xl md:text-2xl tracking-wide" id="form-header">Input Data</h3>
+                            <p class="text-blue-100 text-xs mt-1" id="form-sub-header">Silakan lengkapi formulir di bawah ini</p>
+                        </div>
                     </div>
-                    <button onclick="closeForm()" class="text-white/80 hover:text-white transition bg-white/10 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 
-                <form id="dynamic-form" onsubmit="handleSave(event)" class="p-6 md:p-8 space-y-5 bg-slate-50 dark:bg-slate-900">
-                    <!-- Form generated by JS -->
-                </form>
-
-                <div class="p-5 bg-white dark:bg-slate-900 border-t dark:border-slate-800 border-gray-100 flex justify-end gap-4 sticky bottom-0 z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                    <button type="button" onclick="closeForm()" class="px-6 py-2.5 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition">Batal</button>
-                    <button type="button" onclick="document.getElementById('dynamic-form').requestSubmit()" class="px-8 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition btn-press flex items-center gap-2">
-                        <i class="fa-solid fa-save"></i> Simpan Data
-                    </button>
+                <div class="flex-1 overflow-y-auto custom-scroll p-6 md:p-10 bg-slate-50/50 dark:bg-slate-900/50">
+                    <form id="dynamic-form" onsubmit="handleSave(event)" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+                        </form>
                 </div>
+
+                <div class="p-5 md:p-6 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden md:block">Pastikan data sudah benar sebelum menyimpan.</p>
+                    <div class="flex gap-4 w-full md:w-auto justify-end">
+                        <button type="button" onclick="document.getElementById('dynamic-form').requestSubmit()" class="w-full md:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-1 btn-press flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-save"></i> SIMPAN DATA
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -2090,17 +2158,39 @@
             editMode = isEdit;
             editId = id;
             document.getElementById('form-header').innerText = isEdit ? `Edit Data` : `Input Data Baru`;
+            document.getElementById('form-sub-header').innerText = currentTitle; // Tampilkan nama layanan
+            
             const form = document.getElementById('dynamic-form');
             form.innerHTML = '';
+            
             const fields = getFieldsConfig(currentSheet);
             let existingData = {};
             if(isEdit) existingData = activeDataList.find(x => x.ID_Unik === id) || {};
-            fields.forEach(f => {
-                const div = document.createElement('div'); div.className = "flex flex-col gap-1";
-                const label = document.createElement('label'); label.className = "text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1"; label.innerText = f.label;
+            
+            fields.forEach((f, index) => {
+                const div = document.createElement('div'); 
+                
+                // 🌟 LOGIKA LEBAR KOLOM
+                const isFullWidth = f.type === 'textarea' || f.type === 'multi-select-siswa' || f.key.includes('Identifikasi') || f.key.includes('Masalah');
+                
+                div.className = `flex flex-col relative group transform transition-all duration-500 opacity-0 translate-y-4 ${isFullWidth ? 'md:col-span-2' : ''}`;
+                setTimeout(() => { div.classList.remove('opacity-0', 'translate-y-4'); }, 30 * index); // Animasi lebih cepat
+
+                // 🌟 DESAIN LABEL 
+                const label = document.createElement('label'); 
+                let iconLabel = '<i class="fa-solid fa-cube text-blue-400"></i>';
+                if(f.type === 'date') iconLabel = '<i class="fa-regular fa-calendar text-green-400"></i>';
+                if(f.type === 'select' || f.type === 'multi-select-siswa') iconLabel = '<i class="fa-solid fa-list-ul text-purple-400"></i>';
+                if(f.type === 'textarea') iconLabel = '<i class="fa-solid fa-align-left text-orange-400"></i>';
+                
+                label.className = "text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2"; 
+                label.innerHTML = `${iconLabel} ${f.label}`;
+
                 let input;
                 const val = isEdit ? (existingData[f.key] || '') : (f.value || '');
-                const baseClass = "w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium placeholder-gray-400";
+                
+                // 🌟 DESAIN KOTAK INPUT
+                const baseClass = "w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 font-medium placeholder-gray-400 shadow-sm transition-all hover:border-blue-300 dark:hover:border-slate-500 group-hover:shadow-md";
                 
                 if (f.type === 'select') {
                     if (f.options === 'siswa') {
@@ -2108,192 +2198,160 @@
                         input.setAttribute('list', `list-${f.key}`);
                         input.className = baseClass;
                         input.value = val;
-                        input.placeholder = "Ketik untuk mencari nama siswa..."; // Add placeholder
+                        input.placeholder = "Ketik untuk mencari nama siswa..."; 
                         const datalist = document.createElement('datalist');
                         datalist.id = `list-${f.key}`;
                         let opts = metaData[f.options] || [];
                         datalist.innerHTML = opts.map(o => {
-                            if(typeof o === 'object') return `<option value="${o.nama}">${o.kelas} - ${o.nisn || ''}</option>`; // More details
+                            if(typeof o === 'object') return `<option value="${o.nama}">${o.kelas} - ${o.nisn || ''}</option>`; 
                             return `<option value="${o}"></option>`;
                         }).join('');
-                        if(f.key.includes('Nama_Siswa')) {
-							input.onchange = (e) => autoFillSiswa(e.target.value, f.key);
-						}
+                        if(f.key.includes('Nama_Siswa')) { input.onchange = (e) => autoFillSiswa(e.target.value, f.key); }
                         div.appendChild(datalist);
                     } else {
-                        input = document.createElement('select'); input.className = baseClass;
+                        input = document.createElement('select'); 
+                        input.className = baseClass + " cursor-pointer appearance-none"; 
+                        input.style.backgroundImage = `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`;
+                        input.style.backgroundPosition = `right 1.2rem center`;
+                        input.style.backgroundRepeat = `no-repeat`;
+                        input.style.backgroundSize = `1.2em 1.2em`;
+
                         let opts = f.options || [];
                         if(typeof f.options === 'string') opts = metaData[f.options] || [];
                         input.innerHTML = `<option value="">-- Pilih ${f.label} --</option>` + opts.map(o => {
                             if(typeof o === 'object') return `<option value="${o.nama}" ${o.nama===val?'selected':''}>${o.nama} (${o.kelas})</option>`;
                             return `<option value="${o}" ${o===val?'selected':''}>${o}</option>`;
                         }).join('');
-                        if(f.key.includes('Nama_Siswa')) {
-							input.onchange = (e) => autoFillSiswa(e.target.value, f.key);
-						}
+                        if(f.key.includes('Nama_Siswa')) { input.onchange = (e) => autoFillSiswa(e.target.value, f.key); }
                     }
                 } else if (f.type === 'textarea') {
-                    input = document.createElement('textarea'); input.className = baseClass + " min-h-[100px]"; input.rows = 3; input.value = val; input.placeholder = f.placeholder || '';
+                    input = document.createElement('textarea'); 
+                    input.className = baseClass + " min-h-[120px] resize-y leading-relaxed"; 
+                    input.rows = 3; input.value = val; 
+                    input.placeholder = f.placeholder || `Ketikkan detail ${f.label.toLowerCase()} di sini...`;
                 } else if (f.type === 'date') {
-                    input = document.createElement('input'); input.type = 'date'; input.className = baseClass;
+                    input = document.createElement('input'); 
+                    input.type = 'date'; input.className = baseClass + " cursor-pointer";
                     if(val) { let d = new Date(val); if(!isNaN(d)) input.value = d.toISOString().split('T')[0]; }
-				// ==========================================
-                // PASTE KODE BARU DI SINI (AWAL)
-                // ==========================================
                 } else if (f.type === 'multi-select-siswa') {
-                    // Jadikan 'input' sebagai wadah utama (div)
+                    // Logic Multi-select persis seperti revisi 1
                     input = document.createElement('div');
                     input.className = "relative w-full";
                     
-                    // 1. Hidden input (Ini yang akan dikirim ke Google Sheets)
                     const hiddenInput = document.createElement('input');
-                    hiddenInput.type = "hidden";
-                    hiddenInput.name = f.key;
-                    hiddenInput.id = `field-${f.key}`;
-                    hiddenInput.value = val;
+                    hiddenInput.type = "hidden"; hiddenInput.name = f.key; hiddenInput.id = `field-${f.key}`; hiddenInput.value = val;
                     
-                    // 2. Kotak visual tempat tag nama berada
                     const tagsContainer = document.createElement('div');
-                    tagsContainer.className = baseClass + " min-h-[50px] flex flex-wrap gap-2 items-center p-2 cursor-text";
+                    tagsContainer.className = baseClass + " min-h-[55px] flex flex-wrap gap-2 items-center p-2 cursor-text";
                     
-                    // 3. Input untuk mengetik pencarian nama
                     const searchInput = document.createElement('input');
-                    searchInput.type = "text";
-                    searchInput.className = "flex-1 outline-none bg-transparent min-w-[150px] text-sm dark:text-white";
-                    searchInput.placeholder = f.placeholder || "Ketik nama...";
+                    searchInput.type = "text"; searchInput.className = "flex-1 outline-none bg-transparent min-w-[150px] text-sm dark:text-white mt-1";
+                    searchInput.placeholder = f.placeholder || "Ketik nama siswa...";
                     
-                    // 4. Kotak Dropdown hasil pencarian (Saran AI)
                     const dropdown = document.createElement('div');
-                    dropdown.className = "absolute z-50 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden custom-scroll";
+                    dropdown.className = "absolute z-50 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mt-2 shadow-2xl max-h-48 overflow-y-auto hidden custom-scroll";
                     
                     tagsContainer.appendChild(searchInput);
-                    input.appendChild(tagsContainer);
-                    input.appendChild(dropdown);
-                    input.appendChild(hiddenInput);
+                    input.appendChild(tagsContainer); input.appendChild(dropdown); input.appendChild(hiddenInput);
                     
-                    // Inisialisasi data tag (berguna jika Bapak sedang Edit Data)
                     let tagsArray = val ? val.split(',').map(t => t.trim()).filter(Boolean) : [];
                     
-                    // Fungsi untuk menggambar ulang tag
                     const renderTags = () => {
-                        // Bersihkan tag lama
-                        Array.from(tagsContainer.children).forEach(child => {
-                            if(child !== searchInput) tagsContainer.removeChild(child);
-                        });
-                        
+                        Array.from(tagsContainer.children).forEach(child => { if(child !== searchInput) tagsContainer.removeChild(child); });
                         tagsArray.forEach((tag, index) => {
                             const tagEl = document.createElement('span');
                             tagEl.className = "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-2 border border-blue-200 dark:border-blue-800 shadow-sm font-semibold";
                             tagEl.innerHTML = `<span>${tag}</span> <i class="fa-solid fa-xmark cursor-pointer hover:text-red-500 transition-colors"></i>`;
-                            
-                            // Fungsi hapus tag saat ikon (X) diklik
-                            tagEl.querySelector('i').onclick = (e) => {
-                                e.stopPropagation(); // Mencegah klik tembus
-                                tagsArray.splice(index, 1);
-                                renderTags();
-                            };
+                            tagEl.querySelector('i').onclick = (e) => { e.stopPropagation(); tagsArray.splice(index, 1); renderTags(); };
                             tagsContainer.insertBefore(tagEl, searchInput);
                         });
-                        // Update nilai hidden input agar tersimpan di backend
                         hiddenInput.value = tagsArray.join(', ');
                     };
 
-                    // Klik kotak untuk fokus ke input pencarian
                     tagsContainer.onclick = () => searchInput.focus();
-
-                    // Logika pencarian cerdas saat ngetik
                     searchInput.onkeyup = (e) => {
                         const keyword = e.target.value.toLowerCase();
                         dropdown.innerHTML = '';
-                        
                         if(!keyword) { dropdown.classList.add('hidden'); return; }
                         
-                        // Cari dari variabel metaData.siswa (Filter nama)
                         const matches = metaData.siswa.filter(s => s.nama.toLowerCase().includes(keyword)).slice(0, 10);
-                        
                         if(matches.length === 0) {
                             dropdown.innerHTML = `<div class="p-3 text-xs text-gray-500 dark:text-gray-400 text-center">Nama tidak ditemukan</div>`;
-                            dropdown.classList.remove('hidden');
-                            return;
+                            dropdown.classList.remove('hidden'); return;
                         }
                         
                         matches.forEach(s => {
                             const opt = document.createElement('div');
                             opt.className = "p-2.5 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm border-b dark:border-slate-700/50 last:border-0 transition-colors";
                             opt.innerHTML = `<div class="font-bold dark:text-white text-slate-700">${s.nama}</div><div class="text-[10px] text-blue-500 font-medium mt-0.5">Kelas: ${s.kelas}</div>`;
-                            
                             opt.onclick = () => {
                                 const finalName = `${s.nama} (${s.kelas})`;
-                                if(!tagsArray.includes(finalName)) {
-                                    tagsArray.push(finalName); 
-                                } else {
-                                    showToast('Siswa sudah ada di dalam grup!', 'error'); // Mencegah nama ganda
-                                }
-                                searchInput.value = ''; 
-                                dropdown.classList.add('hidden');
-                                renderTags(); 
-                                searchInput.focus(); // Kembali fokus agar bisa ngetik nama selanjutnya
+                                if(!tagsArray.includes(finalName)) tagsArray.push(finalName); 
+                                else showToast('Siswa sudah ada di grup!', 'error');
+                                searchInput.value = ''; dropdown.classList.add('hidden'); renderTags(); searchInput.focus();
                             };
                             dropdown.appendChild(opt);
                         });
                         dropdown.classList.remove('hidden');
                     };
-
-                    // Tutup dropdown kalau klik di luar area
-                    document.addEventListener('click', (e) => {
-                        if(!input.contains(e.target)) dropdown.classList.add('hidden');
-                    });
-
+                    document.addEventListener('click', (e) => { if(!input.contains(e.target)) dropdown.classList.add('hidden'); });
                     renderTags();
                 } else {
-                    input = document.createElement('input'); input.type = f.type || 'text'; input.className = baseClass + (f.type === 'readonly' ? " bg-gray-100 dark:bg-slate-700 text-gray-500 cursor-not-allowed" : ""); input.value = val; if(f.type === 'readonly') input.readOnly = true; input.placeholder = f.placeholder || '';
+                    input = document.createElement('input'); 
+                    input.type = f.type || 'text'; 
+                    input.className = baseClass + (f.type === 'readonly' ? " bg-slate-100 dark:bg-slate-700/50 text-slate-500 cursor-not-allowed border-dashed" : ""); 
+                    input.value = val; 
+                    if(f.type === 'readonly') input.readOnly = true; 
+                    input.placeholder = f.placeholder || `Masukkan ${f.label.toLowerCase()}...`;
                 }
+                
                 input.name = f.key; input.id = `field-${f.key}`;
                 div.appendChild(label); 
                 div.appendChild(input); 
                 
-                /// note+++ TAMBAHAN TOMBOL AI UNTUK KOLOM TARGET
-                // 1. Target untuk AI Pemecah Masalah (Membuat Solusi)
+                // 🌟 TOMBOL AI MELAYANG ESTETIK
+                const btnContainer = document.createElement('div');
+                btnContainer.className = "flex gap-2 absolute right-2 -top-1 z-10"; 
+
                 const aiTargets = ['Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan', 'Evaluasi_Tindak_Lanjut'];
                 if(aiTargets.includes(f.key)) {
                     const aiBtn = document.createElement('button');
-                    aiBtn.type = "button";
-                    aiBtn.id = `btn-ai-${f.key}`;
-                    aiBtn.className = "mt-1 flex items-center gap-2 text-[11px] font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-3 py-1.5 rounded-lg shadow-md transition-all btn-press w-max";
-                    aiBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Susun Otomatis (AI)`;
+                    aiBtn.type = "button"; aiBtn.id = `btn-ai-${f.key}`;
+                    aiBtn.className = "flex items-center gap-1.5 text-[10px] font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-2.5 py-1 rounded-lg shadow-md transition-all btn-press ring-4 ring-slate-50 dark:ring-slate-900";
+                    aiBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> AI Asisten`;
                     aiBtn.onclick = () => generateAIDraft(f.key);
-                    div.appendChild(aiBtn);
+                    btnContainer.appendChild(aiBtn);
                 }
 
-                // 2. Target BARU untuk AI Penyihir Bahasa (Rapihkan Teks) - VERSI LENGKAP SEMUA LAYANAN
-                const aiRewriters = [
-                    // Layanan Individu & Kelompok
-                    'Identifikasi_Masalah', 'Penjelasan_Masalah', 'Penyebab_Masalah', 
-                    // Bimbingan Kelompok & Klasikal
-                    'Tujuan_Layanan', 'Eksperientasi_Awal', 'Identifikasi', 'Analisis', 'Generalisasi', 'Topik_Layanan',
-                    // Konsultasi & Konferensi Kasus
-                    'Uraian_Topik', 'Deskripsi_Kasus', 
-                    // Alih Tangan, Mediasi, Advokasi
-                    'Alasan_Rujukan', 'Pokok_Masalah', 'Kronologi_Masalah', 'Bentuk_Advokasi', 
-                    // Dukungan Sistem
-                    'Deskripsi_Kegiatan'
-                ];
-                
+                const aiRewriters = ['Identifikasi_Masalah', 'Penjelasan_Masalah', 'Penyebab_Masalah', 'Tujuan_Layanan', 'Eksperientasi_Awal', 'Identifikasi', 'Analisis', 'Generalisasi', 'Topik_Layanan', 'Uraian_Topik', 'Deskripsi_Kasus', 'Alasan_Rujukan', 'Pokok_Masalah', 'Kronologi_Masalah', 'Bentuk_Advokasi', 'Deskripsi_Kegiatan'];
                 if(aiRewriters.includes(f.key)) {
                     const rewriteBtn = document.createElement('button');
-                    rewriteBtn.type = "button";
-                    rewriteBtn.id = `btn-rewrite-${f.key}`;
-                    rewriteBtn.className = "mt-1 flex items-center gap-2 text-[11px] font-bold text-slate-700 dark:text-white bg-gradient-to-r from-amber-200 to-yellow-400 hover:from-amber-300 hover:to-yellow-500 px-3 py-1.5 rounded-lg shadow-md transition-all btn-press w-max border border-yellow-300 dark:border-yellow-600";
-                    rewriteBtn.innerHTML = `<i class="fa-solid fa-pen-nib"></i> Rapihkan Bahasa (AI)`;
+                    rewriteBtn.type = "button"; rewriteBtn.id = `btn-rewrite-${f.key}`;
+                    rewriteBtn.className = "flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-gradient-to-r from-amber-300 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 px-2.5 py-1 rounded-lg shadow-md transition-all btn-press ring-4 ring-slate-50 dark:ring-slate-900";
+                    rewriteBtn.innerHTML = `<i class="fa-solid fa-pen-nib"></i> Rapihkan`;
                     rewriteBtn.onclick = () => rewriteTextAI(f.key);
-                    div.appendChild(rewriteBtn);
+                    btnContainer.appendChild(rewriteBtn);
+                }
+
+                if(btnContainer.children.length > 0) {
+                    div.appendChild(btnContainer);
+                    if(f.type === 'textarea') input.classList.add('pt-6');
                 }
                 
                 form.appendChild(div);
             });
+            
+            // LOGIKA NAVIGASI HALAMAN PENUH
+            // Sembunyikan halaman tabel layanan, tampilkan form
+            document.getElementById('page-service').classList.add('hide');
             document.getElementById('page-form').classList.remove('hide');
         }
-        function closeForm() { document.getElementById('page-form').classList.add('hide'); }
+
+        function closeForm() { 
+            // Sembunyikan form, kembalikan ke halaman tabel layanan
+            document.getElementById('page-form').classList.add('hide'); 
+            document.getElementById('page-service').classList.remove('hide');
+        }
         // GANTI FUNCTION autoFillSiswa YANG LAMA DENGAN INI
 		function autoFillSiswa(nama, fieldKey) {
 			// 1. Cari data siswa di metadata
