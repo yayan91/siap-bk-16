@@ -2004,7 +2004,7 @@
                 html: '<p class="text-sm text-slate-500 mb-4">Pilih jenis dokumen yang ingin Anda unduh.</p>',
                 showDenyButton: true,
                 showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-file-contract mr-2"></i> LPL (Resmi)',
+                confirmButtonText: '<i class="fa-solid fa-file-contract mr-2"></i> Jurnal (Resmi)',
                 denyButtonText: '<i class="fa-solid fa-table mr-2"></i> Ringkasan Tabel',
                 cancelButtonText: 'Batal',
                 buttonsStyling: false,
@@ -2070,7 +2070,7 @@
             // 3. JUDUL LAPORAN (Spasi sudah dirapatkan)
             currentY += 10; 
             doc.setFont("times", "bold"); doc.setFontSize(12);
-            doc.text(`LAPORAN PELAKSANAAN LAYANAN`, centerX, currentY, { align: 'center' });
+            doc.text(`JURNAL PELAKSANAAN LAYANAN`, centerX, currentY, { align: 'center' });
             currentY += 5;
             doc.text(currentTitle.toUpperCase(), centerX, currentY, { align: 'center' });
 
@@ -3534,3 +3534,4 @@
     </script>
 </body>
 </html>
+
