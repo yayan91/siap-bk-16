@@ -550,6 +550,25 @@
                     </div>
                 </div>
             </div>
+			
+			<div class="mb-8">
+                <div class="glass p-6 md:p-8 rounded-3xl shadow-xl border-l-8 border-emerald-500 flex flex-col md:flex-row items-center justify-between gap-6 group hover:-translate-y-1 transition-all duration-300 relative overflow-hidden bg-white/60 dark:bg-slate-800/60">
+                    <div class="absolute right-0 top-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
+                    <div class="flex items-center gap-5 z-10 w-full md:w-auto">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 shrink-0 transform group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-book-journal-whills text-3xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-black dark:text-white text-slate-800 tracking-wide">Jurnal Harian & Bulanan</h3>
+                            <p class="text-sm dark:text-emerald-200/70 text-slate-500 mt-1 font-medium">Rekap 10 layanan menjadi 1 dokumen laporan standar.</p>
+                        </div>
+                    </div>
+                    <button onclick="openJurnalGenerator()" class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-bold shadow-xl shadow-emerald-500/30 transition-all hover:-translate-y-1 btn-press flex items-center justify-center gap-3 z-10 border border-emerald-400/50">
+                        <i class="fa-solid fa-print text-xl animate-pulse"></i> CETAK JURNAL PDF
+                    </button>
+                </div>
+            </div>
+			
         </section>
 
         <!-- 3. SERVICE DETAIL (WITH DATE FILTER & PAGINATION) -->
@@ -685,6 +704,7 @@
                 </div>
 
             </div>
+			
         </section>
 
         <!-- PROFESSIONAL APP FOOTER -->
@@ -1978,7 +1998,192 @@
 
         function printItem(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
-            generatePDF([item], `Laporan_${currentTitle}`, false);
+            
+            Swal.fire({
+                title: '<span class="text-xl font-bold dark:text-white text-slate-800">Pilih Format Cetak</span>',
+                html: '<p class="text-sm text-slate-500 mb-4">Pilih jenis dokumen yang ingin Anda unduh.</p>',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-file-contract mr-2"></i> LPL (Resmi)',
+                denyButtonText: '<i class="fa-solid fa-table mr-2"></i> Ringkasan Tabel',
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
+                    confirmButton: 'px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all mx-1 btn-press',
+                    denyButton: 'px-5 py-2.5 bg-slate-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all mx-1 btn-press',
+                    cancelButton: 'px-5 py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 transition-all mx-1 btn-press'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    printLPL_PDF(item); // Panggil fungsi cetak naratif resmi
+                } else if (result.isDenied) {
+                    generatePDF([item], `Laporan_${currentTitle}`, false); // Fungsi cetak tabel bawaan
+                }
+            });
+        }
+		
+		// --- FITUR PREMIUM: CETAK LAPORAN PELAKSANAAN LAYANAN (LPL) ---
+        async function printLPL_PDF(item) {
+            Swal.fire({ title: 'Menyusun Laporan...', html: 'Mengubah data menjadi format dokumen naratif resmi.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] }); // F4
+            const s = metaData.sekolah || {};
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const centerX = pageWidth / 2;
+
+            // 1. KOP SURAT
+            doc.setFont("times", "normal");
+            const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
+            const urlKanan = s.logo_kanan || ""; 
+            if (urlKiri) { const imgData = await getBase64FromUrl(urlKiri); if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); }
+            if (urlKanan) { const imgData2 = await getBase64FromUrl(urlKanan); if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); }
+
+            let currentY = 15;
+            doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+            
+            currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+
+            // 2. IDENTIFIKASI VARIABEL
+            const tahunAjar = item['Tahun_Ajar'] || s.tahun_ajar || '-';
+            const semester = item['Semester'] || s.semester || '-';
+            const tgl = formatTanggalIndo(getItemDate(item));
+            
+            let sasaran = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Anggota_Kelompok_Siswa'] || item['Sasaran_Layanan'] || item['Nama_Konsulti'] || '-';
+            let kelas = item['Kelas'] || item['Kelas_1'] || '';
+            const sasaranKls = (kelas && kelas !== '-') ? `${sasaran} (Kelas ${kelas})` : sasaran;
+            
+            const komponen = item['Komponen_Layanan'] || '-';
+            const bidang = item['Bidang_Bimbingan'] || item['Bidang_Layanan'] || '-';
+            const topik = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kasus'] || item['Deskripsi_Kegiatan'] || '-';
+            
+            const proses = item['Penjelasan_Masalah'] || item['Penyebab_Masalah'] || item['Kronologi_Masalah'] || item['Alasan_Rujukan'] || item['Deskripsi_Kegiatan'] || 'Proses layanan berjalan dengan baik sesuai rencana awal.';
+            const evaluasi = item['Hasil'] || item['Hasil_Kesepakatan'] || item['Hasil_Keputusan'] || item['Hasil_Konsultasi'] || item['Capaian_Layanan'] || item['Hasil_Kegiatan'] || '-';
+            const tindakLanjut = item['Alternatif_Pemecahan'] || item['Tindak_Lanjut'] || item['Evaluasi_Tindak_Lanjut'] || '-';
+
+            // 3. JUDUL LAPORAN (Spasi sudah dirapatkan)
+            currentY += 10; 
+            doc.setFont("times", "bold"); doc.setFontSize(12);
+            doc.text(`LAPORAN PELAKSANAAN LAYANAN`, centerX, currentY, { align: 'center' });
+            currentY += 5;
+            doc.text(currentTitle.toUpperCase(), centerX, currentY, { align: 'center' });
+
+            // 4. ISI KONTEN (Fungsi Helper untuk baris rapi)
+            currentY += 8; // Spasi dirapatkan dari sebelumnya 15
+            doc.setFontSize(11);
+            
+            const writeRow = (label, value) => {
+                doc.setFont("times", "normal");
+                doc.text(label, 15, currentY);
+                doc.text(":", 60, currentY);
+                const splitText = doc.splitTextToSize(String(value), pageWidth - 70);
+                doc.text(splitText, 65, currentY);
+                currentY += (splitText.length * 5) + 2;
+            };
+
+            doc.setFont("times", "bold"); doc.text("A. IDENTITAS KEGIATAN", 15, currentY); currentY += 7;
+            writeRow("Tahun Pelajaran", tahunAjar);
+            writeRow("Semester", semester);
+            writeRow("Guru Bimbingan Konseling", currentUser.nama); // <--- NAMA GURU BK DITAMBAHKAN DI SINI
+            writeRow("Komponen Layanan", komponen);
+            writeRow("Bidang Layanan", bidang);
+            writeRow("Topik / Pokok Masalah", topik);
+            writeRow("Sasaran Layanan", sasaranKls);
+            writeRow("Tanggal Pelaksanaan", tgl);
+            
+            currentY += 5;
+            doc.setFont("times", "bold"); doc.text("B. URAIAN / PROSES LAYANAN", 15, currentY); currentY += 7;
+            doc.setFont("times", "normal");
+            const splitProses = doc.splitTextToSize(String(proses), pageWidth - 30);
+            doc.text(splitProses, 15, currentY);
+            currentY += (splitProses.length * 5) + 5;
+
+            doc.setFont("times", "bold"); doc.text("C. EVALUASI DAN HASIL", 15, currentY); currentY += 7;
+            doc.setFont("times", "normal");
+            const splitEval = doc.splitTextToSize(String(evaluasi), pageWidth - 30);
+            doc.text(splitEval, 15, currentY);
+            currentY += (splitEval.length * 5) + 5;
+
+            doc.setFont("times", "bold"); doc.text("D. TINDAK LANJUT", 15, currentY); currentY += 7;
+            doc.setFont("times", "normal");
+            const splitTL = doc.splitTextToSize(String(tindakLanjut), pageWidth - 30);
+            doc.text(splitTL, 15, currentY);
+            currentY += (splitTL.length * 5) + 10;
+
+            // 5. TANDA TANGAN & QR CODE (Dengan Logika Kerahasiaan)
+            if(currentY > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); currentY = 30; }
+
+            const namaKepsek = s.kepsek || "..............................";
+            const nipKepsek = s.nip_kepsek || "..................";
+            const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+
+            let qrImage = null;
+            try {
+                const qrText = `Dokumen Resmi LPL\nLayanan: ${currentTitle}\nSasaran: ${sasaran}\nTanggal: ${tgl}\nGuru BK: ${currentUser.nama}`;
+                const qr = new QRious({ value: qrText, size: 100, level: 'H' });
+                qrImage = qr.toDataURL();
+            } catch (e) {}
+
+            // Cek apakah ini layanan yang bersifat rahasia (Konseling Individu / Kelompok)
+            const isConfidential = currentSheet === '7_Layanan_Individu' || currentSheet === '8_Layanan_Kelompok';
+
+            if (isConfidential) {
+                // HANYA GURU BK SAJA (Posisinya agak di tengah-kanan)
+                doc.text(`Makassar, ${dateStr}`, centerX + 25, currentY, { align: 'center' });
+                doc.text("Guru Bimbingan Konseling", centerX + 25, currentY + 5, { align: 'center' });
+
+                if (qrImage) {
+                    doc.addImage(qrImage, 'PNG', centerX - 45, currentY - 2, 25, 25);
+                    doc.setFontSize(7); doc.text("Scan Validasi", centerX - 32.5, currentY + 26, { align: 'center' });
+                    doc.setFontSize(11);
+                }
+
+                currentY += 25;
+                doc.setFont("times", "bold"); doc.setFontSize(11);
+                doc.text(currentUser.nama, centerX + 25, currentY, { align: 'center' });
+                let bWidth = doc.getTextWidth(currentUser.nama); 
+                doc.setLineWidth(0.2); doc.line(centerX + 25 - bWidth/2, currentY + 1, centerX + 25 + bWidth/2, currentY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, centerX + 25, currentY + 5, { align: 'center' });
+
+            } else {
+                // KEPALA SEKOLAH & GURU BK (Untuk Bimbingan Klasikal, Konsultasi, dll)
+                doc.text("Mengetahui,", 40, currentY, { align: 'center' });
+                doc.text("Kepala Sekolah", 40, currentY + 5, { align: 'center' });
+                doc.text(`Makassar, ${dateStr}`, pageWidth - 40, currentY, { align: 'center' });
+                doc.text("Guru Bimbingan Konseling", pageWidth - 40, currentY + 5, { align: 'center' });
+
+                if (qrImage) {
+                    doc.addImage(qrImage, 'PNG', centerX - 12.5, currentY - 2, 25, 25);
+                    doc.setFontSize(7); doc.text("Scan Validasi", centerX, currentY + 26, { align: 'center' });
+                    doc.setFontSize(11);
+                }
+
+                currentY += 25;
+                doc.setFont("times", "bold"); doc.setFontSize(11);
+                doc.text(namaKepsek, 40, currentY, { align: 'center' });
+                let kWidth = doc.getTextWidth(namaKepsek); doc.setLineWidth(0.2); doc.line(40 - kWidth/2, currentY + 1, 40 + kWidth/2, currentY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${nipKepsek}`, 40, currentY + 5, { align: 'center' });
+
+                doc.setFont("times", "bold");
+                doc.text(currentUser.nama, pageWidth - 40, currentY, { align: 'center' });
+                let bWidth = doc.getTextWidth(currentUser.nama); doc.line(pageWidth - 40 - bWidth/2, currentY + 1, pageWidth - 40 + bWidth/2, currentY + 1);
+                doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip}`, pageWidth - 40, currentY + 5, { align: 'center' });
+            }
+
+            // OUTPUT DOKUMEN
+            Swal.close();
+            try { 
+                const blob = doc.output('blob'); 
+                window.open(URL.createObjectURL(blob), '_blank'); 
+            } catch (e) { 
+                doc.save(`LPL_${currentTitle}.pdf`); 
+            }
         }
 
         // --- PDF FUNCTION (UPDATED - BACK TO ORIGINAL WITH PRO STYLING) ---
@@ -2194,8 +2399,8 @@
         // --- FORM ---
         function getFieldsConfig(sheetName) { /* ... unchanged ... */ 
             const common = [{ key: 'Tanggal_Layanan', label: 'Tanggal Layanan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }];
-            if(sheetName === '7_Layanan_Individu') return [...common, { key: 'Konseling_Ke', label: 'Konseling Ke-', type: 'number' }, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Ruang', label: 'Ruang', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan', 'Layanan Responsif', 'Dukungan Sistem'] }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Penjelasan_Masalah', label: 'Penjelasan Masalah', type: 'textarea' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik Konseling', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek Layanan', type: 'select', options: 'aspek' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Konseling', type: 'textarea' }, { key: 'Status_Konseling', label: 'Status', type: 'select', options: ['Proses', 'Selesai', 'Rujuk', 'Drop Out'] }];
-            if(sheetName === '8_Layanan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok (Siswa)', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa lalu pilih...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Responsif', 'Layanan Dasar'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Pendekatan', label: 'Pendekatan', type: 'select', options: 'pendekatan' }, { key: 'Teknik_Konseling', label: 'Teknik', type: 'select', options: 'teknik' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Penyebab_Masalah', label: 'Penyebab Masalah', type: 'textarea' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Layanan', type: 'textarea' }, { key: 'Status_Proses', label: 'Status Proses', type: 'select', options: ['Aktif', 'Selesai'] }];
+            if(sheetName === '7_Layanan_Individu') return [...common, { key: 'Konseling_Ke', label: 'Konseling Ke-', type: 'number' }, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Ruang', label: 'Ruang', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan', 'Layanan Responsif', 'Dukungan Sistem'] }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Penjelasan_Masalah', label: 'Penjelasan Masalah', type: 'textarea' }, { key: 'Pendekatan', label: 'Pendekatan (Teori)', type: 'textarea', placeholder: 'Ketik teori manual atau gunakan AI...' }, { key: 'Teknik_Konseling', label: 'Teknik Spesifik', type: 'textarea', placeholder: 'Ketik teknik manual atau gunakan AI...' }, { key: 'Aspek_Layanan', label: 'Aspek Layanan', type: 'select', options: 'aspek' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Konseling', type: 'textarea' }, { key: 'Status_Konseling', label: 'Status', type: 'select', options: ['Proses', 'Selesai', 'Rujuk', 'Drop Out'] }];
+            if(sheetName === '8_Layanan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Tempat', label: 'Tempat', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok (Siswa)', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa lalu pilih...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Responsif', 'Layanan Dasar'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Identifikasi_Masalah', label: 'Identifikasi Masalah', type: 'text' }, { key: 'Pendekatan', label: 'Pendekatan (Teori)', type: 'textarea', placeholder: 'Ketik teori manual atau gunakan AI...' }, { key: 'Teknik_Konseling', label: 'Teknik Spesifik', type: 'textarea', placeholder: 'Ketik teknik manual atau gunakan AI...' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Penyebab_Masalah', label: 'Penyebab Masalah', type: 'textarea' }, { key: 'Alternatif_Pemecahan', label: 'Alternatif Pemecahan', type: 'textarea' }, { key: 'Hasil', label: 'Hasil Layanan', type: 'textarea' }, { key: 'Status_Proses', label: 'Status Proses', type: 'select', options: ['Aktif', 'Selesai'] }];
             if(sheetName === '9_Bimbingan_Kelompok') return [...common, { key: 'Durasi', label: 'Durasi (Menit)', type: 'text' }, { key: 'Anggota_Kelompok_Siswa', label: 'Anggota Kelompok', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa lalu pilih...' }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Layanan Dasar', 'Layanan Peminatan'] }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text', placeholder: 'Contoh: Bahaya Cyberbullying' }, { key: 'Tujuan_Layanan', label: 'Tujuan Layanan', type: 'textarea' }, { key: 'Eksperientasi_Awal', label: 'Tahap Awal', type: 'textarea' }, { key: 'Identifikasi', label: 'Tahap Identifikasi', type: 'textarea' }, { key: 'Analisis', label: 'Tahap Analisis', type: 'textarea' }, { key: 'Generalisasi', label: 'Tahap Generalisasi', type: 'textarea' }, { key: 'Status_Proses', label: 'Status', type: 'select', options: ['Selesai', 'Berlanjut'] }];
             if(sheetName === '10_Konsultasi') return [...common, { key: 'Durasi', label: 'Durasi', type: 'text' }, { key: 'Nama_Konsulti', label: 'Nama Konsulti (Orang Tua/Guru)', type: 'text' }, { key: 'Status_Konsulti', label: 'Status Konsulti', type: 'select', options: ['Orang Tua', 'Guru Mapel', 'Wali Kelas', 'Lainnya'] }, { key: 'Nama_Konsultan_GuruBK', label: 'Nama Konsultan (Guru BK)', type: 'text', value: currentUser.nama }, { key: 'Komponen_Layanan', label: 'Komponen', type: 'select', options: ['Dukungan Sistem', 'Layanan Responsif'] }, { key: 'Bidang_Bimbingan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Uraian_Topik', label: 'Uraian Topik', type: 'textarea' }, { key: 'Hasil_Konsultasi', label: 'Hasil Konsultasi', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
             if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang', type: 'select', options: ['Pribadi', 'Sosial', 'Belajar', 'Karir','Pibadi Sosial'] }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
@@ -2239,6 +2444,7 @@
                 const isFullWidth = f.type === 'textarea' || f.type === 'multi-select-siswa' || f.key.includes('Identifikasi') || f.key.includes('Masalah');
                 
                 div.className = `flex flex-col relative group transform transition-all duration-500 opacity-0 translate-y-4 ${isFullWidth ? 'md:col-span-2' : ''}`;
+				div.style.zIndex = 100 - index;
                 setTimeout(() => { div.classList.remove('opacity-0', 'translate-y-4'); }, 30 * index); // Animasi lebih cepat
 
                 // 🌟 DESAIN LABEL 
@@ -2259,20 +2465,76 @@
                 
                 if (f.type === 'select') {
                     if (f.options === 'siswa') {
-                        input = document.createElement('input');
-                        input.setAttribute('list', `list-${f.key}`);
-                        input.className = baseClass;
-                        input.value = val;
-                        input.placeholder = "Ketik untuk mencari nama siswa..."; 
-                        const datalist = document.createElement('datalist');
-                        datalist.id = `list-${f.key}`;
-                        let opts = metaData[f.options] || [];
-                        datalist.innerHTML = opts.map(o => {
-                            if(typeof o === 'object') return `<option value="${o.nama}">${o.kelas} - ${o.nisn || ''}</option>`; 
-                            return `<option value="${o}"></option>`;
-                        }).join('');
-                        if(f.key.includes('Nama_Siswa')) { input.onchange = (e) => autoFillSiswa(e.target.value, f.key); }
-                        div.appendChild(datalist);
+                        // 1. Buat Container Relatif
+                        input = document.createElement('div');
+                        input.className = "relative w-full";
+                        
+                        // 2. Buat Input Asli untuk mengetik nama
+                        const actualInput = document.createElement('input');
+                        actualInput.type = "text";
+                        actualInput.name = f.key; // PENTING: Agar datanya terkirim saat disave
+                        actualInput.className = baseClass;
+                        actualInput.value = val;
+                        actualInput.placeholder = "Ketik nama siswa..."; 
+                        actualInput.autocomplete = "off"; // Matikan history browser biar bersih
+                        
+                        // 3. Buat Kotak Dropdown Melayang
+                        const dropdown = document.createElement('div');
+                        dropdown.className = "absolute z-50 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden custom-scroll";
+                        
+                        input.appendChild(actualInput);
+                        input.appendChild(dropdown);
+                        
+                        // 4. Logika Pencarian Langsung (Live Search)
+                        actualInput.onkeyup = (e) => {
+                            const keyword = e.target.value.toLowerCase();
+                            dropdown.innerHTML = '';
+                            
+                            // Jika kosong, sembunyikan kotak pencarian
+                            if(keyword === '') { 
+                                dropdown.classList.add('hidden'); 
+                                return; 
+                            }
+                            
+                            // Cari kecocokan data dari metaData.siswa (Maksimal 10 nama)
+                            const matches = metaData.siswa.filter(s => s.nama.toLowerCase().includes(keyword)).slice(0, 10);
+                            
+                            if(matches.length === 0) {
+                                dropdown.innerHTML = `<div class="p-3 text-xs text-gray-500 dark:text-gray-400 text-center font-medium">Nama tidak ditemukan</div>`;
+                                dropdown.classList.remove('hidden'); 
+                                return;
+                            }
+                            
+                            // Tampilkan hasil pencarian
+                            matches.forEach(s => {
+                                const opt = document.createElement('div');
+                                opt.className = "p-2.5 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm border-b dark:border-slate-700/50 last:border-0 transition-colors";
+                                opt.innerHTML = `<div class="font-bold dark:text-white text-slate-700">${s.nama}</div><div class="text-[10px] text-blue-500 font-medium mt-0.5">Kelas: ${s.kelas}</div>`;
+                                
+                                // Saat nama diklik
+                                opt.onclick = () => {
+                                    actualInput.value = s.nama;
+                                    dropdown.classList.add('hidden');
+                                    // Panggil fungsi auto-fill kelas yang sudah mantap itu!
+                                    if(f.key.includes('Nama_Siswa')) { 
+                                        autoFillSiswa(s.nama, f.key); 
+                                    }
+                                };
+                                dropdown.appendChild(opt);
+                            });
+                            dropdown.classList.remove('hidden');
+                        };
+
+                        // Tampilkan hasil terakhir jika form di-klik lagi
+                        actualInput.onclick = () => {
+                            actualInput.dispatchEvent(new Event('keyup'));
+                        };
+
+                        // Sembunyikan dropdown kalau layar di-klik di tempat lain
+                        document.addEventListener('click', (e) => { 
+                            if(!input.contains(e.target)) dropdown.classList.add('hidden'); 
+                        });
+
                     } else {
                         input = document.createElement('select'); 
                         input.className = baseClass + " cursor-pointer appearance-none"; 
@@ -2394,7 +2656,7 @@
                 const btnContainer = document.createElement('div');
                 btnContainer.className = "flex gap-2 absolute right-2 -top-1 z-10"; 
 
-                const aiTargets = ['Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan', 'Evaluasi_Tindak_Lanjut'];
+                const aiTargets = ['Pendekatan', 'Teknik_Konseling', 'Alternatif_Pemecahan', 'Hasil', 'Tindak_Lanjut', 'Hasil_Rujukan', 'Hasil_Kesepakatan', 'Bentuk_Advokasi', 'Hasil_Advokasi', 'Hasil_Konsultasi', 'Capaian_Layanan', 'Evaluasi_Tindak_Lanjut'];
                 if(aiTargets.includes(f.key)) {
                     const aiBtn = document.createElement('button');
                     aiBtn.type = "button"; aiBtn.id = `btn-ai-${f.key}`;
@@ -2483,9 +2745,21 @@
             targetEl.value = "Meminta petunjuk AI...";
 
             try {
-                // 3. Tembak ke Backend
-                // note+++ PERBAIKAN: Tambahkan targetField ke dalam payload yang dikirim ke backend
-                const payload = { action: 'askAI', prompt: contextText, targetField: targetField };
+                // 3. Tembak ke Backend dengan Prompt Khusus
+                let finalPrompt = contextText;
+                
+                // Jika yang diklik adalah Pendekatan atau Teknik, ubah AI jadi Psikolog Ahli
+                if (targetField === 'Pendekatan') {
+                    finalPrompt = `TUGAS: Bertindaklah sebagai Ahli Psikologi / Konselor Senior.\nBerdasarkan masalah siswa berikut:\n"${contextText}"\n\nSebutkan 1 PENDEKATAN KONSELING (Contoh: CBT, Realita, SFBT, dll) yang paling tepat untuk masalah ini, dan berikan alasan singkatnya (maksimal 2 kalimat). Jawab langsung ke intinya tanpa salam.`;
+                } else if (targetField === 'Teknik_Konseling') {
+                    // Cek apakah kolom Pendekatan sudah diisi sebelumnya
+                    const pendekatanEl = document.getElementById('field-Pendekatan');
+                    const pendekatanTerpilih = (pendekatanEl && pendekatanEl.value.trim() !== '') ? pendekatanEl.value : 'Belum ditentukan (Pilihkan yang paling cocok)';
+                    
+                    finalPrompt = `TUGAS: Bertindaklah sebagai Ahli Psikologi / Konselor Senior.\nBerdasarkan masalah siswa berikut:\n"${contextText}"\n\nPERHATIAN: Pendekatan konseling yang digunakan adalah "${pendekatanTerpilih}".\n\nSebutkan 1 TEKNIK KONSELING spesifik yang BERSUMBER DARI PENDEKATAN TERSEBUT yang relevan untuk mengatasi masalah ini. Jelaskan cara singkat penerapannya (maksimal 2 kalimat). Jawab langsung ke intinya tanpa salam.`;
+                }
+
+                const payload = { action: 'askAI', prompt: finalPrompt, targetField: targetField };
                 const res = await apiCall(payload, 'POST', payload);
                 
                 if(res && res.status === 'success') {
@@ -2509,13 +2783,13 @@
                     typeWriter();
                 } else {
                     targetEl.value = "";
-                    Swal.fire("Gagal", res?.message || "AI sedang sibuk.", "error");
+                    tampilkanPesanErrorAI(res?.message);
                     btnEl.innerHTML = originalBtnText;
                     btnEl.disabled = false;
                 }
             } catch(e) {
                 targetEl.value = "";
-                Swal.fire("Error", "Koneksi ke AI gagal. Cek internet.", "error");
+                tampilkanPesanErrorAI("Koneksi ke AI gagal. Cek internet.");
                 btnEl.innerHTML = originalBtnText;
                 btnEl.disabled = false;
             }
@@ -2564,7 +2838,7 @@
                     }
                     typeWriter();
                 } else {
-                    Swal.fire("Gagal", res?.message || "AI sedang sibuk.", "error");
+                    tampilkanPesanErrorAI("Sirkuit AI terputus. Cek internet Anda.");
                     btnEl.innerHTML = originalBtnText;
                     btnEl.disabled = false;
                 }
@@ -2925,10 +3199,12 @@
                         confirmButtonColor: '#4f46e5'
                     });
                 } else {
-                    throw new Error("Gagal mendapatkan respons AI.");
+                    Swal.close();
+                    tampilkanPesanErrorAI(res?.message);
                 }
             } catch (err) {
-                Swal.fire("Error", "Sirkuit AI terputus. Cek internet Anda.", "error");
+                Swal.close();
+                tampilkanPesanErrorAI(err.message);
             }
         }
 		
@@ -3008,6 +3284,253 @@
                 padding: '1rem'
             });
         }
+		
+		// =========================================================================
+        // FITUR PREMIUM: GENERATOR JURNAL BULANAN MAGIC
+        // =========================================================================
+
+        function openJurnalGenerator() {
+            if(!cachedAllServices) {
+                Swal.fire("Data Belum Siap", "Sistem sedang mengumpulkan data dari cloud, mohon tunggu sebentar lalu klik lagi.", "info");
+                return;
+            }
+
+            Swal.fire({
+                title: '<span class="text-emerald-600 dark:text-emerald-400 font-black tracking-wide">PENGATURAN JURNAL</span>',
+                html: `
+                    <div class="text-left mt-4">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl mb-4 border border-blue-100 dark:border-blue-800 flex gap-3 items-start">
+                            <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mt-0.5"></i>
+                            <p class="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">Sistem akan otomatis menyatukan dan mengurutkan data dari 10 jenis layanan berdasarkan rentang waktu yang Anda pilih.</p>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Mulai Tanggal</label>
+                                <input type="date" id="jurnal-start" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Sampai Tanggal</label>
+                                <input type="date" id="jurnal-end" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
+                            </div>
+                        </div>
+                    </div>
+                `,
+                icon: 'none',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-gears mr-2"></i> Buat Laporan',
+                cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl',
+                    confirmButton: 'px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all mx-2 btn-press',
+                    cancelButton: 'px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition-all mx-2 btn-press'
+                },
+                preConfirm: () => {
+                    const s = document.getElementById('jurnal-start').value;
+                    const e = document.getElementById('jurnal-end').value;
+                    if (!s || !e) { Swal.showValidationMessage('Tentukan rentang tanggalnya, sahabat!'); return false; }
+                    return { start: s, end: e };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) processJurnalData(result.value.start, result.value.end);
+            });
+        }
+
+        async function processJurnalData(startDateStr, endDateStr) {
+            Swal.fire({ title: 'Menjahit Dokumen...', html: 'Menyatukan data dan merapihkan tabel Jurnal.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            let allData = [];
+            const startDate = new Date(startDateStr); startDate.setHours(0,0,0,0);
+            const endDate = new Date(endDateStr); endDate.setHours(23,59,59,999);
+
+            const sheetLabels = {
+                '7_Layanan_Individu': 'Konseling Individu', '8_Layanan_Kelompok': 'Konseling Kelompok', 
+                '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
+                '11_Layanan_Klasikal': 'Bim. Klasikal', '12_Konferensi_Kasus': 'Konferensi Kasus',
+                '13_Alih_Tangan_Kasus': 'Alih Tangan Kasus', '14_Mediasi': 'Mediasi',
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem'
+            };
+
+            // Menyedot data dari semua sheet di memori cache
+            for(const [sheet, data] of Object.entries(cachedAllServices)) {
+                data.forEach(item => {
+                    const dateVal = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                    if(!dateVal) return;
+                    const itemDate = new Date(dateVal);
+                    
+                    if (itemDate >= startDate && itemDate <= endDate) {
+                        // Mencari kecocokan variabel target sasaran
+                        let sasaran = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Anggota_Kelompok_Siswa'] || item['Nama_Konsulti'] || item['Sasaran_Layanan'] || item['Pihak_Terlibat'] || item['Nama_Kegiatan'] || '-';
+                        let kelas = item['Kelas'] || item['Kelas_1'] || '';
+                        let displaySasaran = (kelas && sasaran !== '-') ? `${sasaran}\n(Kls: ${kelas})` : sasaran;
+                        
+                        // Mencari kecocokan variabel inti laporan
+                        let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kegiatan'] || '-';
+                        
+                        // Mencari status / hasil akhir
+                        let status = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'] || item['Hasil_Kegiatan'] || 'Terlaksana';
+
+                        allData.push({
+                            _date: itemDate,
+                            tanggalFormatted: formatTanggalIndo(dateVal),
+                            layanan: sheetLabels[sheet],
+                            sasaran: displaySasaran,
+                            uraian: uraian,
+                            status: status
+                        });
+                    }
+                });
+            }
+
+            // Urutkan dari tanggal paling lama ke terbaru
+            allData.sort((a, b) => a._date - b._date);
+
+            if(allData.length === 0) {
+                Swal.fire("Nihil", "Tidak ada layanan tercatat pada rentang tanggal tersebut.", "warning");
+                return;
+            }
+
+            await printJurnalPDF(allData, startDateStr, endDateStr);
+            Swal.close();
+        }
+
+        async function printJurnalPDF(data, sDateStr, eDateStr) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [330.2, 215.9] }); // Kertas F4 Landscape
+            const s = metaData.sekolah || {};
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const centerX = pageWidth / 2;
+
+            // 1. KOP SURAT
+            doc.setFont("times", "normal");
+            const urlKiri = s.logo_kiri || ""; // Mengambil logo kiri dari pengaturan metadata
+            const urlKanan = s.logo_kanan || ""; // Mengambil logo kanan dari pengaturan metadata
+            
+            // Render Logo Kiri
+            if (urlKiri) { 
+                const imgData = await getBase64FromUrl(urlKiri); 
+                if (imgData) doc.addImage(imgData, 'PNG', 15, 10, 25, 25); 
+            }
+            // Render Logo Kanan
+            if (urlKanan) { 
+                const imgData2 = await getBase64FromUrl(urlKanan); 
+                if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 40, 10, 25, 25); 
+            }
+            
+            let currentY = 15;
+            doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+            
+            currentY += 5; doc.setLineWidth(0.8); doc.line(15, currentY, pageWidth - 15, currentY); 
+            doc.setLineWidth(0.3); doc.line(15, currentY + 1.2, pageWidth - 15, currentY + 1.2); 
+
+            // 2. JUDUL JURNAL
+            currentY += 12;
+            doc.setFont("times", "bold"); doc.setFontSize(13);
+            doc.text("JURNAL KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
+            
+            const d1 = new Date(sDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            const d2 = new Date(eDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            currentY += 6;
+            doc.setFont("times", "italic"); doc.setFontSize(11);
+            doc.text(`Periode: ${d1} s.d. ${d2}`, centerX, currentY, { align: 'center' });
+
+            // 3. TABEL ISI JURNAL
+            const tableBody = data.map((d, i) => [ i + 1, d.tanggalFormatted, d.layanan, d.sasaran, d.uraian, d.status ]);
+            
+            doc.autoTable({
+                startY: currentY + 6,
+                head: [['No', 'Hari, Tanggal', 'Jenis Layanan', 'Sasaran / Terlibat', 'Uraian Kegiatan / Topik Bahasan', 'Status / Keterangan']],
+                body: tableBody,
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], fontStyle: 'bold', halign: 'center', valign: 'middle' },
+                columnStyles: { 
+                    0: { cellWidth: 10, halign: 'center' }, 
+                    1: { cellWidth: 35 }, 
+                    2: { cellWidth: 40 }, 
+                    3: { cellWidth: 45 }, 
+                    4: { cellWidth: 'auto' }, 
+                    5: { cellWidth: 30, halign: 'center' } 
+                },
+                margin: { left: 15, right: 15, bottom: 20 }
+            });
+
+            // 4. TANDA TANGAN KEPSEK & GURU BK
+            let finalY = doc.lastAutoTable.finalY + 20;
+            if(finalY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); finalY = 30; }
+
+            doc.setFont("times", "normal"); doc.setFontSize(11);
+            const namaKepsek = (s.kepsek) ? s.kepsek : "..............................";
+            const nipKepsek = (s.nip_kepsek) ? s.nip_kepsek : "..................";
+
+            doc.text("Mengetahui,", 50, finalY, { align: 'center' });
+            doc.text("Kepala Sekolah", 50, finalY + 5, { align: 'center' });
+            doc.text(`Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}`, pageWidth - 50, finalY, { align: 'center' });
+            doc.text("Guru Bimbingan Konseling", pageWidth - 50, finalY + 5, { align: 'center' });
+            
+            finalY += 25;
+            doc.setFont("times", "bold"); 
+            doc.text(namaKepsek, 50, finalY, { align: 'center' });
+            doc.text(currentUser.nama, pageWidth - 50, finalY, { align: 'center' });
+            
+            doc.setFont("times", "normal"); 
+            doc.text(`NIP. ${nipKepsek}`, 50, finalY + 5, { align: 'center' });
+            doc.text(`NIP. ${currentUser.nip}`, pageWidth - 50, finalY + 5, { align: 'center' });
+
+            // OUTPUT DOKUMEN
+            try { 
+                const blob = doc.output('blob'); 
+                window.open(URL.createObjectURL(blob), '_blank'); 
+            } catch (e) { 
+                doc.save(`Jurnal_Bulanan_BK.pdf`); 
+            }
+        }
+		
+		// --- FUNGSI PENJINAK ERROR AI KHUSUS SIAP-BK ---
+        function tampilkanPesanErrorAI(errorMessage) {
+            let title = "🤖 AI Sedang Gangguan";
+            let text = "Maaf, sirkuit AI sedang terputus atau ada gangguan jaringan.";
+            let icon = "error";
+            let color = "#ef4444"; // Merah
+
+            // Cek apakah error karena Kuota Habis (Terlalu cepat klik)
+            if (errorMessage && errorMessage.includes("Quota exceeded")) {
+                title = "☕ AI Butuh Istirahat";
+                text = "Wah, Bapak/Ibu terlalu bersemangat memberi perintah! Jatah gratis dari Google untuk menit ini sudah habis. <br><br><b>Tarik napas dulu 1 menit</b>, lalu silakan klik tombolnya lagi ya.";
+                icon = "warning";
+                color = "#f59e0b"; // Kuning
+            } 
+            // Cek apakah error karena Server Google sedang sibuk
+            else if (errorMessage && errorMessage.includes("high demand")) {
+                title = "🚀 Server Global Penuh";
+                text = "Server AI Google sedang melayani jutaan antrean dari seluruh dunia. <br><br><b>Tunggu sekitar 10 detik</b>, lalu coba klik lagi ya!";
+                icon = "info";
+                color = "#3b82f6"; // Biru
+            } 
+            // Error lainnya
+            else if (errorMessage) {
+                text = errorMessage;
+            }
+
+            // Tampilkan Alert Keren
+            Swal.fire({
+                icon: icon,
+                iconColor: color,
+                title: `<span class="text-xl font-bold dark:text-white text-slate-800">${title}</span>`,
+                html: `<p class="text-sm text-slate-500 dark:text-slate-400 mt-2">${text}</p>`,
+                confirmButtonText: '<i class="fa-solid fa-thumbs-up mr-2"></i>Baik, Saya Paham',
+                buttonsStyling: false,
+                customClass: { 
+                    popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl',
+                    confirmButton: 'px-6 py-2.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl shadow-md mt-4 hover:-translate-y-1 transition-transform btn-press'
+                }
+            });
+        }
+		
     </script>
 </body>
 </html>
