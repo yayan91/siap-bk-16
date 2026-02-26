@@ -1998,27 +1998,27 @@
 
         function printItem(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
+            const isIndividu = currentSheet === '7_Layanan_Individu'; // Cek apakah ini menu Konseling Individu
             
+            // Susun tombol berdasarkan jenis layanan (RPL hanya muncul di Konseling Individu)
+            let htmlButtons = `
+                <div class="flex flex-col gap-3 mt-4">
+                    ${isIndividu ? `<button onclick="Swal.close(); generateRPL_Individu('${id}')" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-blue-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPLBK Individu (Dirancang AI)</button>` : ''}
+                    <button onclick="Swal.close(); printLPL_PDF(activeDataList.find(x => x.ID_Unik === '${id}'))" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-file-contract mr-2"></i> Cetak Jurnal (Jurnal Resmi)</button>
+                    <button onclick="Swal.close(); generatePDF([activeDataList.find(x => x.ID_Unik === '${id}')], 'Laporan_${currentTitle}', false)" class="px-5 py-3 bg-slate-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-table mr-2"></i> Cetak Ringkasan Tabel</button>
+                </div>
+            `;
+
             Swal.fire({
                 title: '<span class="text-xl font-bold dark:text-white text-slate-800">Pilih Format Cetak</span>',
-                html: '<p class="text-sm text-slate-500 mb-4">Pilih jenis dokumen yang ingin Anda unduh.</p>',
-                showDenyButton: true,
+                html: htmlButtons,
+                showConfirmButton: false, // Kita matikan tombol default, pakai tombol kustom di atas
                 showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-file-contract mr-2"></i> Jurnal (Resmi)',
-                denyButtonText: '<i class="fa-solid fa-table mr-2"></i> Ringkasan Tabel',
                 cancelButtonText: 'Batal',
                 buttonsStyling: false,
                 customClass: {
                     popup: 'rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl',
-                    confirmButton: 'px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all mx-1 btn-press',
-                    denyButton: 'px-5 py-2.5 bg-slate-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all mx-1 btn-press',
-                    cancelButton: 'px-5 py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 transition-all mx-1 btn-press'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    printLPL_PDF(item); // Panggil fungsi cetak naratif resmi
-                } else if (result.isDenied) {
-                    generatePDF([item], `Laporan_${currentTitle}`, false); // Fungsi cetak tabel bawaan
+                    cancelButton: 'px-5 py-2.5 mt-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition-all btn-press'
                 }
             });
         }
@@ -3490,6 +3490,220 @@
             }
         }
 		
+		// =========================================================================
+        // FITUR DEWA: GENERATOR RPL KONSELING INDIVIDU (AI POWERED)
+        // =========================================================================
+        async function generateRPL_Individu(id) {
+            const item = activeDataList.find(x => x.ID_Unik === id);
+            if(!item) return;
+
+            // 1. Tampilkan Loading AI
+            Swal.fire({ 
+                title: 'AI Sedang Meracik RPL...', 
+                html: 'Menyusun tujuan dan skenario konseling berdasarkan teori psikologi yang Anda pilih.', 
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
+
+            // Siapkan data untuk disuapkan ke AI
+            const masalah = item['Identifikasi_Masalah'] || 'Masalah pribadi/sosial/belajar/karir';
+            const pendekatan = item['Pendekatan'] || 'Eklektik / Sesuai Kebutuhan';
+            const teknik = item['Teknik_Konseling'] || 'Wawancara Konseling';
+
+            // 2. Prompt Khusus untuk AI agar outputnya poin per poin
+            const promptRPL = `
+                TUGAS: Anda adalah Ahli Bimbingan dan Konseling. Buatkan komponen Rencana Pelaksanaan Layanan (RPL) Konseling Individu berdasarkan data berikut:
+                - Kasus/Masalah: ${masalah}
+                - Pendekatan: ${pendekatan}
+                - Teknik: ${teknik}
+
+                INSTRUKSI PENTING: 
+                - Susunlah setiap bagian dalam bentuk DAFTAR POIN MENGGUNAKAN HURUF (a., b., c., dst). 
+                - DILARANG menggunakan simbol peluru (bullet) seperti *, -, atau •.
+                - Pastikan langkah Inti benar-benar menjabarkan sintaks/tahapan dari teknik ${teknik}.
+
+                FORMAT JAWABAN WAJIB SEPERTI INI (Gunakan tag kurung siku persis seperti di bawah):
+                [TUJUAN]
+                a. (tujuan pertama yang positif dan aplikatif)
+                b. (tujuan kedua...)
+                
+                [AWAL]
+                a. Menyambut konseli dengan hangat dan mengatur tempat duduk yang nyaman (attending).
+                b. Membangun rapport dan menanyakan kabar.
+                c. (langkah selanjutnya terkait asas kerahasiaan dan penyampaian tujuan...)
+                
+                [INTI]
+                a. (langkah pertama penerapan teknik ${teknik} untuk menggali masalah ${masalah}...)
+                b. (langkah kedua...)
+                c. (langkah ketiga...)
+                d. (langkah keempat...)
+                
+                [PENUTUP]
+                a. (langkah menyimpulkan sesi...)
+                b. (langkah mengevaluasi perasaan/kelegaan konseli...)
+                c. (langkah menetapkan tindak lanjut/komitmen...)
+            `;
+
+            try {
+                // Tembak ke Backend AI
+                const payload = { action: 'askAI', prompt: promptRPL, targetField: 'RPL Generator' };
+                const res = await apiCall(payload, 'POST', payload);
+
+                if(res && res.status === 'success') {
+                    // Ekstrak jawaban AI menggunakan regex
+                    const aiText = res.data;
+                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[AWAL\]/i) || [])[1]?.trim() || "Konseli mampu menyelesaikan permasalahannya dengan baik.";
+                    const tahapAwal = (aiText.match(/\[AWAL\]([\s\S]*?)\[INTI\]/i) || [])[1]?.trim() || "Membangun rapport dan menyepakati asas kerahasiaan.";
+                    const tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENUTUP\]/i) || [])[1]?.trim() || "Melakukan intervensi konseling sesuai pendekatan.";
+                    const tahapPenutup = (aiText.match(/\[PENUTUP\]([\s\S]*?)$/i) || [])[1]?.trim() || "Melakukan terminasi dan menyepakati tindak lanjut.";
+
+                    // 3. MULAI CETAK PDF
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] }); // F4
+                    const s = metaData.sekolah || {};
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const centerX = pageWidth / 2;
+
+                    // -- KOP SURAT --
+                    doc.setFont("times", "normal");
+                    const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
+                    const urlKanan = s.logo_kanan || ""; 
+                    if (urlKiri) { const imgData = await getBase64FromUrl(urlKiri); if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); }
+                    if (urlKanan) { const imgData2 = await getBase64FromUrl(urlKanan); if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); }
+
+                    let currentY = 15;
+                    doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
+                    
+                    currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+                    doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+
+                    // -- JUDUL RPL --
+                    currentY += 10; 
+                    doc.setFont("times", "bold"); doc.setFontSize(12);
+                    doc.text(`RENCANA PELAKSANAAN LAYANAN BIMBINGAN DAN KONSELING`, centerX, currentY, { align: 'center' });
+                    currentY += 5;
+                    doc.text(`KONSELING INDIVIDU`, centerX, currentY, { align: 'center' });
+
+                    // -- A. IDENTITAS --
+                    currentY += 10;
+                    doc.setFontSize(11);
+                    
+                    const writeRow = (label, value) => {
+                        doc.setFont("times", "normal");
+                        doc.text(label, 15, currentY); doc.text(":", 60, currentY);
+                        const splitText = doc.splitTextToSize(String(value), pageWidth - 70);
+                        doc.text(splitText, 65, currentY);
+                        currentY += (splitText.length * 5) + 1; // Spasi rapat
+                    };
+
+                    doc.setFont("times", "bold"); doc.text("A. IDENTITAS KEGIATAN", 15, currentY); currentY += 6;
+                    writeRow("Tahun Ajaran", item['Tahun_Ajar'] || s.tahun_ajar || '-');
+                    writeRow("Semester", item['Semester'] || s.semester || '-');
+                    writeRow("Tanggal Pelaksanaan", formatTanggalIndo(getItemDate(item)));
+                    writeRow("Guru BK", `${currentUser.nama} (NIP. ${currentUser.nip || '-'})`);
+                    writeRow("Komponen Layanan", item['Komponen_Layanan'] || '-');
+                    writeRow("Bidang Layanan", item['Bidang_Bimbingan'] || '-');
+                    writeRow("Nama Konseli", `${item['Nama_Siswa']} (Kelas ${item['Kelas']})`);
+                    writeRow("Topik / Masalah", masalah);
+                    writeRow("Pendekatan & Teknik", `${pendekatan} - ${teknik}`);
+                    writeRow("Waktu & Tempat", `1 x 45 Menit di Ruang BK`);
+
+                    // -- B. TUJUAN --
+                    currentY += 4;
+                    doc.setFont("times", "bold"); doc.text("B. TUJUAN LAYANAN", 15, currentY); currentY += 6;
+                    doc.setFont("times", "normal");
+                    const splitTujuan = doc.splitTextToSize(tujuan, pageWidth - 30);
+                    doc.text(splitTujuan, 15, currentY);
+                    currentY += (splitTujuan.length * 5) + 4;
+
+                    // -- C. LANGKAH KEGIATAN --
+                    const cekHalaman = (butuhSpasi) => { if(currentY + butuhSpasi > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; } };
+
+                    cekHalaman(30);
+                    doc.setFont("times", "bold"); doc.text("C. LANGKAH-LANGKAH KEGIATAN", 15, currentY); currentY += 6;
+                    
+                    // Tahap Awal
+                    doc.setFont("times", "bold"); doc.text("1. Tahap Awal (Pendahuluan)", 15, currentY); currentY += 5;
+                    doc.setFont("times", "normal");
+                    const sAwal = doc.splitTextToSize(tahapAwal, pageWidth - 35);
+                    doc.text(sAwal, 20, currentY); currentY += (sAwal.length * 5) + 2;
+
+                    // Tahap Inti
+                    cekHalaman(25);
+                    doc.setFont("times", "bold"); doc.text("2. Tahap Inti (Kerja)", 15, currentY); currentY += 5;
+                    doc.setFont("times", "normal");
+                    const sInti = doc.splitTextToSize(tahapInti, pageWidth - 35);
+                    doc.text(sInti, 20, currentY); currentY += (sInti.length * 5) + 2;
+
+                    // Tahap Penutup
+                    cekHalaman(20);
+                    doc.setFont("times", "bold"); doc.text("3. Tahap Penutup (Pengakhiran)", 15, currentY); currentY += 5;
+                    doc.setFont("times", "normal");
+                    const sPenutup = doc.splitTextToSize(tahapPenutup, pageWidth - 35);
+                    doc.text(sPenutup, 20, currentY); currentY += (sPenutup.length * 5) + 4;
+
+                    // -- D. EVALUASI DAN TINDAK LANJUT --
+                    cekHalaman(30);
+                    doc.setFont("times", "bold"); doc.text("D. EVALUASI DAN TINDAK LANJUT", 15, currentY); currentY += 6;
+                    doc.setFont("times", "normal");
+                    doc.text("1. Evaluasi Proses", 15, currentY); doc.text(":", 50, currentY);
+                    const sEvalProses = doc.splitTextToSize("Memperhatikan keaktifan, keterbukaan, dan kenyamanan konseli selama sesi berlangsung.", pageWidth - 55);
+                    doc.text(sEvalProses, 53, currentY); currentY += (sEvalProses.length * 5);
+                    
+                    doc.text("2. Evaluasi Hasil", 15, currentY); doc.text(":", 50, currentY);
+                    const sEvalHasil = doc.splitTextToSize(item['Hasil'] || '-', pageWidth - 55);
+                    doc.text(sEvalHasil, 53, currentY); currentY += (sEvalHasil.length * 5);
+
+                    doc.text("3. Tindak Lanjut", 15, currentY); doc.text(":", 50, currentY);
+                    const sTL = doc.splitTextToSize(item['Tindak_Lanjut'] || item['Alternatif_Pemecahan'] || '-', pageWidth - 55);
+                    doc.text(sTL, 53, currentY); currentY += (sTL.length * 5) + 10;
+
+                    // -- TANDA TANGAN (Hanya Guru BK) --
+                    cekHalaman(40);
+                    const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+                    
+                    // Posisikan di tengah-kanan
+                    doc.text(`Makassar, ${dateStr}`, centerX + 25, currentY, { align: 'center' });
+                    doc.text("Guru Bimbingan Konseling", centerX + 25, currentY + 5, { align: 'center' });
+
+                    // QR Code
+                    try {
+                        const qrText = `Dokumen Resmi RPL-BK\nNama: ${item['Nama_Siswa']}\nTanggal: ${formatTanggalIndo(getItemDate(item))}\nGuru BK: ${currentUser.nama}`;
+                        const qrImage = new QRious({ value: qrText, size: 100, level: 'H' }).toDataURL();
+                        doc.addImage(qrImage, 'PNG', centerX - 45, currentY - 2, 25, 25);
+                        doc.setFontSize(7); doc.text("Scan Validasi", centerX - 32.5, currentY + 26, { align: 'center' });
+                    } catch (e) {}
+
+                    currentY += 25;
+                    doc.setFont("times", "bold"); doc.setFontSize(11);
+                    doc.text(currentUser.nama, centerX + 25, currentY, { align: 'center' });
+                    let bWidth = doc.getTextWidth(currentUser.nama); 
+                    doc.setLineWidth(0.2); doc.line(centerX + 25 - bWidth/2, currentY + 1, centerX + 25 + bWidth/2, currentY + 1);
+                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip || '-'}`, centerX + 25, currentY + 5, { align: 'center' });
+
+                    // -- OUTPUT --
+                    Swal.close();
+                    try { 
+                        const blob = doc.output('blob'); 
+                        window.open(URL.createObjectURL(blob), '_blank'); 
+                    } catch (e) { 
+                        doc.save(`RPL_Konseling_${item['Nama_Siswa']}.pdf`); 
+                    }
+
+                } else {
+                    Swal.close();
+                    tampilkanPesanErrorAI(res?.message);
+                }
+            } catch (err) {
+                Swal.close();
+                tampilkanPesanErrorAI("Sirkuit AI terputus. Pastikan koneksi stabil.");
+            }
+        }
+		
 		// --- FUNGSI PENJINAK ERROR AI KHUSUS SIAP-BK ---
         function tampilkanPesanErrorAI(errorMessage) {
             let title = "🤖 AI Sedang Gangguan";
@@ -3534,4 +3748,3 @@
     </script>
 </body>
 </html>
-
