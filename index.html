@@ -2080,10 +2080,23 @@
             currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
             
-            currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
-            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+            // --- BAGIAN ALAMAT DINAMIS ---
+            currentY += 5; 
+            doc.setFont("times", "normal"); 
+            doc.setFontSize(10);
+            const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+            // Memecah alamat menjadi beberapa baris (wrapping) agar tidak meluber
+            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
+            doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+            // Hitung tinggi total alamat (jumlah baris x 4mm)
+            const tinggiAlamat = alamatSplit.length * 4;
+            currentY += tinggiAlamat; 
+
+            // --- GARIS PEMBATAS KOP ---
+            doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2);
 
             // 2. IDENTIFIKASI VARIABEL
             const tahunAjar = item['Tahun_Ajar'] || s.tahun_ajar || '-';
@@ -2264,11 +2277,24 @@
                 currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
                 
                 currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-                currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(12); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
                 
-                // Garis Kop
-                currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+                // --- PERBAIKAN ALAMAT DINAMIS ---
+                currentY += 5; 
+                doc.setFont("times", "normal"); 
+                doc.setFontSize(12); // Tetap 12 sesuai kode asli sahabat
+                const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+                // Membungkus teks alamat agar tidak meluber ke samping
+                const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 60); 
+                doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+                // Menghitung tinggi alamat (untuk font 12, jarak per baris sekitar 5mm)
+                const tinggiAlamat = alamatSplit.length * 5;
+                currentY += tinggiAlamat; 
+                
+                // Garis Kop (Sekarang posisinya aman di bawah baris terakhir alamat)
+                doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
                 doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+                
                 return currentY + 10;
             };
 
@@ -3134,10 +3160,23 @@
             currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
             
-            currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
-            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+            // --- BAGIAN ALAMAT DINAMIS (ANTI TABRAK) ---
+            currentY += 5; 
+            doc.setFont("times", "normal"); 
+            doc.setFontSize(10);
+            const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+            // Membagi alamat menjadi beberapa baris jika terlalu panjang
+            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
+            doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+            // Hitung tinggi alamat (sekitar 4mm per baris)
+            const tinggiAlamat = alamatSplit.length * 4;
+            currentY += tinggiAlamat; 
+
+            // --- GARIS PEMBATAS KOP ---
+            doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2);
             
             // 2. JUDUL DOKUMEN & BIODATA SISWA (Semua Font Times & Model Kotak Simpel)
             currentY += 15;
@@ -3489,10 +3528,10 @@
             const pageWidth = doc.internal.pageSize.getWidth();
             const centerX = pageWidth / 2;
 
-            // 1. KOP SURAT
+            // 1. KOP SURAT (EDISI ANTI-TINDIH ALAMAT)
             doc.setFont("times", "normal");
-            const urlKiri = s.logo_kiri || ""; // Mengambil logo kiri dari pengaturan metadata
-            const urlKanan = s.logo_kanan || ""; // Mengambil logo kanan dari pengaturan metadata
+            const urlKiri = s.logo_kiri || ""; 
+            const urlKanan = s.logo_kanan || ""; 
             
             // Render Logo Kiri
             if (urlKiri) { 
@@ -3510,10 +3549,23 @@
             currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
             
-            currentY += 5; doc.setLineWidth(0.8); doc.line(15, currentY, pageWidth - 15, currentY); 
-            doc.setLineWidth(0.3); doc.line(15, currentY + 1.2, pageWidth - 15, currentY + 1.2); 
+            // --- BAGIAN ALAMAT DINAMIS ---
+            currentY += 5; 
+            doc.setFont("times", "normal"); 
+            doc.setFontSize(10);
+            const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+            // Memaksa teks alamat membungkus jika terlalu lebar (wrap text)
+            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
+            doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+            // Menghitung tinggi alamat berdasarkan jumlah baris (4mm per baris)
+            const tinggiAlamat = alamatSplit.length * 4;
+            currentY += tinggiAlamat; 
+
+            // --- GARIS PEMBATAS KOP ---
+            doc.setLineWidth(0.8); doc.line(15, currentY, pageWidth - 15, currentY); 
+            doc.setLineWidth(0.3); doc.line(15, currentY + 1.2, pageWidth - 15, currentY + 1.2);
 
             // 2. JUDUL JURNAL
             currentY += 12;
@@ -3781,7 +3833,7 @@
             const pageWidth = doc.internal.pageSize.getWidth();
             const centerX = pageWidth / 2;
 
-            // --- 1. KOP SURAT ---
+            // --- 1. KOP SURAT (VERSI DINAMIS 2 BARIS ALAMAT) ---
             doc.setFont("times", "normal");
             const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L";
             const urlKanan = s.logo_kanan || ""; 
@@ -3793,9 +3845,22 @@
             currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-            currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
-            currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
-            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+            
+            // Logika Alamat 2 Baris
+            currentY += 5; 
+            doc.setFont("times", "normal"); 
+            doc.setFontSize(10);
+            const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); // Mengatur lebar teks agar membungkus
+            doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+            // Menentukan posisi garis berdasarkan jumlah baris alamat (tiap baris ~4mm)
+            const tinggiAlamat = alamatSplit.length * 4;
+            currentY += tinggiAlamat; 
+
+            // Gambar Garis Double
+            doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+            doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2);
 
             // --- 2. JUDUL LAPORAN ---
             currentY += 10;
@@ -4042,7 +4107,7 @@
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const centerX = pageWidth / 2;
 
-                    // -- KOP SURAT --
+                    // -- KOP SURAT (Dinamis: Anti-Tabrak Alamat 2 Baris) --
                     doc.setFont("times", "normal");
                     const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
                     const urlKanan = s.logo_kanan || ""; 
@@ -4054,9 +4119,21 @@
                     currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-                    currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10); doc.text(s.alamat || "Alamat Sekolah Lengkap", centerX, currentY, { align: 'center' });
                     
-                    currentY += 4; doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+                    // Cetak Alamat dengan pembungkus teks (wrapping)
+                    currentY += 5; 
+                    doc.setFont("times", "normal"); 
+                    doc.setFontSize(10);
+                    const alamatText = s.alamat || "Alamat Sekolah Lengkap";
+                    const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
+                    doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+
+                    // Hitung posisi Y baru berdasarkan jumlah baris alamat (4mm per baris)
+                    const tinggiAlamat = alamatSplit.length * 4;
+                    currentY += tinggiAlamat; 
+                    
+                    // Garis Pembatas KOP (Sekarang aman di bawah alamat)
+                    doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
                     doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
 
                     // -- JUDUL RPL --
