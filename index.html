@@ -334,7 +334,7 @@
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Siswa Terbantu</p>
                     <h3 class="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400 mt-1" id="stat-students">0</h3>
                     <p class="text-[10px] text-gray-400 mt-2">Siswa Unik</p>
-                    <i class="fa-solid fa-user-check absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
+                    <i class="fa-solid fa-user-graduate absolute bottom-4 right-4 text-4xl text-gray-200 dark:text-slate-700/50"></i>
                 </div>
                 <!-- Card 3 -->
                 <div class="glass p-4 rounded-2xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
@@ -837,8 +837,8 @@
             else if(hour >= 15 && hour < 18) greet = "Selamat Sore";
             else if(hour >= 18) greet = "Selamat Malam";
             
-            const firstName = currentUser.nama.split(',')[0].split(' ')[0];
-            document.getElementById('greeting-text').innerHTML = `<span class="text-blue-500 font-bold">${greet}, Pak/Bu ${firstName}!</span> Siap melayani siswa hari ini?`;
+            const namaLengkap = currentUser.nama.split(',')[0];
+			document.getElementById('greeting-text').innerHTML = `<span class="text-blue-500 font-bold">${greet}, ${namaLengkap}!</span> Siap melayani siswa hari ini?`;
         }
 
         // --- NEW: REFRESH APP ---
@@ -1422,8 +1422,8 @@
                     studentListEl.innerHTML += `
                         <div class="flex justify-between items-center p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 hover:-translate-y-1 transition group cursor-pointer shadow-sm" onclick="document.getElementById('global-student-search').value='${s.name}'; searchStudentHistory();">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md uppercase">
-                                    ${s.name.charAt(0)}
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white shadow-md">
+                                    <i class="fa-solid fa-user-graduate text-lg"></i>
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-bold dark:text-white text-slate-700 truncate group-hover:text-blue-500 transition">${s.name}</p>
@@ -2004,8 +2004,8 @@
             let htmlButtons = `
                 <div class="flex flex-col gap-3 mt-4">
                     ${isIndividu ? `<button onclick="Swal.close(); generateRPL_Individu('${id}')" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-blue-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPLBK Individu (Dirancang AI)</button>` : ''}
-                    <button onclick="Swal.close(); printLPL_PDF(activeDataList.find(x => x.ID_Unik === '${id}'))" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-file-contract mr-2"></i> Cetak Jurnal (Jurnal Resmi)</button>
-                    <button onclick="Swal.close(); generatePDF([activeDataList.find(x => x.ID_Unik === '${id}')], 'Laporan_${currentTitle}', false)" class="px-5 py-3 bg-slate-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-table mr-2"></i> Cetak Ringkasan Tabel</button>
+                    <button onclick="Swal.close(); printLPL_PDF(activeDataList.find(x => x.ID_Unik === '${id}'))" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-file-contract mr-2"></i> Cetak Model Jurnal</button>
+                    <button onclick="Swal.close(); generatePDF([activeDataList.find(x => x.ID_Unik === '${id}')], 'Laporan_${currentTitle}', false)" class="px-5 py-3 bg-slate-600 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press"><i class="fa-solid fa-table mr-2"></i> Cetak Laporan</button>
                 </div>
             `;
 
@@ -2258,21 +2258,26 @@
                         relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
                     }
 
-                    // Format Header
-                    const headerDisplay = relevantKeys.map(h => toProperCase(h.replace(/_/g, ' ')));
+                    // Format Header (Tambahkan 'No.' di awal)
+                    const headerDisplay = ['No.', ...relevantKeys.map(h => toProperCase(h.replace(/_/g, ' ')))];
                     
-                    // Format Isi Tabel
-                    const body = data.map(row => relevantKeys.map(h => {
-                         let val = row[h];
-                         if(h && h.includes('Tanggal')) val = formatTanggalIndo(val);
-                         return val;
-                    }));
+                    // Format Isi Tabel (Tambahkan nomor urut di awal setiap baris)
+                    const body = data.map((row, index) => {
+                         const rowData = relevantKeys.map(h => {
+                             let val = row[h] || '-';
+                             if(h && h.includes('Tanggal')) val = formatTanggalIndo(val);
+                             return val;
+                         });
+                         return [index + 1, ...rowData]; // index + 1 agar mulai dari angka 1
+                    });
 
+                    // Cetak Tabel
                     doc.autoTable({
                         startY: startY + 5, head: [headerDisplay], body: body, theme: 'grid',
-                        // Font Times 11 untuk Rekap
-                        styles: { font: "times", fontSize: 11, cellPadding: 1.5, lineWidth: 0.1, lineColor: 0 },
-                        headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', lineWidth: 0.1 },
+                        styles: { font: "times", fontSize: 11, cellPadding: 1.5, lineWidth: 0.1, lineColor: 0, textColor: 0 },
+                        headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', lineWidth: 0.1, halign: 'center', valign: 'middle' },
+                        // Tambahkan columnStyles khusus untuk mengecilkan kolom ke-0 (Kolom No.)
+                        columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
                         margin: { top: 10, left: 10, right: 10, bottom: 20 }
                     });
                 }
@@ -3093,8 +3098,10 @@
                 head: [['No', 'Tanggal', 'Jenis Layanan', 'Deskripsi / Masalah', 'Hasil / Tindak Lanjut']],
                 body: tableData,
                 theme: 'grid',
-                styles: { font: "times", fontSize: 10, cellPadding: 3, lineColor: 0, lineWidth: 0.1 },
-                headStyles: { fillColor: [168, 85, 247], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                // Perubahan 1: Tambahkan textColor: 0 agar hitam pekat
+                styles: { font: "times", fontSize: 10, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                // Perubahan 2: Samakan warna header dengan cetakan rekap/jurnal (Abu-abu, teks hitam tebal)
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center', valign: 'middle' },
                 columnStyles: { 0: {cellWidth: 10, halign: 'center'}, 1: {cellWidth: 25}, 2: {cellWidth: 35}, 3: {cellWidth: 'auto'}, 4: {cellWidth: 'auto'} },
                 margin: { left: 15, right: 15 }
             });
@@ -3430,7 +3437,7 @@
             // 2. JUDUL JURNAL
             currentY += 12;
             doc.setFont("times", "bold"); doc.setFontSize(13);
-            doc.text("JURNAL KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
+            doc.text("LAPORAN KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
             
             const d1 = new Date(sDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             const d2 = new Date(eDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
