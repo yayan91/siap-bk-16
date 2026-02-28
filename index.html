@@ -3185,11 +3185,33 @@
             
             currentY += 8; // Jarak dari judul ke kotak biodata
             
-            // note+++ Membuat kotak biodata yang simpel dan elegan
+            // note+++ 1. CARI DATA & TERJEMAHKAN GENDER
+            let kelasSiswa = '-';
+            let jkSiswa = '-';
+            if (metaData && metaData.siswa) {
+                const dataSiswa = metaData.siswa.find(x => x.nama.toLowerCase() === studentName.toLowerCase());
+                if (dataSiswa) {
+                    kelasSiswa = dataSiswa.kelas || '-';
+                    
+                    // Logika otomatis L/P menjadi Laki-laki/Perempuan
+                    let genderRaw = (dataSiswa.kelamin || dataSiswa.Jenis_Kelamin || '-').toUpperCase();
+                    if (genderRaw.startsWith('L')) {
+                        jkSiswa = 'Laki-laki';
+                    } else if (genderRaw.startsWith('P')) {
+                        jkSiswa = 'Perempuan';
+                    } else {
+                        jkSiswa = genderRaw; // Jika isinya sudah lengkap atau format lain
+                    }
+                }
+            }
+
+            // note+++ 2. Membuat kotak biodata tetap sama seperti sebelumnya
             doc.autoTable({
                 startY: currentY,
                 body: [
                     ['Nama Siswa', studentName],
+                    ['Kelas', kelasSiswa],
+                    ['Jenis Kelamin', jkSiswa], // Sekarang akan muncul teks lengkap
                     ['Tahun Ajaran', `${s.tahun_ajar || '-'} (Semester ${s.semester || '-'})`],
                     ['Total Kasus', `${historyData.length} Riwayat Layanan`],
                     ['Tanggal Cetak', new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})]
@@ -3197,7 +3219,7 @@
                 theme: 'grid',
                 styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
                 columnStyles: { 
-                    0: { cellWidth: 40, fontStyle: 'bold', fillColor: [245, 245, 245] }, // Latar abu-abu terang untuk label
+                    0: { cellWidth: 40, fontStyle: 'bold', fillColor: [245, 245, 245] }, 
                     1: { cellWidth: 'auto', fillColor: 255 } 
                 },
                 margin: { left: 15, right: 15 }
