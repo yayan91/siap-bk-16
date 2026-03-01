@@ -170,6 +170,11 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
+					
+					<button onclick="showDeveloperProfile()" class="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-blue-500 hover:scale-110 transition-all" title="Info Pengembang">
+						<i class="fa-solid fa-circle-check"></i>
+					</button>
+				
                     <!-- Refresh Button -->
                     <button onclick="refreshApp()" id="btn-refresh" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-blue-400 transition hover:scale-105 shadow-inner" title="Refresh Data">
                         <i class="fa-solid fa-arrows-rotate"></i>
@@ -238,10 +243,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="relative z-10 text-xs text-blue-200/60 font-light mt-10">
-                        Build 2026 &copy; Developed by Muhammad Hasratul
-                    </div>
                 </div>
 
                 <div class="w-full lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative bg-white/60 dark:bg-slate-900/60">
@@ -272,14 +273,22 @@
                             </div>
                             
                             <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1 transition-all duration-300 btn-press mt-4">
-                                MASUK APLIKASI <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
+                                MASUK SIAP-BK <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
                             </button>
+
+                            <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700/50 text-center">
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-[0.2em] uppercase">SIAP BK PROJECT</span>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-light tracking-wide">
+                                        @ <span id="login-year">2026</span> <span class="font-semibold text-slate-700 dark:text-slate-300">Mappaguru Online</span>
+                                    </p>
+                                    <p class="text-[9px] text-slate-400 dark:text-slate-500 italic mt-1">
+                                        Muhammad Hasratul - Developer & Founder
+                                    </p>
+                                </div>
+                            </div>
                         </form>
-                        
-                    </div>
-                </div>
-                
-            </div>
+
         </section>
 
         <!-- 2. DASHBOARD GRID (PREMIUM DASHBOARD) -->
@@ -743,16 +752,31 @@
         </section>
 
         <!-- PROFESSIONAL APP FOOTER -->
-        <footer id="app-footer" class="hide mt-auto pt-6 pb-2">
-            <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/5 border dark:border-white/5 border-slate-200 backdrop-blur-sm">
-                    <span class="text-[10px] dark:text-slate-400 text-slate-500 font-light">Sistem Informasi Administrasi & Pelayanan BK</span>
-                    <span class="w-1 h-1 rounded-full bg-slate-500"></span>
-                    <span class="text-[10px] dark:text-slate-400 text-slate-500 font-light">Build 2026</span>
-                </div>
-                <p class="text-[10px] text-slate-500 mt-2 font-light">Developed with <i class="fa-solid fa-heart text-red-500 text-[8px] mx-0.5"></i> by Muhammad Hasratul</p>
-            </div>
-        </footer>
+        <footer id="app-footer" class="hide mt-auto pt-10 pb-6">
+			<div class="text-center px-4">
+				<div class="inline-flex flex-col md:flex-row items-center gap-2 md:gap-3 px-6 py-2 rounded-2xl bg-white/5 border dark:border-white/10 border-slate-200 backdrop-blur-md shadow-sm">
+					<span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-widest uppercase">SIAP BK PROJECT</span>
+					<span class="hidden md:block w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+					<span class="text-[11px] dark:text-slate-300 text-slate-600 font-medium">Sistem Informasi Administrasi & Pelayanan BK</span>
+				</div>
+				
+				<div class="mt-4">
+					<p class="text-sm font-bold dark:text-white text-slate-800 tracking-wide">
+						Muhammad Hasratul - <span class="text-blue-500 font-medium text-xs">Developer & Founder</span>
+					</p>
+				</div>
+
+				<div class="mt-2 flex flex-col items-center">
+					<p class="text-[10px] text-slate-500 dark:text-slate-400 font-light tracking-wide">
+						@ <span id="current-year">2026</span> <span class="font-semibold text-slate-700 dark:text-slate-300">Mappaguru Online</span>. Hak Cipta Dilindungi Undang-undang.
+					</p>
+					<div class="flex items-center gap-1 mt-1 opacity-60">
+						<i class="fa-solid fa-shield-halved text-[8px]"></i>
+						<span class="text-[9px] uppercase tracking-tighter">Bimbingan dan Konseling</span>
+					</div>
+				</div>
+			</div>
+		</footer>
 
     </div>
 
@@ -1059,6 +1083,9 @@
             }
             showSection('page-dashboard');
             loadDashboardStats();
+			
+			// Letakkan ini di dalam fungsi initApp() atau window.onload
+			document.getElementById('current-year').innerText = new Date().getFullYear();
         }
 
         window.onload = () => {
@@ -1067,7 +1094,14 @@
             else { showSection('page-login'); }
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.getElementById('theme-icon').className = savedTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-        };
+			// LOGIKA TAHUN OTOMATIS (Login & Main Footer)
+			const currentYear = new Date().getFullYear();
+			const loginYear = document.getElementById('login-year');
+			const mainYear = document.getElementById('current-year');
+			
+			if(loginYear) loginYear.innerText = currentYear;
+			if(mainYear) mainYear.innerText = currentYear;
+		};
 
         // --- PREMIUM DASHBOARD LOGIC ---
         const fetchData = async (sheet) => {
@@ -4492,7 +4526,62 @@
             });
         }
 		
+		function showDeveloperProfile() {
+			Swal.fire({
+				title: '<span class="text-blue-600 dark:text-blue-400 text-lg">PENGEMBANG</span>',
+				html: `
+					<div class="mt-4 text-left">
+						<div class="flex flex-col items-center mb-6">
+							<div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg mb-3 border-4 border-white dark:border-slate-700">
+								<i class="fa-solid fa-user-tie text-white text-4xl"></i>
+							</div>
+							<h3 class="text-lg font-bold text-slate-800 dark:text-white">Muhammad Hasratul</h3>
+							<p class="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full font-bold uppercase tracking-wider">Developer & Founder</p>
+						</div>
+						
+						<div class="space-y-3 text-sm bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
+							<div class="flex items-start gap-3">
+								<i class="fa-solid fa-id-card text-blue-500 mt-1"></i>
+								<div>
+									<p class="text-[10px] text-slate-400 uppercase font-bold">Tempat, Tanggal Lahir</p>
+									<p class="dark:text-slate-200">Bone, 21 Maret 1991</p>
+								</div>
+							</div>
+							<div class="flex items-start gap-3">
+								<i class="fa-solid fa-location-dot text-blue-500 mt-1"></i>
+								<div>
+									<p class="text-[10px] text-slate-400 uppercase font-bold">Domisili</p>
+									<p class="dark:text-slate-200">Makassar, Sulawesi Selatan</p>
+								</div>
+							</div>
+							<div class="flex items-start gap-3">
+								<i class="fa-solid fa-building-columns text-blue-500 mt-1"></i>
+								<div>
+									<p class="text-[10px] text-slate-400 uppercase font-bold">Instansi</p>
+									<p class="dark:text-slate-200">UPT SPF SMP Negeri 16 Makassar</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="mt-6 grid grid-cols-2 gap-3">
+							<a href="https://wa.me/6285259259767" target="_blank" class="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-500/20">
+								<i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp
+							</a>
+							<a href="mailto:mappaguruonline01@gmail.com" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/20">
+								<i class="fa-solid fa-envelope text-lg"></i> Email
+							</a>
+						</div>
+					</div>
+				`,
+				showConfirmButton: false,
+				showCloseButton: true,
+				background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+				customClass: {
+					popup: 'rounded-[2.5rem] border-none shadow-2xl'
+				}
+			});
+		}
+		
     </script>
 </body>
 </html>
-
