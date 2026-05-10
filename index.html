@@ -547,6 +547,53 @@
                     </div>
                 </div>
             </div>
+			
+			<div class="mb-8">
+				<div class="flex items-center gap-4 mb-4">
+					<div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+					<h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Asesmen & Data Siswa</h3>
+					<div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+				</div>
+				
+				<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+					
+					<div onclick="openService('17_Catatan_Anekdot', 'Catatan Anekdot')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-yellow-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-yellow-500/20 flex items-center justify-center group-hover:bg-yellow-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-yellow-500/10">
+							<i class="fa-solid fa-clipboard-list text-3xl text-yellow-600 dark:text-yellow-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Catatan Anekdot</span>
+					</div>
+
+					<div onclick="openService('18_Kunjungan_Rumah', 'Kunjungan Rumah')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-rose-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-rose-500/20 flex items-center justify-center group-hover:bg-rose-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-rose-500/10">
+							<i class="fa-solid fa-house-chimney-user text-3xl text-rose-600 dark:text-rose-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Kunjungan Rumah</span>
+					</div>
+
+					<div onclick="openService('19_Catatan_Pelanggaran', 'Catatan Pelanggaran')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-red-500 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center group-hover:bg-red-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-red-500/10">
+							<i class="fa-solid fa-triangle-exclamation text-3xl text-red-600 dark:text-red-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Pelanggaran</span>
+					</div>
+
+					<div onclick="openService('20_Catatan_Prestasi', 'Catatan Prestasi')" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-emerald-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-emerald-500/10">
+							<i class="fa-solid fa-medal text-3xl text-emerald-600 dark:text-emerald-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Prestasi</span>
+					</div>
+
+					<div onclick="openModalBukuSiswa()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-indigo-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-indigo-500/10">
+							<i class="fa-solid fa-book-open-reader text-3xl text-indigo-600 dark:text-indigo-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Buku Siswa</span>
+					</div>
+
+				</div>
+			</div>
 
             <!-- KELOMPOK 3 -->
             <div class="mb-8">
@@ -779,10 +826,42 @@
 		</footer>
 
     </div>
+	
+	<div id="modalBukuSiswa" class="fixed inset-0 z-[100] hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalBukuSiswaContent">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/30">
+                <h3 class="text-xl font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Cetak Buku Pribadi
+                </h3>
+                <button onclick="closeModalBukuSiswa()" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Siswa yang akan dicetak:</label>
+					<input type="text" id="inputCetakBukuSiswa" list="siswaListBuku" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Ketik nama siswa...">
+					
+					<datalist id="siswaListBuku"></datalist> 
+				</div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <p class="text-sm text-blue-800 dark:text-blue-300">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Sistem akan merekap otomatis identitas dan seluruh riwayat layanan ke dalam format siap cetak (A4) yang dilengkapi kotak untuk menempel foto 3x4.
+                    </p>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50 flex justify-end gap-3">
+                <button onclick="closeModalBukuSiswa()" class="px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-medium">Batal</button>
+                <button onclick="generateDanCetakBukuSiswa()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 transition-all font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Buat Dokumen
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxJLO0Koh8hXqbul3ILVkO-I7caseyH2KXZzcfYKqTGXn938t_YPBdQPiWV7D9Td-s/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbz2gdd4Z1AWoyMnA-vlsgB3JgNs37vmXDjRbBCkqlzTsr-DFA5A6tiXGvSbqRc8RisY/exec"; 
 
         // State
         let currentUser = null;
@@ -1139,7 +1218,7 @@
         async function loadDashboardStats() {
             const sheets = [
                 '7_Layanan_Individu', '8_Layanan_Kelompok', '9_Bimbingan_Kelompok', '10_Konsultasi', '11_Layanan_Klasikal',
-                '12_Konferensi_Kasus', '13_Alih_Tangan_Kasus', '14_Mediasi', '15_Advokasi', '16_Dukungan_Sistem'
+                '12_Konferensi_Kasus', '13_Alih_Tangan_Kasus', '14_Mediasi', '15_Advokasi', '16_Dukungan_Sistem', '17_Catatan_Anekdot', '18_Kunjungan_Rumah', '19_Catatan_Pelanggaran', '20_Catatan_Prestasi'
             ];
             
             // Check cache or fetch
@@ -1253,7 +1332,7 @@
                 '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
                 '11_Layanan_Klasikal': 'Klasikal', '12_Konferensi_Kasus': 'Konferensi',
                 '13_Alih_Tangan_Kasus': 'Alih Tangan', '14_Mediasi': 'Mediasi',
-                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan'
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan', '17_Catatan_Anekdot': 'C. Anekdot', '18_Kunjungan_Rumah': 'Home Visit', '19_Catatan_Pelanggaran': 'Pelanggaran', '20_Catatan_Prestasi': 'Prestasi'
             };
             
             for(let [key, val] of Object.entries(countsPerSheet)) {
@@ -1354,7 +1433,7 @@
             const chartColors = [
                 'rgba(59, 130, 246, 0.8)', 'rgba(34, 197, 94, 0.8)', 'rgba(168, 85, 247, 0.8)', 
                 'rgba(249, 115, 22, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(6, 182, 212, 0.8)',
-                'rgba(20, 184, 166, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(100, 116, 139, 0.8)'
+                'rgba(20, 184, 166, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(99, 102, 241, 0.8)', 'rgba(100, 116, 139, 0.8)', 'rgba(234, 179, 8, 0.8)', 'rgba(244, 63, 94, 0.8)'
             ];
 
             window.myStatsChart = new Chart(ctx, {
@@ -1739,7 +1818,11 @@
                 '13_Alih_Tangan_Kasus': { label: 'Alih Tangan', icon: 'fa-share-from-square', color: 'teal' },
                 '14_Mediasi': { label: 'Mediasi', icon: 'fa-handshake-angle', color: 'pink' },
                 '15_Advokasi': { label: 'Advokasi', icon: 'fa-gavel', color: 'indigo' },
-                '16_Dukungan_Sistem': { label: 'Dukungan', icon: 'fa-network-wired', color: 'slate' }
+                '16_Dukungan_Sistem': { label: 'Dukungan', icon: 'fa-network-wired', color: 'slate' },
+				'17_Catatan_Anekdot': { label: 'Catatan Anekdot', icon: 'fa-clipboard-list', color: 'yellow' },
+				'18_Kunjungan_Rumah': { label: 'Kunjungan Rumah', icon: 'fa-house-chimney-user', color: 'rose' },
+				'19_Catatan_Pelanggaran': { label: 'Pelanggaran', icon: 'fa-triangle-exclamation', color: 'red' },
+				'20_Catatan_Prestasi': { label: 'Prestasi', icon: 'fa-medal', color: 'emerald' }
             };
 
             for(const [sheet, data] of Object.entries(cachedAllServices)) {
@@ -1761,25 +1844,26 @@
             document.getElementById('profile-class').innerText = `Total: ${history.length} Riwayat Layanan`;
 
             history.forEach(h => {
-                const dateFmt = new Date(h._date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                
-                // 1. Tentukan Judul
-                const detail = h['Topik_Layanan'] || h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || h['Nama_Kegiatan'] || 'Detail Layanan';
-                
-                // 2. Tentukan Isi Teks (Pintar: Cegah Duplikasi dengan Judul)
-                let textIsi = h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || '-';
-                
-                if (detail === textIsi) {
-                    // Kalau sama persis dengan judul, ganti isinya dengan info pendukung
-                    if (h['Pihak_Terlibat']) textIsi = `Pihak Terlibat: ${h['Pihak_Terlibat']}`;
-                    else if (h['Pihak_Penerima']) textIsi = `Dirujuk ke: ${h['Pihak_Penerima']}`;
-                    else if (h['Bidang_Bimbingan'] || h['Bidang_Layanan']) textIsi = `Bidang Layanan: ${h['Bidang_Bimbingan'] || h['Bidang_Layanan']}`;
-                    else textIsi = "Tindak Lanjut: " + (h['Tindak_Lanjut'] || h['Alternatif_Pemecahan'] || '-');
-                }
+				const dateFmt = new Date(h._date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+				
+				// UPDATED: Daftar kolom judul untuk layanan baru
+				const detail = h['Topik_Layanan'] || h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || 
+							   h['Pokok_Masalah'] || h['Nama_Kegiatan'] || h['Deskripsi_Peristiwa'] || 
+							   h['Tujuan_Kunjungan'] || h['Bentuk_Pelanggaran'] || h['Nama_Prestasi'] || 'Detail Layanan';
+				
+				// UPDATED: Daftar kolom isi/uraian untuk layanan baru
+				let textIsi = h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || 
+							  h['Deskripsi_Peristiwa'] || h['Tujuan_Kunjungan'] || h['Bentuk_Pelanggaran'] || 
+							  h['Nama_Prestasi'] || '-';
+				
+				if (detail === textIsi) {
+					// Jika judul dan isi sama, tampilkan keterangan tambahan
+					textIsi = h['Tafsiran_Analisis'] || h['Hasil_Wawancara'] || h['Tindak_Lanjut'] || h['Pihak_Lain'] || h['Pihak_Keluarga'] || '-';
+				}
 
-                // 3. Ambil Hasil & Status
-                const hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Hasil_Advokasi'] || '-';
-                const status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || h['Status_Advokasi'] || h['Status_Rujukan'] || 'Selesai';
+				// Ambil Hasil & Status (Sesuaikan dengan kolom baru)
+				const hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Hasil_Advokasi'] || h['Kesepakatan'] || h['Tindak_Lanjut'] || '-';
+				const status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || h['Status_Advokasi'] || h['Status_Rujukan'] || h['Status_Kasus'] || h['Status_Kunjungan'] || h['Status_Pembinaan'] || 'Selesai';
                 
                 container.innerHTML += `
                     <div class="relative pl-8 pb-8 group">
@@ -1992,6 +2076,26 @@
                 } else if (currentSheet === '16_Dukungan_Sistem') {
                     main = item['Nama_Kegiatan'] || 'Kegiatan';
                     sub = item['Peran_GuruBK'] ? `Peran: ${item['Peran_GuruBK']}` : '-';
+					
+				} else if (currentSheet === '17_Catatan_Anekdot') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    sub = `[Anekdot] ${item['Waktu_Kejadian']} di ${item['Tempat_Kejadian']}: ${item['Deskripsi_Peristiwa'] || '-'}${getStatus()}`;
+					
+				} else if (currentSheet === '18_Kunjungan_Rumah') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    sub = `Tujuan: ${item['Tujuan_Kunjungan'] || '-'} | Bertemu: ${item['Pihak_Keluarga'] || '-'}${getStatus()}`;
+					
+				} else if (currentSheet === '19_Catatan_Pelanggaran') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    sub = `Pelanggaran: ${item['Bentuk_Pelanggaran'] || '-'}${getStatus()}`;
+					
+                } else if (currentSheet === '20_Catatan_Prestasi') {
+                    namaSiswaCheck = item['Nama_Siswa'];
+                    main = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
+                    sub = `Prestasi: ${item['Nama_Prestasi'] || '-'} (Tk. ${item['Tingkat'] || '-'})`;
 
                 } else {
                     main = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Kegiatan'] || 'Data Layanan';
@@ -2338,7 +2442,7 @@
             if (isRecap) {
                 // === MODE REKAP ===
                 doc.setFont("times", "bold"); doc.setFontSize(12);
-                doc.text(`REKAPITULASI ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
+                doc.text(`REKAPITULASI JURNAL ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
                 if(subTitle) { startY += 5; doc.setFontSize(11); doc.setFont("times", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
                 
                 if(data.length > 0) {
@@ -2369,6 +2473,14 @@
                     } else if (currentSheet === '16_Dukungan_Sistem') {
                         // Menambahkan 'Durasi' di akhir kolom khusus untuk Dukungan Sistem
                         relevantKeys = ['Tanggal_Kegiatan', 'Nama_Kegiatan', 'Penyelenggara', 'Peran_GuruBK', 'Deskripsi_Kegiatan', 'Hasil_Kegiatan', 'Durasi'];
+					} else if (currentSheet === '17_Catatan_Anekdot') {
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Waktu_Kejadian', 'Tempat_Kejadian', 'Deskripsi_Peristiwa', 'Tafsiran_Analisis', 'Status_Kasus'];
+					} else if (currentSheet === '18_Kunjungan_Rumah') {
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Pihak_Keluarga', 'Tujuan_Kunjungan', 'Hasil_Wawancara', 'Kesepakatan', 'Status_Kunjungan'];
+					} else if (currentSheet === '19_Catatan_Pelanggaran') {
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Bentuk_Pelanggaran', 'Tindak_Lanjut', 'Status_Pembinaan'];
+                    } else if (currentSheet === '20_Catatan_Prestasi') {
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Nama_Prestasi', 'Tingkat', 'Penyelenggara', 'Link_Sertifikat'];
                     } else {
                         const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
                         relevantKeys = allKeys.filter(k => !excludedKeys.includes(k)).slice(0, 8);
@@ -2567,6 +2679,70 @@
 			
             // 10. Dukungan Sistem
             if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 3 Jam / 1 Hari' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'textarea' }];
+			
+			// 11. Catatan Anekdot
+            if(sheetName === '17_Catatan_Anekdot') return [
+                { key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
+                { key: 'Waktu_Kejadian', label: 'Waktu Kejadian', type: 'text', placeholder: 'Contoh: Jam Istirahat, Pergantian Jam' },
+                { key: 'Tempat_Kejadian', label: 'Tempat Kejadian', type: 'text', placeholder: 'Contoh: Kantin, Ruang Kelas' },
+                { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
+                { key: 'Kelas', label: 'Kelas', type: 'readonly' },
+                { key: 'NISN', label: 'NISN', type: 'readonly' },
+                { key: 'Pihak_Lain', label: 'Pihak Lain yang Terlibat', type: 'text', placeholder: 'Kosongkan jika tidak ada' },
+                { key: 'Deskripsi_Peristiwa', label: 'Deskripsi Peristiwa (Fakta Objektif)', type: 'textarea', placeholder: 'Ceritakan kejadian faktual apa yang Bapak/Ibu lihat atau dengar...' },
+                { key: 'Tafsiran_Analisis', label: 'Tafsiran / Analisis BK (Subjektif)', type: 'textarea', placeholder: 'Apa penilaian atau interpretasi Guru BK terhadap kejadian ini?' },
+                { key: 'Tindak_Lanjut', label: 'Tindak Lanjut / Rekomendasi', type: 'textarea' },
+                { key: 'Status_Kasus', label: 'Status', type: 'select', options: ['Selesai', 'Perlu Pemantauan Khusus', 'Rujuk ke Konseling'] }
+            ];
+			
+			// 12. Kunjungan Rumah
+            if(sheetName === '18_Kunjungan_Rumah') return [
+                { key: 'Tanggal_Layanan', label: 'Tanggal Kunjungan', type: 'date' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
+                { key: 'Waktu_Kunjungan', label: 'Waktu Kunjungan', type: 'text', placeholder: 'Contoh: 14.00 - 15.30 WITA' },
+                { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
+                { key: 'Kelas', label: 'Kelas', type: 'readonly' },
+                { key: 'NISN', label: 'NISN', type: 'readonly' },
+                { key: 'Alamat_Kunjungan', label: 'Alamat Faktual yang Didatangi', type: 'text' },
+                { key: 'Pihak_Keluarga', label: 'Pihak Keluarga yang Ditemui', type: 'textarea', placeholder: 'Sebutkan nama dan hubungannya. Contoh: 1. Bpk Budi (Ayah), 2. Nenek Imah' },
+                { key: 'Tujuan_Kunjungan', label: 'Tujuan / Alasan Kunjungan', type: 'textarea' },
+                { key: 'Kondisi_Lingkungan', label: 'Kondisi Lingkungan & Keluarga (Observasi)', type: 'textarea' },
+                { key: 'Hasil_Wawancara', label: 'Hasil Wawancara / Klarifikasi', type: 'textarea' },
+                { key: 'Kesepakatan', label: 'Kesepakatan / Komitmen Bersama', type: 'textarea' },
+                { key: 'Tindak_Lanjut', label: 'Tindak Lanjut Guru BK', type: 'textarea' },
+                { key: 'Link_Dokumentasi', label: 'Link Dokumentasi / Foto Kunjungan', type: 'text', placeholder: 'Link Google Drive foto kunjungan (opsional)' },
+                { key: 'Status_Kunjungan', label: 'Status', type: 'select', options: ['Selesai', 'Pemantauan Lanjutan', 'Panggil Orangtua ke Sekolah'] }
+            ];
+			
+			// 13. Pelanggaran
+            if(sheetName === '19_Catatan_Pelanggaran') return [
+                { key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
+                { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
+                { key: 'Kelas', label: 'Kelas', type: 'readonly' },
+                { key: 'NISN', label: 'NISN', type: 'readonly' },
+                { key: 'Bentuk_Pelanggaran', label: 'Bentuk Pelanggaran', type: 'textarea', placeholder: 'Contoh: Terlambat masuk, berkelahi, atribut tidak lengkap...' },
+                { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea', placeholder: 'Contoh: Teguran lisan, pembinaan...' },
+                { key: 'Status_Pembinaan', label: 'Status', type: 'select', options: ['Selesai', 'Perlu Konseling Lanjutan', 'Panggil Orangtua'] }
+            ];
+
+            // 14. Prestasi
+            if(sheetName === '20_Catatan_Prestasi') return [
+                { key: 'Tanggal_Layanan', label: 'Tanggal Pencapaian', type: 'date' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
+                { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
+                { key: 'Kelas', label: 'Kelas', type: 'readonly' },
+                { key: 'NISN', label: 'NISN', type: 'readonly' },
+                { key: 'Nama_Prestasi', label: 'Nama Prestasi / Lomba', type: 'text', placeholder: 'Contoh: Juara 1 Pidato, Peserta OSN...' },
+                { key: 'Tingkat', label: 'Tingkat', type: 'select', options: ['Sekolah', 'Kabupaten/Kota', 'Provinsi', 'Nasional', 'Internasional'] },
+                { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text', placeholder: 'Contoh: Dinas Pendidikan Kota Makassar' },
+                { key: 'Link_Sertifikat', label: 'Link Sertifikat / Dokumentasi', type: 'text', placeholder: 'Link Google Drive (Opsional)' }
+            ];
 			
             return [];
         }
@@ -3531,7 +3707,7 @@
                 '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
                 '11_Layanan_Klasikal': 'Bim. Klasikal', '12_Konferensi_Kasus': 'Konferensi Kasus',
                 '13_Alih_Tangan_Kasus': 'Alih Tangan Kasus', '14_Mediasi': 'Mediasi',
-                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem'
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem','17_Catatan_Anekdot': 'Catatan Anekdot','18_Kunjungan_Rumah': 'Kunjungan Rumah'
             };
 
             // Menyedot data dari semua sheet di memori cache
@@ -3548,7 +3724,7 @@
                         let displaySasaran = (kelas && sasaran !== '-') ? `${sasaran}\n(Kls: ${kelas})` : sasaran;
                         
                         // Mencari kecocokan variabel inti laporan
-                        let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kegiatan'] || '-';
+                        let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kegiatan'] || item['Deskripsi_Peristiwa'] || item['Tujuan_Kunjungan'] || item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] ||'-';
                         
                         // Mencari status / hasil akhir
                         let status = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'] || item['Hasil_Kegiatan'] || 'Terlaksana';
@@ -3775,7 +3951,7 @@
                 '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
                 '11_Layanan_Klasikal': 'Bim. Klasikal', '12_Konferensi_Kasus': 'Konferensi Kasus',
                 '13_Alih_Tangan_Kasus': 'Alih Tangan Kasus', '14_Mediasi': 'Mediasi',
-                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem'
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem','17_Catatan_Anekdot': 'Catatan Anekdot'
             };
 
             // Pre-fill Layanan dengan 0
@@ -4413,28 +4589,38 @@
                 '13_Alih_Tangan_Kasus': { title: 'Alih Tangan Kasus', dot: 'bg-red-500', badge: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300', icon: 'fa-truck-medical' },
                 '14_Mediasi': { title: 'Mediasi', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300', icon: 'fa-scale-balanced' },
                 '15_Advokasi': { title: 'Advokasi', dot: 'bg-cyan-500', badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300', icon: 'fa-shield-halved' },
-                '16_Dukungan_Sistem': { title: 'Dukungan Sistem', dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700 dark:bg-slate-900/50 dark:text-slate-300', icon: 'fa-server' }
+                '16_Dukungan_Sistem': { title: 'Dukungan Sistem', dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700 dark:bg-slate-900/50 dark:text-slate-300', icon: 'fa-server' },
+				'18_Kunjungan_Rumah': { title: 'Kunjungan Rumah', dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300', icon: 'fa-house-chimney-user' },
+				'19_Catatan_Pelanggaran': { title: 'Pelanggaran', dot: 'bg-red-600', badge: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300', icon: 'fa-triangle-exclamation' },
+				'20_Catatan_Prestasi': { title: 'Prestasi', dot: 'bg-emerald-600', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300', icon: 'fa-medal' }
+
             };
 
             // Menyelam ke 10 layanan mencari nama siswa
             for (const [sheet, data] of Object.entries(cachedAllServices)) {
-                data.forEach(item => {
-                    const checkMatch = (val) => val && String(val).toLowerCase().includes(searchName);
+				data.forEach(item => {
+					const checkMatch = (val) => val && String(val).toLowerCase().includes(searchName);
 
-                    if (checkMatch(item.Nama_Siswa) || checkMatch(item.Nama_Siswa_1) || checkMatch(item.Nama_Siswa_2) || 
-                        checkMatch(item.Anggota_Kelompok_Siswa) || checkMatch(item.Sasaran_Layanan) || checkMatch(item.Uraian_Topik)) {
-                        
-                        const dateVal = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
-                        history.push({
-                            sheet: sheet,
-                            date: dateVal ? new Date(dateVal) : new Date(0),
-                            dateStr: formatTanggalIndo(dateVal) || '-',
-                            topic: item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Pokok_Masalah'] || item['Deskripsi_Kasus'] || item['Kronologi_Masalah'] || item['Uraian_Topik'] || '-',
-                            result: item['Hasil'] || item['Hasil_Kesepakatan'] || item['Hasil_Keputusan'] || item['Hasil_Advokasi'] || item['Hasil_Rujukan'] || item['Tindak_Lanjut'] || '-'
-                        });
-                    }
-                });
-            }
+					if (checkMatch(item.Nama_Siswa) || checkMatch(item.Nama_Siswa_1) || checkMatch(item.Nama_Siswa_2) || 
+						checkMatch(item.Anggota_Kelompok_Siswa)) {
+						
+						const dateVal = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+						history.push({
+							sheet: sheet,
+							date: dateVal ? new Date(dateVal) : new Date(0),
+							dateStr: formatTanggalIndo(dateVal) || '-',
+							// Deteksi Topik dari layanan baru
+							topic: item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Pokok_Masalah'] || 
+								   item['Deskripsi_Kasus'] || item['Deskripsi_Peristiwa'] || item['Tujuan_Kunjungan'] || 
+								   item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || '-',
+							// Deteksi Hasil dari layanan baru
+							result: item['Hasil'] || item['Hasil_Kesepakatan'] || item['Hasil_Keputusan'] || 
+									item['Hasil_Advokasi'] || item['Kesepakatan'] || item['Tindak_Lanjut'] || 
+									item['Penyelenggara'] || '-'
+						});
+					}
+				});
+			}
 
             // Urutkan dari Terkini ke Terlama (Descending)
             history.sort((a, b) => b.date - a.date);
@@ -4582,7 +4768,219 @@
 			});
 		}
 		
+		// ==========================================
+        // FITUR CETAK BUKU SISWA (PROFIL PROFESIONAL)
+        // ==========================================
+
+        // 1. Fungsi Membuka Modal (Sekarang otomatis mengisi daftar nama siswa)
+		function openModalBukuSiswa() {
+			// Isi datalist siswa agar muncul saat diketik
+			const datalist = document.getElementById('siswaListBuku');
+			if (metaData && metaData.siswa) {
+				datalist.innerHTML = metaData.siswa.map(s => `<option value="${s.nama}">`).join('');
+			}
+
+			document.getElementById('modalBukuSiswa').classList.remove('hidden');
+			setTimeout(() => {
+				document.getElementById('modalBukuSiswaContent').classList.remove('scale-95', 'opacity-0');
+			}, 10);
+		}
+		
+		// Fungsi Menutup Modal (Ini yang terhapus sebelumnya)
+        function closeModalBukuSiswa() {
+            document.getElementById('modalBukuSiswaContent').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('modalBukuSiswa').classList.add('hidden');
+                document.getElementById('inputCetakBukuSiswa').value = ''; // Reset input
+            }, 300);
+        }
+
+		// ==========================================
+        // FITUR CETAK BUKU SISWA (PROFIL PROFESIONAL UPDATED)
+        // ==========================================
+		async function generateDanCetakBukuSiswa() {
+			const namaSiswa = document.getElementById('inputCetakBukuSiswa').value;
+			if (!namaSiswa) {
+				Swal.fire('Oops!', 'Silakan pilih nama siswa terlebih dahulu.', 'warning');
+				return;
+			}
+
+			Swal.fire({
+				title: 'Menyusun Dokumen...',
+				text: 'Merekap data dan menghitung statistik layanan.',
+				allowOutsideClick: false,
+				didOpen: () => { Swal.showLoading(); }
+			});
+
+			const s = metaData.sekolah || {};
+			const logoKiriBase64 = await getBase64FromUrl(s.logo_kiri || s.logo_url);
+			const logoKananBase64 = await getBase64FromUrl(s.logo_kanan);
+
+			// 1. CARI DATA SISWA UNTUK GENDER
+			let kelasSiswa = '-';
+			let nisnSiswa = '-';
+			let jkSiswa = '-';
+			if (metaData && metaData.siswa) {
+				const ds = metaData.siswa.find(x => x.nama === namaSiswa);
+				if (ds) {
+					kelasSiswa = ds.kelas || '-';
+					nisnSiswa = ds.nisn || '-';
+					let genderRaw = (ds.kelamin || ds.Jenis_Kelamin || '-').toUpperCase();
+					jkSiswa = genderRaw.startsWith('L') ? 'Laki-laki' : (genderRaw.startsWith('P') ? 'Perempuan' : genderRaw);
+				}
+			}
+
+			// 2. PROSES DATA LAYANAN & HITUNG REKAP
+			let riwayatHtml = '';
+			let counter = 1;
+			const rekapCounts = {}; 
+
+			const sheetsToSearch = [
+				'7_Layanan_Individu', '8_Layanan_Kelompok', '9_Bimbingan_Kelompok', '10_Konsultasi', '11_Layanan_Klasikal',
+				'12_Konferensi_Kasus', '13_Alih_Tangan_Kasus', '14_Mediasi', '15_Advokasi', '16_Dukungan_Sistem', 
+                '17_Catatan_Anekdot', '18_Kunjungan_Rumah', '19_Catatan_Pelanggaran', '20_Catatan_Prestasi'
+			];
+			
+			const labelsMap = {
+				'7_Layanan_Individu': 'Individu', '8_Layanan_Kelompok': 'Kelompok', 
+				'9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
+				'11_Layanan_Klasikal': 'Klasikal', '12_Konferensi_Kasus': 'Konferensi',
+				'13_Alih_Tangan_Kasus': 'Alih Tangan', '14_Mediasi': 'Mediasi',
+				'15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan', 
+				'17_Catatan_Anekdot': 'C. Anekdot', '18_Kunjungan_Rumah': 'Home Visit',
+                '19_Catatan_Pelanggaran': 'Pelanggaran', '20_Catatan_Prestasi': 'Prestasi'
+			};
+
+			Object.values(labelsMap).forEach(lbl => rekapCounts[lbl] = 0);
+
+			sheetsToSearch.forEach(sheet => {
+				if (cachedAllServices && cachedAllServices[sheet]) {
+					cachedAllServices[sheet].forEach(item => {
+						const match = item['Nama_Siswa'] === namaSiswa || 
+									  item['Nama_Siswa_1'] === namaSiswa || 
+									  (item['Anggota_Kelompok_Siswa'] && item['Anggota_Kelompok_Siswa'].includes(namaSiswa));
+
+						if (match) {
+							if (kelasSiswa === '-' && item['Kelas']) kelasSiswa = item['Kelas'];
+							if (nisnSiswa === '-' && item['NISN']) nisnSiswa = item['NISN'];
+
+							const namaLayanan = labelsMap[sheet] || sheet;
+							rekapCounts[namaLayanan]++; 
+
+							let tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'] || '-';
+							
+                            // UPDATED: Menambahkan Bentuk Pelanggaran & Nama Prestasi agar terbaca
+							let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || 
+                                         item['Tujuan_Kunjungan'] || item['Deskripsi_Peristiwa'] || 
+                                         item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || '-';
+
+							riwayatHtml += `
+								<tr>
+									<td style="border: 1px solid #333; padding: 6px; text-align: center;">${counter++}</td>
+									<td style="border: 1px solid #333; padding: 6px; text-align: center;">${tgl}</td>
+									<td style="border: 1px solid #333; padding: 6px; font-weight: bold;">${namaLayanan}</td>
+									<td style="border: 1px solid #333; padding: 6px;">${uraian}</td>
+								</tr>
+							`;
+						}
+					});
+				}
+			});
+
+			// Susun Tabel Rekapitulasi Profesional
+			let rekapHtml = '';
+			Object.entries(rekapCounts).forEach(([layanan, count]) => {
+				if (count > 0) {
+					rekapHtml += `<tr><td style="border: 1px solid #000; padding: 5px;">${layanan}</td><td style="border: 1px solid #000; padding: 5px; text-align: center;">${count} Kali</td></tr>`;
+				}
+			});
+
+			if (riwayatHtml === '') riwayatHtml = `<tr><td colspan="4" style="border: 1px solid #333; padding: 20px; text-align: center; font-style: italic;">Belum ada riwayat layanan.</td></tr>`;
+
+			// --- HTML UNTUK HALAMAN PRINT ---
+			const printContent = `
+				<html>
+				<head>
+					<title>Buku Pribadi - ${namaSiswa}</title>
+					<style>
+						body { font-family: 'Times New Roman', Times, serif; padding: 20px; font-size: 13px; color: #000; }
+						.header-table { width: 100%; border-bottom: 3px solid #000; margin-bottom: 5px; }
+						.header-table td { text-align: center; vertical-align: middle; }
+						.line-thin { border-bottom: 1px solid #000; margin-bottom: 20px; }
+						.title { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-bottom: 25px; }
+						.profil-container { display: flex; gap: 20px; margin-bottom: 20px; }
+						.foto-box { width: 3cm; height: 4cm; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-size: 10px; text-align: center; }
+						.table-rekap { width: 45%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; }
+						.table-rekap th { border: 1px solid #000; background: #f2f2f2; padding: 5px; text-align: center; }
+						.table-riwayat { width: 100%; border-collapse: collapse; font-size: 12px; }
+						.table-riwayat th { border: 1px solid #000; background: #f2f2f2; padding: 8px; }
+						.ttd-container { display: flex; justify-content: flex-end; margin-top: 40px; }
+						@media print { @page { margin: 1.5cm; } }
+					</style>
+				</head>
+				<body onload="window.print(); window.close();">
+					<table class="header-table">
+						<tr>
+							<td width="15%">${logoKiriBase64 ? `<img src="${logoKiriBase64}" width="70">` : ''}</td>
+							<td width="70%">
+								<div style="font-size: 14px;">${(s.pemerintah || 'PEMERINTAH KOTA').toUpperCase()}</div>
+								<div style=\"font-size: 14px;\">${(s.instansi || 'DINAS PENDIDIKAN').toUpperCase()}</div>
+								<div style=\"font-size: 18px; font-weight: bold;\">${(s.nama || 'NAMA SEKOLAH').toUpperCase()}</div>
+								<div style=\"font-size: 14px; font-weight: bold;\">${(s.judul_bk || 'BIMBINGAN DAN KONSELING').toUpperCase()}</div>
+								<div style=\"font-size: 10px; line-height: 1.4; max-width: 500px; margin: 0 auto;\">
+									${(s.alamat || '').replace(/\n/g, '<br>')}
+								</div>
+							</td>
+							<td width=\"15%\">${logoKananBase64 ? `<img src="${logoKananBase64}" width="70">` : ''}</td>
+						</tr>
+					</table>
+					<div class=\"line-thin\"></div>
+
+					<div class=\"title\">BUKU PRIBADI SISWA (REKAM JEJAK)</div>
+
+					<div class=\"profil-container\">
+						<div class=\"foto-box\">PAS FOTO<br>3 X 4</div>
+						<table border=\"0\" style=\"font-size: 14px;\">
+							<tr><td width=\"150\">Nama Lengkap</td><td>:</td><td><b>${namaSiswa}</b></td></tr>
+							<tr><td>NISN</td><td>:</td><td>${nisnSiswa}</td></tr>
+							<tr><td>Kelas</td><td>:</td><td>${kelasSiswa}</td></tr>
+							<tr><td>Jenis Kelamin</td><td>:</td><td>${jkSiswa}</td></tr>
+							<tr><td>Tahun Ajaran</td><td>:</td><td>${s.tahun_ajar || '-'} / ${s.semester || '-'}</td></tr>
+						</table>
+					</div>
+
+					<p><b>A. REKAPITULASI JUMLAH LAYANAN / PEMBINAAN</b></p>
+					<table class=\"table-rekap\">
+						<thead>
+							<tr><th>Kategori Data</th><th>Intensitas</th></tr>
+						</thead>
+						<tbody>
+							${rekapHtml || '<tr><td colspan=\"2\" style=\"text-align:center; padding: 5px; border: 1px solid #000;\">Belum ada riwayat</td></tr>'}
+						</tbody>
+					</table>
+
+					<p><b>B. RINCIAN RIWAYAT LAYANAN & PERKEMBANGAN</b></p>
+					<table class=\"table-riwayat\">
+						<thead>
+							<tr><th width=\"5%\">No</th><th width=\"15%\">Tanggal</th><th width=\"25%\">Jenis Layanan</th><th width=\"55%\">Uraian / Keterangan</th></tr>
+						</thead>
+						<tbody>${riwayatHtml}</tbody>
+					</table>
+
+					<div class=\"ttd-container\">
+						<div style=\"text-align: center; width: 40%;\">Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}<br>Guru Bimbingan dan Konseling<br><br><br><br><b>${currentUser.nama}</b><br>NIP. ${currentUser.nip || '-'}</div>
+					</div>
+				</body>
+				</html>
+			`;
+
+			Swal.close();
+			closeModalBukuSiswa();
+			const printWindow = window.open('', '_blank');
+			printWindow.document.open();
+			printWindow.document.write(printContent);
+			printWindow.document.close();
+		}
     </script>
 </body>
 </html>
-
