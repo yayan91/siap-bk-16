@@ -3951,7 +3951,8 @@
                 '9_Bimbingan_Kelompok': 'Bim. Kelompok', '10_Konsultasi': 'Konsultasi', 
                 '11_Layanan_Klasikal': 'Bim. Klasikal', '12_Konferensi_Kasus': 'Konferensi Kasus',
                 '13_Alih_Tangan_Kasus': 'Alih Tangan Kasus', '14_Mediasi': 'Mediasi',
-                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem','17_Catatan_Anekdot': 'Catatan Anekdot'
+                '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem','17_Catatan_Anekdot': 'Catatan Anekdot',
+				'18_Kunjungan_Rumah': 'Kunjungan Rumah'
             };
 
             // Pre-fill Layanan dengan 0
@@ -3959,6 +3960,7 @@
 
             // Looping filter data
             for (const [sheet, data] of Object.entries(cachedAllServices)) {
+				if (!sheetLabels[sheet]) continue;
                 data.forEach(item => {
                     // Filter Semester
                     if (filters.semester !== 'Semua' && item['Semester'] !== filters.semester) return;
