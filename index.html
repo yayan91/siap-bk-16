@@ -921,7 +921,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbz2gdd4Z1AWoyMnA-vlsgB3JgNs37vmXDjRbBCkqlzTsr-DFA5A6tiXGvSbqRc8RisY/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbw2kVxfsBz7Npge1reQ5y2t-XAJJHS66pHRQ4aXTtPBHtFbCxOeJkhC7EDOvsMm_iha/exec"; 
 
         // State
         let currentUser = null;
@@ -2651,9 +2651,16 @@
             // 2. ISI TABEL
             if (isRecap) {
                 // === MODE REKAP ===
-                doc.setFont("times", "bold"); doc.setFontSize(12);
-                doc.text(`REKAPITULASI JURNAL ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
-                if(subTitle) { startY += 5; doc.setFontSize(11); doc.setFont("times", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
+				doc.setFont("times", "bold"); doc.setFontSize(12);
+				doc.text(`REKAPITULASI KEGIATAN LAYANAN ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
+				
+				// Tambahan Tahun Ajaran
+				const tahunAjarText = s.tahun_ajar ? `TAHUN AJARAN ${s.tahun_ajar}` : "TAHUN AJARAN -";
+				startY += 5; 
+				doc.setFontSize(11); 
+				doc.text(tahunAjarText, centerX, startY, { align: 'center' });
+
+				if(subTitle) { startY += 5; doc.setFontSize(11); doc.setFont("times", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
                 
                 if(data.length > 0) {
                     const allKeys = Object.keys(data[0]);
@@ -3951,7 +3958,14 @@
                         let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kegiatan'] || item['Deskripsi_Peristiwa'] || item['Tujuan_Kunjungan'] || item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] ||'-';
                         
                         // Mencari status / hasil akhir
-                        let status = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'] || item['Hasil_Kegiatan'] || 'Terlaksana';
+                        let status = "";
+                        if (sheet === '16_Dukungan_Sistem') {
+                            const penyelenggara = item['Penyelenggara'] || '-';
+                            const peran = item['Peran_GuruBK'] || '-';
+                            status = `Penyelenggara: ${penyelenggara}\nPeran: ${peran}`;
+                        } else {
+                            status = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'] || item['Hasil_Kegiatan'] || 'Terlaksana';
+                        }
 
                         allData.push({
                             _date: itemDate,
@@ -4026,8 +4040,14 @@
             // 2. JUDUL JURNAL
             currentY += 12;
             doc.setFont("times", "bold"); doc.setFontSize(13);
-            doc.text("LAPORAN KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
+            doc.text("LAPORAN JURNAL KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
             
+            // Tambahan Tahun Ajaran
+            const tahunAjarText = s.tahun_ajar ? `TAHUN AJARAN ${s.tahun_ajar}` : "TAHUN AJARAN -";
+            currentY += 6;
+            doc.setFontSize(11);
+            doc.text(tahunAjarText, centerX, currentY, { align: 'center' });
+
             const d1 = new Date(sDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             const d2 = new Date(eDateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             currentY += 6;
@@ -4630,84 +4650,89 @@
                     doc.text(`KONSELING INDIVIDU`, centerX, currentY, { align: 'center' });
 
                     // -- A. IDENTITAS --
-                    currentY += 10;
-                    doc.setFontSize(11);
+                    currentY += 5;
                     
-                    const writeRow = (label, value) => {
-                        doc.setFont("times", "normal");
-                        doc.text(label, 15, currentY); doc.text(":", 60, currentY);
-                        const splitText = doc.splitTextToSize(String(value), pageWidth - 70);
-                        doc.text(splitText, 65, currentY);
-                        currentY += (splitText.length * 5) + 1; // Spasi rapat
-                    };
-
-                    doc.setFont("times", "bold"); doc.text("A. IDENTITAS KEGIATAN", 15, currentY); currentY += 6;
-                    writeRow("Tahun Ajaran", item['Tahun_Ajar'] || s.tahun_ajar || '-');
-                    writeRow("Semester", item['Semester'] || s.semester || '-');
-                    writeRow("Tanggal Pelaksanaan", formatTanggalIndo(getItemDate(item)));
-                    writeRow("Guru BK", `${currentUser.nama} (NIP. ${currentUser.nip || '-'})`);
-                    writeRow("Komponen Layanan", item['Komponen_Layanan'] || '-');
-                    writeRow("Bidang Layanan", item['Bidang_Bimbingan'] || '-');
-                    writeRow("Nama Konseli", `${item['Nama_Siswa']} (Kelas ${item['Kelas']})`);
-                    writeRow("Topik / Masalah", masalah);
-                    writeRow("Pendekatan & Teknik", `${pendekatan} - ${teknik}`);
-                    writeRow("Waktu & Tempat", `1 x 45 Menit di Ruang BK`);
+                    doc.autoTable({
+                        startY: currentY,
+                        head: [[{ content: 'A. IDENTITAS KEGIATAN', colSpan: 3, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        body: [
+                            ['1', 'Tahun Ajaran', item['Tahun_Ajar'] || s.tahun_ajar || '-'],
+                            ['2', 'Semester', item['Semester'] || s.semester || '-'],
+                            ['3', 'Tanggal Pelaksanaan', formatTanggalIndo(getItemDate(item))],
+                            ['4', 'Guru Bimbingan Konseling', `${currentUser.nama} (NIP. ${currentUser.nip || '-'})`],
+                            ['5', 'Komponen Layanan', item['Komponen_Layanan'] || '-'],
+                            ['6', 'Bidang Layanan', item['Bidang_Bimbingan'] || '-'],
+                            ['7', 'Nama Konseli', `${item['Nama_Siswa']} (Kelas ${item['Kelas']})`],
+                            ['8', 'Topik / Pokok Masalah', masalah],
+                            ['9', 'Pendekatan & Teknik', `${pendekatan} - ${teknik}`],
+                            ['10', 'Waktu & Tempat', `1 x 45 Menit di Ruang BK`]
+                        ],
+                        theme: 'grid',
+                        styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 
+                            0: { cellWidth: 10, halign: 'center' }, 
+                            1: { cellWidth: 55, fontStyle: 'bold' }, 
+                            2: { cellWidth: 'auto' } 
+                        },
+                        margin: { left: 15, right: 15 }
+                    });
 
                     // -- B. TUJUAN --
-                    currentY += 4;
-                    doc.setFont("times", "bold"); doc.text("B. TUJUAN LAYANAN", 15, currentY); currentY += 6;
-                    doc.setFont("times", "normal");
-                    const splitTujuan = doc.splitTextToSize(tujuan, pageWidth - 30);
-                    doc.text(splitTujuan, 15, currentY);
-                    currentY += (splitTujuan.length * 5) + 4;
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 4,
+                        head: [[{ content: 'B. TUJUAN LAYANAN', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        body: [[tujuan]],
+                        theme: 'grid',
+                        styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        margin: { left: 15, right: 15 }
+                    });
 
                     // -- C. LANGKAH KEGIATAN --
-                    const cekHalaman = (butuhSpasi) => { if(currentY + butuhSpasi > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; } };
-
-                    cekHalaman(30);
-                    doc.setFont("times", "bold"); doc.text("C. LANGKAH-LANGKAH KEGIATAN", 15, currentY); currentY += 6;
-                    
-                    // Tahap Awal
-                    doc.setFont("times", "bold"); doc.text("1. Tahap Awal (Pendahuluan)", 15, currentY); currentY += 5;
-                    doc.setFont("times", "normal");
-                    const sAwal = doc.splitTextToSize(tahapAwal, pageWidth - 35);
-                    doc.text(sAwal, 20, currentY); currentY += (sAwal.length * 5) + 2;
-
-                    // Tahap Inti
-                    cekHalaman(25);
-                    doc.setFont("times", "bold"); doc.text("2. Tahap Inti (Kerja)", 15, currentY); currentY += 5;
-                    doc.setFont("times", "normal");
-                    const sInti = doc.splitTextToSize(tahapInti, pageWidth - 35);
-                    doc.text(sInti, 20, currentY); currentY += (sInti.length * 5) + 2;
-
-                    // Tahap Penutup
-                    cekHalaman(20);
-                    doc.setFont("times", "bold"); doc.text("3. Tahap Penutup (Pengakhiran)", 15, currentY); currentY += 5;
-                    doc.setFont("times", "normal");
-                    const sPenutup = doc.splitTextToSize(tahapPenutup, pageWidth - 35);
-                    doc.text(sPenutup, 20, currentY); currentY += (sPenutup.length * 5) + 4;
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 4,
+                        head: [[{ content: 'C. LANGKAH-LANGKAH KEGIATAN', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        body: [
+                            ['Tahap Awal\n(Pendahuluan)', tahapAwal],
+                            ['Tahap Inti\n(Kerja)', tahapInti],
+                            ['Tahap Penutup\n(Pengakhiran)', tahapPenutup]
+                        ],
+                        theme: 'grid',
+                        styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 
+                            0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' }, 
+                            1: { cellWidth: 'auto' } 
+                        },
+                        margin: { left: 15, right: 15 }
+                    });
 
                     // -- D. EVALUASI DAN TINDAK LANJUT --
-                    cekHalaman(30);
-                    doc.setFont("times", "bold"); doc.text("D. EVALUASI DAN TINDAK LANJUT", 15, currentY); currentY += 6;
-                    doc.setFont("times", "normal");
-                    doc.text("1. Evaluasi Proses", 15, currentY); doc.text(":", 50, currentY);
-                    const sEvalProses = doc.splitTextToSize("Memperhatikan keaktifan, keterbukaan, dan kenyamanan konseli selama sesi berlangsung.", pageWidth - 55);
-                    doc.text(sEvalProses, 53, currentY); currentY += (sEvalProses.length * 5);
-                    
-                    doc.text("2. Evaluasi Hasil", 15, currentY); doc.text(":", 50, currentY);
-                    const sEvalHasil = doc.splitTextToSize(item['Hasil'] || '-', pageWidth - 55);
-                    doc.text(sEvalHasil, 53, currentY); currentY += (sEvalHasil.length * 5);
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 4,
+                        head: [[{ content: 'D. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        body: [
+                            ['Evaluasi Proses', 'Memperhatikan keaktifan, keterbukaan, dan kenyamanan konseli selama sesi berlangsung.'],
+                            ['Evaluasi Hasil', item['Hasil'] || '-'],
+                            ['Tindak Lanjut', item['Tindak_Lanjut'] || item['Alternatif_Pemecahan'] || '-']
+                        ],
+                        theme: 'grid',
+                        styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 
+                            0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' }, 
+                            1: { cellWidth: 'auto' } 
+                        },
+                        margin: { left: 15, right: 15 }
+                    });
 
-                    doc.text("3. Tindak Lanjut", 15, currentY); doc.text(":", 50, currentY);
-                    const sTL = doc.splitTextToSize(item['Tindak_Lanjut'] || item['Alternatif_Pemecahan'] || '-', pageWidth - 55);
-                    doc.text(sTL, 53, currentY); currentY += (sTL.length * 5) + 10;
+                    // Sinkronisasi posisi Y untuk Tanda Tangan
+                    currentY = doc.lastAutoTable.finalY + 15;
+                    const cekHalaman = (butuhSpasi) => { if(currentY + butuhSpasi > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; } };
 
                     // -- TANDA TANGAN (Hanya Guru BK) --
                     cekHalaman(40);
                     const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
                     
-                    // Posisikan di tengah-kanan
+                    // Posisikan di tengah-kanan (Pastikan font Normal)
+                    doc.setFont("times", "normal"); doc.setFontSize(11);
                     doc.text(`Makassar, ${dateStr}`, centerX + 25, currentY, { align: 'center' });
                     doc.text("Guru Bimbingan Konseling", centerX + 25, currentY + 5, { align: 'center' });
 
@@ -4720,11 +4745,13 @@
                     } catch (e) {}
 
                     currentY += 25;
+                    // Hanya Nama yang disetel Bold (garis bawah dihapus)
                     doc.setFont("times", "bold"); doc.setFontSize(11);
                     doc.text(currentUser.nama, centerX + 25, currentY, { align: 'center' });
-                    let bWidth = doc.getTextWidth(currentUser.nama); 
-                    doc.setLineWidth(0.2); doc.line(centerX + 25 - bWidth/2, currentY + 1, centerX + 25 + bWidth/2, currentY + 1);
-                    doc.setFont("times", "normal"); doc.text(`NIP. ${currentUser.nip || '-'}`, centerX + 25, currentY + 5, { align: 'center' });
+                    
+                    // Kembalikan ke Normal untuk baris NIP
+                    doc.setFont("times", "normal"); 
+                    doc.text(`NIP. ${currentUser.nip || '-'}`, centerX + 25, currentY + 5, { align: 'center' });
 
                     // -- OUTPUT --
                     Swal.close();
