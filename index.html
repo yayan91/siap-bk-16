@@ -137,9 +137,29 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+		/* ========================================== */
+        /* 2. EFEK HOLOGRAPHIC LASER SCAN */
+        /* ========================================== */
+        @keyframes scan {
+            0% { top: -10%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 110%; opacity: 0; }
+        }
+        .laser-scan { position: relative; overflow: hidden; }
+        .laser-scan::after {
+            content: ''; position: absolute; left: 0; width: 100%; height: 3px;
+            background: #3b82f6; box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.6);
+            animation: scan 2s infinite linear; pointer-events: none; z-index: 50;
+        }
     </style>
 </head>
 <body id="main-body" class="bg-custom-dark min-h-screen text-slate-800 dark:text-white flex flex-col transition-colors duration-500">
+
+<div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-blue-600/20 dark:bg-blue-600/10 blur-[100px] animate-pulse" style="animation-duration: 4s;"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-600/20 dark:bg-purple-600/10 blur-[100px] animate-pulse" style="animation-duration: 5s; animation-delay: 2s;"></div>
+</div>
 
     <!-- TOAST CONTAINER -->
     <div id="toast-container"></div>
@@ -758,9 +778,8 @@
             </div>
 
             <!-- Data List Container with Scroll -->
-            <div id="data-container" class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scroll mb-4">
-                <!-- Data or Skeleton will be injected here -->
-            </div>
+            <div id="data-container" class="flex-1 overflow-y-auto pl-4 pr-2 custom-scroll mb-4">
+				</div>
 
             <!-- PAGINATION CONTROLS -->
             <div id="pagination-controls" class="flex flex-col md:flex-row justify-between items-center gap-4 p-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t dark:border-slate-700 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)] sticky bottom-0 z-20">
@@ -910,6 +929,22 @@
             </div>
         </div>
     </div>
+	
+	<div id="spotlight-modal" class="fixed inset-0 z-[100] hidden items-start justify-center pt-[15vh] backdrop-blur-md bg-slate-900/60 opacity-0 transition-opacity duration-300">
+		<div class="bg-white/95 dark:bg-slate-800/95 w-11/12 max-w-2xl rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.3)] border border-blue-500/30 overflow-hidden transform scale-95 transition-transform duration-300 relative" id="spotlight-content">
+			<div class="flex items-center px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+				<i class="fa-solid fa-magnifying-glass text-blue-500 text-xl animate-pulse"></i>
+				<input type="text" id="spotlight-input" class="w-full bg-transparent border-none outline-none text-slate-800 dark:text-white px-4 py-2 text-lg placeholder-slate-400 dark:placeholder-slate-500 font-medium" placeholder="Pusat Komando: Cari siswa atau layanan... (Tekan ESC untuk tutup)">
+				<div class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-slate-500 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-600 shadow-sm">ESC</div>
+			</div>
+			<div id="spotlight-results" class="max-h-[50vh] overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-900/50">
+				<div class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm flex flex-col items-center justify-center gap-3">
+					<i class="fa-solid fa-satellite-dish text-3xl opacity-50"></i>
+					<span>Menunggu perintah pencarian...</span>
+				</div>
+			</div>
+		</div>
+	</div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
@@ -1399,6 +1434,75 @@
             document.getElementById('stat-students').innerText = siswaSet.size;
             document.getElementById('stat-top').innerText = topService;
             document.getElementById('stat-status').innerText = `${percentSelesai}%`;
+			
+			// =========================================================
+            // SMART DUAL-INDICATOR (ANGKA RAKSASA & BADGE TOP 3)
+            // =========================================================
+            
+            // 1. Tentukan peringkat Top 3 Layanan
+            const sortedServicesRank = Object.entries(countsPerSheet)
+                .filter(([key, val]) => val > 0) // Abaikan yang masih 0
+                .sort((a, b) => b[1] - a[1]);
+            
+            // Ambil 3 layanan dengan angka tertinggi
+            const top3Keys = sortedServicesRank.slice(0, 3).map(item => item[0]);
+
+            // 2. Loop semua kartu menu layanan di dashboard (Otomatis tanpa ubah HTML)
+            const menuCards = document.querySelectorAll('#page-dashboard [onclick^="openService"]');
+            
+            menuCards.forEach(card => {
+                // Bersihkan efek lama (penting jika tombol Refresh ditekan)
+                const oldBg = card.querySelector('.bg-angka-raksasa');
+                if(oldBg) oldBg.remove();
+                const oldBadge = card.querySelector('.badge-hot');
+                if(oldBadge) oldBadge.remove();
+                card.classList.remove('ring-2', 'ring-orange-400/50', 'shadow-orange-500/20');
+
+                // Kunci posisi kartu agar elemen baru tidak meluber keluar
+                card.classList.add('relative', 'overflow-hidden');
+
+                // Baca nama layanan dari atribut onclick kartu tersebut
+                const match = card.getAttribute('onclick').match(/'([^']+)'/);
+                if(match) {
+                    const sheetKey = match[1];
+                    const count = countsPerSheet[sheetKey] || 0;
+
+                    // --- OPSI B: ANGKA RAKSASA TRANSPARAN DI BACKGROUND ---
+                    const bgNumber = document.createElement('div');
+                    // Menggunakan opacity sangat tipis agar membaur dengan efek Glassmorphism
+                    bgNumber.className = "bg-angka-raksasa absolute -bottom-4 -right-2 text-[80px] font-black text-slate-800 dark:text-white opacity-[0.03] dark:opacity-[0.02] pointer-events-none select-none transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2 group-hover:opacity-[0.06] dark:group-hover:opacity-[0.05] z-0";
+                    bgNumber.innerText = count;
+                    card.appendChild(bgNumber);
+
+                    // --- OPSI A: BADGE "🔥 TOP" KHUSUS UNTUK 3 TERATAS ---
+                    const rankIndex = top3Keys.indexOf(sheetKey);
+                    if (rankIndex !== -1 && count > 0) {
+                        const badge = document.createElement('div');
+                        let badgeColor = "";
+                        let badgeText = "";
+                        
+                        // Kustomisasi warna sesuai peringkat
+                        if (rankIndex === 0) {
+                            badgeColor = "from-red-500 to-orange-500";
+                            badgeText = "⭐ TOP 1";
+                            // Tambahan efek Glow untuk peringkat 1
+                            card.classList.add('ring-2', 'ring-orange-400/50', 'shadow-orange-500/20');
+                        } else if (rankIndex === 1) {
+                            badgeColor = "from-orange-400 to-amber-500";
+                            badgeText = "🔥 TOP 2";
+                        } else {
+                            badgeColor = "from-amber-400 to-yellow-500";
+                            badgeText = "🔥 TOP 3";
+                        }
+
+                        // Desain Badge menempel melayang di pojok kanan atas
+                        badge.className = `badge-hot absolute top-0 right-0 bg-gradient-to-tr ${badgeColor} text-white text-[10px] font-black px-3 py-1 rounded-bl-xl rounded-tr-2xl shadow-md z-20 flex items-center gap-1 animate-pulse shadow-orange-500/30 border-b border-l border-white/20`;
+                        badge.innerHTML = badgeText;
+                        card.appendChild(badge);
+                    }
+                }
+            });
+            // =========================================================
 			
 			// --- note+++ LOGIKA AI SMART INSIGHT & EARLY WARNING ---
             
@@ -2144,7 +2248,7 @@
                     }
                 }
                 return textMatch && dateMatch;
-            });
+            }).reverse();
 
             const container = document.getElementById('data-container');
             container.innerHTML = '';
@@ -2329,33 +2433,52 @@
                 }
                 
                 // --- GENERATE WARNING BADGE ---
-                // Kita panggil fungsi Early Warning dan tempelkan di sebelah Judul (Main)
                 const warningBadge = getRiskBadge(namaSiswaCheck);
 
-                // --- RENDER KARTU ---
+                // --- UBAH FORMAT TANGGAL AGAR ADA HARINYA ---
+                // Kita bungkus variabel date asli dengan fungsi format tanggal Indonesia Anda
+                const tanggalLengkap = date !== '-' ? formatTanggalIndo(date) : '-';
+
+                // --- HITUNG NOMOR URUT BERDASARKAN HALAMAN (PAGINATION) ---
+                // Rumus ini memastikan nomor urut tetap berlanjut ke halaman 2, 3, dst.
+                const limit = rowsPerPage === 'all' ? filteredData.length : parseInt(rowsPerPage);
+                const nomorUrut = rowsPerPage === 'all' ? (filteredData.indexOf(item) + 1) : (startIdx + pageData.indexOf(item) + 1);
+
+                // --- RENDER KARTU DENGAN MODEL LINIMASA (TIMELINE) KEREN ---
                 const card = document.createElement('div');
-                card.className = "bg-white/95 dark:bg-slate-800/80 backdrop-blur rounded-xl p-5 shadow-lg border-l-4 border-blue-500 hover:shadow-xl hover:translate-x-1 transition-all duration-300 flex flex-col md:flex-row justify-between gap-4 group";
+                // Kita tambahkan posisi 'relative pl-8' dan border kiri tipis sebagai garis linimasa
+                card.className = "relative pl-8 pb-4 group animate-slide-in";
                 card.innerHTML = `
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">${currentTitle.split(' ')[0]}</span>
-                            <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${date}</span>
-                        </div>
-                        
-                        <div class="flex items-start justify-between">
-                            <h4 class="font-bold dark:text-white text-slate-800 text-lg group-hover:text-blue-500 transition break-words leading-tight flex-1">
-                                ${main} ${warningBadge} 
-                            </h4>
-                        </div>
-                        
-                        <p class="text-sm dark:text-slate-400 text-slate-600 mt-2 break-words leading-relaxed">
-                            ${sub}
-                        </p>
+                    <div class="absolute left-0 top-2 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-[10px] font-black shadow-md z-10 group-hover:scale-125 transition-transform duration-300 ring-4 ring-white dark:ring-slate-950">
+                        ${nomorUrut}
                     </div>
-                    <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4 flex-shrink-0">
-                        <button onclick="printItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
-                        <button onclick="editItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-lg transition" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg transition" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    
+                    <div class="absolute left-[11px] top-8 bottom-0 w-[2px] bg-slate-200 dark:bg-slate-700/60 group-last:hidden"></div>
+
+                    <div class="bg-white/95 dark:bg-slate-800/80 backdrop-blur rounded-2xl p-5 shadow-lg border-l-4 border-blue-500 hover:shadow-xl hover:translate-x-1 transition-all duration-300 flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span class="bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-200 text-[10px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider border border-blue-200 dark:border-blue-800">${currentTitle.split(' ')[0]}</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+                                    <i class="fa-regular fa-calendar-check text-blue-500"></i> ${tanggalLengkap}
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-start justify-between">
+                                <h4 class="font-black dark:text-white text-slate-800 text-lg group-hover:text-blue-500 transition break-words leading-tight flex-1">
+                                    ${main} ${warningBadge} 
+                                </h4>
+                            </div>
+                            
+                            <p class="text-sm dark:text-slate-400 text-slate-600 mt-2 break-words leading-relaxed font-medium">
+                                ${sub}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4 flex-shrink-0">
+                            <button onclick="printItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-xl transition shadow-sm btn-press" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
+                            <button onclick="editItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-xl transition shadow-sm btn-press" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl transition shadow-sm btn-press" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -2392,7 +2515,7 @@
                 const d2 = new Date(eDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
                 periode = `Periode: ${d1} s.d. ${d2}`;
             }
-            generatePDF(filteredData, `Rekapitulasi_${currentTitle}`, true, periode);
+            generatePDF([...filteredData].reverse(), `Rekapitulasi_${currentTitle}`, true, periode);
         }
 
         function printItem(id) {
@@ -3296,6 +3419,11 @@
             // Sembunyikan halaman tabel layanan, tampilkan form
             document.getElementById('page-service').classList.add('hide');
             document.getElementById('page-form').classList.remove('hide');
+
+            // --- EKSEKUSI PEMULIHAN DRAFT JIKA BUKAN MODE EDIT ---
+            if (!isEdit && typeof window.restoreOfflineDrafts === 'function') {
+                setTimeout(window.restoreOfflineDrafts, 100); 
+            }
         }
 
         function closeForm() { 
@@ -3535,6 +3663,12 @@
 
 				// 3. CEK HASIL
                 if(res && res.status === 'success') { 
+                    
+                    // --- BERSIHKAN DRAFT KARENA SUDAH AMAN DI SERVER ---
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith('draft_')) localStorage.removeItem(key);
+                    });
+
                     // 🌟 Alert Mewah Simpan/Edit
                     Swal.fire({
                         icon: 'success',
@@ -5957,6 +6091,224 @@
 			printWindow.document.write(printContent);
 			printWindow.document.close();
 		}
+		// ==========================================
+		// 4. LOGIKA 3D PARALLAX & SPOTLIGHT SEARCH
+		// ==========================================
+
+		// --- A. Logika Spotlight Search (Ctrl + K) ---
+		document.addEventListener('keydown', (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+				e.preventDefault(); toggleSpotlight(true);
+			}
+			if (e.key === 'Escape') toggleSpotlight(false);
+		});
+
+		const spotlightModal = document.getElementById('spotlight-modal');
+		const spotlightContent = document.getElementById('spotlight-content');
+		const spotlightInput = document.getElementById('spotlight-input');
+
+		function toggleSpotlight(show) {
+			if(!spotlightModal) return;
+			if (show) {
+				spotlightModal.classList.remove('hidden'); spotlightModal.classList.add('flex');
+				setTimeout(() => { spotlightModal.classList.remove('opacity-0'); spotlightContent.classList.remove('scale-95'); spotlightInput.focus(); }, 10);
+			} else {
+				spotlightModal.classList.add('opacity-0'); spotlightContent.classList.add('scale-95');
+				setTimeout(() => { spotlightModal.classList.add('hidden'); spotlightModal.classList.remove('flex'); spotlightInput.value = ''; }, 300);
+			}
+		}
+		if(spotlightModal) {
+			spotlightModal.addEventListener('click', (e) => { if (e.target === spotlightModal) toggleSpotlight(false); });
+		}
+		
+		// ======================================================
+		// MESIN UNIVERSAL LIVE SEARCH (SPOTLIGHT)
+		// ======================================================
+		if (spotlightInput) {
+			spotlightInput.addEventListener('input', (e) => {
+				const keyword = e.target.value.toLowerCase().trim();
+				const resultsContainer = document.getElementById('spotlight-results');
+
+				// Jika kotak pencarian kosong
+				if (!keyword) {
+					resultsContainer.innerHTML = `
+						<div class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm flex flex-col items-center justify-center gap-3">
+							<i class="fa-solid fa-satellite-dish text-3xl opacity-50"></i>
+							<span>Menunggu perintah pencarian...</span>
+						</div>`;
+					return;
+				}
+
+				let htmlContent = '';
+				let hasResults = false;
+
+				// 1. PENCARIAN MENU LAYANAN (Quick Nav)
+				const menuList = [
+					{ key: '7_Layanan_Individu', title: 'Konseling Individu', icon: 'fa-user-shield', color: 'blue' },
+					{ key: '8_Layanan_Kelompok', title: 'Konseling Kelompok', icon: 'fa-users-rays', color: 'green' },
+					{ key: '9_Bimbingan_Kelompok', title: 'Bimbingan Kelompok', icon: 'fa-chalkboard-user', color: 'purple' },
+					{ key: '11_Layanan_Klasikal', title: 'Layanan Klasikal', icon: 'fa-person-chalkboard', color: 'red' },
+					{ key: '10_Konsultasi', title: 'Konsultasi', icon: 'fa-handshake-simple', color: 'orange' },
+					{ key: '12_Konferensi_Kasus', title: 'Konferensi Kasus', icon: 'fa-users-gear', color: 'cyan' },
+					{ key: '13_Alih_Tangan_Kasus', title: 'Alih Tangan Kasus', icon: 'fa-share-from-square', color: 'teal' },
+					{ key: '14_Mediasi', title: 'Mediasi', icon: 'fa-handshake-angle', color: 'pink' },
+					{ key: '15_Advokasi', title: 'Advokasi', icon: 'fa-gavel', color: 'indigo' },
+					{ key: '18_Kunjungan_Rumah', title: 'Kunjungan Rumah', icon: 'fa-house-chimney-user', color: 'rose' },
+					{ key: '21_Layanan_Kolaborasi', title: 'Layanan Kolaborasi', icon: 'fa-hands-holding-circle', color: 'fuchsia' },
+					{ key: '22_Layanan_Lintas_Kelas', title: 'Layanan Lintas Kelas', icon: 'fa-users-viewfinder', color: 'sky' },
+					{ key: '16_Dukungan_Sistem', title: 'Dukungan Sistem', icon: 'fa-network-wired', color: 'slate' },
+					{ key: '17_Catatan_Anekdot', title: 'Catatan Anekdot', icon: 'fa-clipboard-list', color: 'yellow' },
+					{ key: '19_Catatan_Pelanggaran', title: 'Catatan Pelanggaran', icon: 'fa-triangle-exclamation', color: 'red' },
+					{ key: '20_Catatan_Prestasi', title: 'Catatan Prestasi', icon: 'fa-medal', color: 'emerald' }
+				];
+
+				const matchedMenus = menuList.filter(m => m.title.toLowerCase().includes(keyword));
+				
+				if (matchedMenus.length > 0) {
+					hasResults = true;
+					htmlContent += `<div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-1 px-2">Menu Layanan</div>`;
+					matchedMenus.forEach(m => {
+						// Saat diklik: Tutup modal Spotlight -> Langsung buka tabel layanan
+						htmlContent += `
+							<div onclick="toggleSpotlight(false); openService('${m.key}', '${m.title}')" class="flex items-center gap-4 p-3 mb-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-700/50 cursor-pointer transition-all duration-300 group shadow-sm border border-transparent hover:border-slate-300 dark:hover:border-slate-600">
+								<div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+									<i class="fa-solid ${m.icon}"></i>
+								</div>
+								<div class="flex-1">
+									<h4 class="font-bold text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">${m.title}</h4>
+									<p class="text-[10px] text-slate-500">Masuk ke tabel kelola data</p>
+								</div>
+								<i class="fa-solid fa-arrow-right text-slate-300 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all"></i>
+							</div>
+						`;
+					});
+				}
+
+				// 2. PENCARIAN DATA SISWA (Untuk Buka Rekam Jejak 360)
+				if (metaData && metaData.siswa) {
+					// Ambil maksimal 5 siswa teratas yang namanya cocok (agar tidak menumpuk)
+					const matchedStudents = metaData.siswa.filter(s => s.nama.toLowerCase().includes(keyword)).slice(0, 5);
+					
+					if (matchedStudents.length > 0) {
+						hasResults = true;
+						htmlContent += `<div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 mt-4 px-2">Data Siswa (Rekam Jejak 360)</div>`;
+						matchedStudents.forEach(s => {
+							// Saat diklik: Tutup modal -> Isi kotak pencarian utama -> Buka timeline 360
+							htmlContent += `
+								<div onclick="toggleSpotlight(false); document.getElementById('global-student-search').value='${s.nama}'; searchStudentHistory();" class="flex items-center gap-4 p-3 mb-2 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 cursor-pointer transition-all duration-300 group shadow-sm border border-transparent hover:border-blue-200 dark:hover:border-blue-900/50">
+									<div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+										<i class="fa-solid fa-user-graduate"></i>
+									</div>
+									<div class="flex-1">
+										<h4 class="font-bold text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">${s.nama}</h4>
+										<p class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+											<span class="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300">Kelas ${s.kelas || '-'}</span> 
+											<span>NISN: ${s.nisn || '-'}</span>
+										</p>
+									</div>
+									<div class="text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 px-2 py-1 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+										<i class="fa-solid fa-radar animate-spin-slow"></i> Lacak
+									</div>
+								</div>
+							`;
+						});
+					}
+				}
+
+				// Jika mengetik nama hantu yang tidak ada di database
+				if (!hasResults) {
+					htmlContent = `
+						<div class="py-10 text-center text-slate-400 dark:text-slate-500 text-sm flex flex-col items-center justify-center gap-3">
+							<i class="fa-solid fa-ghost text-4xl opacity-50 mb-2"></i>
+							<span>Pencarian <strong>"${e.target.value}"</strong> tidak ditemukan.</span>
+							<span class="text-[10px] mt-1">Coba gunakan kata kunci lain (contoh: "Individu" atau "Budi").</span>
+						</div>`;
+				}
+
+				resultsContainer.innerHTML = htmlContent;
+			});
+		}
+		// ======================================================
+
+		// --- B. Logika Magnetic 3D Parallax Hover ---
+		document.addEventListener('mousemove', (e) => {
+			const cards = document.querySelectorAll('#page-dashboard [onclick^="openService"]');
+			cards.forEach(card => {
+				const rect = card.getBoundingClientRect();
+				const x = e.clientX - rect.left; 
+				const y = e.clientY - rect.top;  
+				if (x > 0 && y > 0 && x < rect.width && y < rect.height) {
+					const centerX = rect.width / 2; const centerY = rect.height / 2;
+					const rotateX = ((y - centerY) / centerY) * -8; 
+					const rotateY = ((x - centerX) / centerX) * 8;
+					card.style.transform = `perspective(1000px) scale(1.03) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+					card.style.transition = 'transform 0.1s ease-out';
+					card.style.zIndex = '50';
+				} else {
+					card.style.transform = 'perspective(1000px) scale(1) rotateX(0deg) rotateY(0deg)';
+					card.style.transition = 'transform 0.5s ease-out';
+					card.style.zIndex = '1';
+				}
+			});
+		});
+		// ==========================================
+		
+		// ======================================================
+		// 5. OFFLINE DRAFT AUTO-SAVE (GAYA GOOGLE DOCS)
+		// ======================================================
+
+		// 1. Membuat Elemen Indikator secara Dinamis (Tanpa ubah HTML asli)
+		const draftStatus = document.createElement('div');
+		draftStatus.className = "fixed bottom-5 right-5 bg-slate-800/90 dark:bg-slate-700/90 text-white text-[11px] font-medium px-4 py-2 rounded-full shadow-lg backdrop-blur flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-5 pointer-events-none z-[100] border border-slate-600/50";
+		draftStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-400" id="draft-icon"></i> <span id="draft-text">Menunggu...</span>`;
+		document.body.appendChild(draftStatus);
+
+		let typingTimer;
+
+		// 2. Mendengarkan setiap ketikan di semua input dan textarea
+		document.addEventListener('input', (e) => {
+			// Kita targetkan hanya area teks dan inputan biasa
+			if (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && (e.target.type === 'text' || e.target.type === 'number'))) {
+				
+				// Tampilkan popup kecil "Menyimpan draft..."
+				draftStatus.classList.remove('opacity-0', 'translate-y-5');
+				document.getElementById('draft-text').innerText = 'Menyimpan draft...';
+				document.getElementById('draft-icon').className = 'fa-solid fa-spinner fa-spin text-blue-400';
+
+				// Simpan ke brankas browser berdasarkan ID atau Name kolom tersebut
+				const fieldKey = 'draft_' + (e.target.id || e.target.name || 'unnamed_field');
+				localStorage.setItem(fieldKey, e.target.value);
+
+				// Tunggu Bapak berhenti mengetik selama 1 detik, lalu ubah status jadi "Tersimpan"
+				clearTimeout(typingTimer);
+				typingTimer = setTimeout(() => {
+					document.getElementById('draft-text').innerText = 'Draft tersimpan lokal';
+					document.getElementById('draft-icon').className = 'fa-solid fa-cloud-check text-green-400';
+					
+					// Sembunyikan popup perlahan setelah 3 detik agar tidak mengganggu layar
+					setTimeout(() => {
+						draftStatus.classList.add('opacity-0', 'translate-y-5');
+					}, 3000);
+				}, 1000);
+			}
+		});
+
+		// 3. Keajaiban: Mengembalikan draft (Sekarang berupa fungsi agar bisa dipanggil kapan saja)
+        window.restoreOfflineDrafts = function() {
+            const inputs = document.querySelectorAll('#dynamic-form textarea, #dynamic-form input[type="text"], #dynamic-form input[type="number"]');
+            inputs.forEach(input => {
+                const fieldKey = 'draft_' + (input.id || input.name || 'unnamed_field');
+                const savedDraft = localStorage.getItem(fieldKey);
+                
+                // Jika ada draft lama DAN formnya saat ini sedang kosong
+                if (savedDraft && !input.value) {
+                    input.value = savedDraft;
+                    // Beri efek highlight hijau sejenak agar Bapak sadar datanya dikembalikan
+                    input.classList.add('ring-2', 'ring-green-400', 'bg-green-50', 'dark:bg-green-900/20');
+                    setTimeout(() => input.classList.remove('ring-2', 'ring-green-400', 'bg-green-50', 'dark:bg-green-900/20'), 2500);
+                }
+            });
+        };
     </script>
 </body>
 </html>
