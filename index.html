@@ -152,6 +152,17 @@
             background: #3b82f6; box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.6);
             animation: scan 2s infinite linear; pointer-events: none; z-index: 50;
         }
+		/* ========================================== */
+        /* CLASS UNTUK RATA KIRI-KANAN PINTAR */
+        /* ========================================== */
+        .smart-justify {
+            text-align: justify;
+			text-align-last: left;
+            text-justify: inter-word;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+        }
     </style>
 </head>
 <body id="main-body" class="bg-custom-dark min-h-screen text-slate-800 dark:text-white flex flex-col transition-colors duration-500">
@@ -2470,9 +2481,9 @@
                                 </h4>
                             </div>
                             
-                            <p class="text-sm dark:text-slate-400 text-slate-600 mt-2 break-words leading-relaxed font-medium">
-                                ${sub}
-                            </p>
+                            <p class="text-sm dark:text-slate-400 text-slate-600 mt-2 break-words leading-relaxed font-medium smart-justify" lang="id">
+								${sub}
+							</p>
                         </div>
                         <div class="flex items-center gap-2 border-t dark:border-slate-700 md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4 flex-shrink-0">
                             <button onclick="printItem('${item.ID_Unik}')" class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-xl transition shadow-sm btn-press" title="Cetak PDF"><i class="fa-solid fa-print"></i></button>
@@ -2649,23 +2660,23 @@
             writeRow("Tempat Kegiatan", tempat); // <--- TEMPAT DIMUNCULKAN DI SINI
             
             currentY += 5;
-            doc.setFont("times", "bold"); doc.text("B. URAIAN / PROSES LAYANAN", 15, currentY); currentY += 7;
-            doc.setFont("times", "normal");
-            const splitProses = doc.splitTextToSize(String(proses), pageWidth - 30);
-            doc.text(splitProses, 15, currentY);
-            currentY += (splitProses.length * 5) + 5;
+			doc.setFont("times", "bold"); doc.text("B. URAIAN / PROSES LAYANAN", 15, currentY); currentY += 7;
+			doc.setFont("times", "normal");
+			const splitProses = doc.splitTextToSize(String(proses), pageWidth - 30);
+			doc.text(splitProses, 15, currentY, { align: 'justify', maxWidth: pageWidth - 30 });
+			currentY += (splitProses.length * 5) + 5;
 
-            doc.setFont("times", "bold"); doc.text("C. EVALUASI DAN HASIL", 15, currentY); currentY += 7;
-            doc.setFont("times", "normal");
-            const splitEval = doc.splitTextToSize(String(evaluasi), pageWidth - 30);
-            doc.text(splitEval, 15, currentY);
-            currentY += (splitEval.length * 5) + 5;
+			doc.setFont("times", "bold"); doc.text("C. EVALUASI DAN HASIL", 15, currentY); currentY += 7;
+			doc.setFont("times", "normal");
+			const splitEval = doc.splitTextToSize(String(evaluasi), pageWidth - 30);
+			doc.text(splitEval, 15, currentY, { align: 'justify', maxWidth: pageWidth - 30 });
+			currentY += (splitEval.length * 5) + 5;
 
-            doc.setFont("times", "bold"); doc.text("D. TINDAK LANJUT", 15, currentY); currentY += 7;
-            doc.setFont("times", "normal");
-            const splitTL = doc.splitTextToSize(String(tindakLanjut), pageWidth - 30);
-            doc.text(splitTL, 15, currentY);
-            currentY += (splitTL.length * 5) + 10;
+			doc.setFont("times", "bold"); doc.text("D. TINDAK LANJUT", 15, currentY); currentY += 7;
+			doc.setFont("times", "normal");
+			const splitTL = doc.splitTextToSize(String(tindakLanjut), pageWidth - 30);
+			doc.text(splitTL, 15, currentY, { align: 'justify', maxWidth: pageWidth - 30 });
+			currentY += (splitTL.length * 5) + 10;
 
             // 5. TANDA TANGAN & QR CODE (Dengan Logika Kerahasiaan)
             if(currentY > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); currentY = 30; }
@@ -2873,8 +2884,20 @@
                         startY: startY + 5, head: [headerDisplay], body: body, theme: 'grid',
                         styles: { font: "times", fontSize: 11, cellPadding: 1.5, lineWidth: 0.1, lineColor: 0, textColor: 0 },
                         headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', lineWidth: 0.1, halign: 'center', valign: 'middle' },
-                        // Tambahkan columnStyles khusus untuk mengecilkan kolom ke-0 (Kolom No.)
-                        columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
+                        
+                        // KODE YANG DIUBAH: Tambahkan halign: 'justify' untuk kolom uraian/keterangan
+                        columnStyles: { 
+                            0: { cellWidth: 10, halign: 'center' }, // Kolom No (CENTER)
+                            1: { halign: 'center' },                // Kolom Tanggal / Hari (CENTER)
+							2: { halign: 'center' },                // Kolom Kelas / Sasaran (CENTER)
+                            3: { halign: 'center' },                // Kolom Kelas / Sasaran (CENTER)
+                            4: { halign: 'center' },               // Kolom Uraian / Identifikasi (Justify)
+                            5: { halign: 'justify' },               // Kolom Proses / Alternatif (Justify)
+                            6: { halign: 'justify' },               // Kolom Hasil (Justify)
+							7: { halign: 'justify' },               // Kolom Hasil (Justify)
+                            8: { halign: 'center' }                // Kolom Tindak Lanjut (Justify)
+                        },
+                        
                         margin: { top: 10, left: 10, right: 10, bottom: 20 }
                     });
                 }
@@ -2903,7 +2926,7 @@
                     // Background biru dibuang, diganti abu-abu terang elegan
                     headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center', cellPadding: 2 },
                     // Lebar kolom DATA diperkecil jadi 45 agar kolom KETERANGAN lebih dekat
-                    columnStyles: { 0: { cellWidth: 45, fillColor: 255, fontStyle: 'bold', textColor: [0, 0, 0] }, 1: { cellWidth: 'auto', fillColor: 255, textColor: 0 } },
+                    columnStyles: { 0: { cellWidth: 45, fillColor: 255, fontStyle: 'bold', textColor: [0, 0, 0] }, 1: { cellWidth: 'auto', fillColor: 255, textColor: 0, halign: 'justify' } },
                     margin: { left: 15, right: 15 }
                 });
             }
@@ -3887,7 +3910,7 @@
                 styles: { font: "times", fontSize: 10, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
                 // Perubahan 2: Samakan warna header dengan cetakan rekap/jurnal (Abu-abu, teks hitam tebal)
                 headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center', valign: 'middle' },
-                columnStyles: { 0: {cellWidth: 10, halign: 'center'}, 1: {cellWidth: 25}, 2: {cellWidth: 35}, 3: {cellWidth: 'auto'}, 4: {cellWidth: 'auto'} },
+                columnStyles: { 0: {cellWidth: 10, halign: 'center'}, 1: {cellWidth: 25}, 2: {cellWidth: 35}, 3: {cellWidth: 'auto', halign: 'justify'}, 4: {cellWidth: 'auto', halign: 'justify'} },
                 margin: { left: 15, right: 15 }
             });
 
@@ -4276,13 +4299,13 @@
                 styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
                 headStyles: { fillColor: [220, 220, 220], fontStyle: 'bold', halign: 'center', valign: 'middle' },
                 columnStyles: { 
-                    0: { cellWidth: 10, halign: 'center' }, 
-                    1: { cellWidth: 35 }, 
-                    2: { cellWidth: 40 }, 
-                    3: { cellWidth: 45 }, 
-                    4: { cellWidth: 'auto' }, 
-                    5: { cellWidth: 30, halign: 'center' } 
-                },
+                        0: { cellWidth: 10, halign: 'center' }, // Kolom No
+                        1: { cellWidth: 35, halign: 'center' }, // Kolom Hari / Tanggal (CENTER)
+						2: { cellWidth: 45, halign: 'center' }, // Kolom Jenis Layanan (CENTER)
+                        3: { cellWidth: 40 },                   // Kolom Nama Siswa
+                        4: { cellWidth: 'auto', halign: 'justify' }, // Kolom Uraian Kegiatan (Justify)
+                        5: { cellWidth: 30, halign: 'center' }  // Kolom Sasaran / Keterangan (CENTER)
+                    },
                 margin: { left: 15, right: 15, bottom: 20 }
             });
 
