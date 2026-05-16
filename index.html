@@ -913,7 +913,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxJElDIuEcVMlpC9nVARmTaM6FBR2VRbXrHLkPPVyKl_uWgd64VpeVbZZMVFs8yFfH_/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwpwxbxEv0ze3bVmYYXMLorLlLBREgSAAWq2ggLOtlwkTd1pI8Jjxpytq6w8clG3XUo/exec"; 
 
         // State
         let currentUser = null;
@@ -2403,10 +2403,10 @@
             if (currentSheet === '7_Layanan_Individu') {
                 btnRPL_AI = `<button onclick="Swal.close(); generateRPL_Individu('${id}')" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-blue-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPL Konseling Individu (AI)</button>`;
             } else if (currentSheet === '8_Layanan_Kelompok') {
-                btnRPL_AI = `<button onclick="Swal.close(); generateRPL_Kelompok('${id}', 'KKP')" class="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-indigo-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPL Konseling Kelompok (AI)</button>`;
-            } else if (currentSheet === '9_Bimbingan_Kelompok') {
-                btnRPL_AI = `<button onclick="Swal.close(); generateRPL_Kelompok('${id}', 'BKP')" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-purple-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPL Bimbingan Kelompok (AI)</button>`;
-            } else if (currentSheet === '12_Konferensi_Kasus') {
+				btnRPL_AI = `<button onclick="Swal.close(); generateRPL_KonselingKelompok('${id}')" class="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-indigo-400"><i class="fa-solid fa-user-shield mr-2"></i> Cetak RPL Konseling Kelompok (AI)</button>`;
+			} else if (currentSheet === '9_Bimbingan_Kelompok') {
+                btnRPL_AI = `<button onclick="Swal.close(); generateRPL_BimbinganKelompok('${id}')" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-purple-400"><i class="fa-solid fa-brain mr-2"></i> Cetak RPL Bimbingan Kelompok (AI)</button>`;
+			} else if (currentSheet === '12_Konferensi_Kasus') {
                 btnRPL_AI = `<button onclick="Swal.close(); generateSkenario_Konferensi('${id}')" class="px-5 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-lg hover:-translate-y-1 transition-all btn-press border border-orange-400"><i class="fa-solid fa-brain mr-2"></i> Cetak Skenario Konferensi (AI)</button>`;
             }
 
@@ -4392,7 +4392,11 @@
             const pageWidth = doc.internal.pageSize.getWidth();
             const centerX = pageWidth / 2;
 
-            // --- 1. KOP SURAT (VERSI DINAMIS 2 BARIS ALAMAT) ---
+            // --- RUMUS MATEMATIKA PRESISI UNTUK LEBAR TABEL ---
+            const marginLR = 15; // Margin Kiri & Kanan
+            const contentWidth = pageWidth - (marginLR * 2); // Total lebar area yang bisa dicetak (185.9 mm)
+
+            // --- 1. KOP SURAT ---
             doc.setFont("times", "normal");
             const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L";
             const urlKanan = s.logo_kanan || ""; 
@@ -4405,19 +4409,17 @@
             currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
             currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
             
-            // Logika Alamat 2 Baris
             currentY += 5; 
             doc.setFont("times", "normal"); 
             doc.setFontSize(10);
             const alamatText = s.alamat || "Alamat Sekolah Lengkap";
-            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); // Mengatur lebar teks agar membungkus
+            const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80);
             doc.text(alamatSplit, centerX, currentY, { align: 'center' });
 
-            // Menentukan posisi garis berdasarkan jumlah baris alamat (tiap baris ~4mm)
             const tinggiAlamat = alamatSplit.length * 4;
             currentY += tinggiAlamat; 
 
-            // Gambar Garis Double
+            // Garis KOP
             doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
             doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2);
 
@@ -4427,8 +4429,6 @@
             doc.text("LAPORAN STATISTIK PELAYANAN BIMBINGAN & KONSELING", centerX, currentY, { align: 'center' });
             
             currentY += 5;
-            
-            // --- MODIFIKASI: Ubah teks "Semua" menjadi "Ganjil dan Genap" ---
             let textSemester = filters.semester === 'Semua' ? 'Ganjil dan Genap' : filters.semester;
             let periodeStr = `Semester: ${textSemester}`;
             
@@ -4440,129 +4440,104 @@
             doc.setFont("times", "normal"); doc.setFontSize(10);
             doc.text(periodeStr, centerX, currentY, { align: 'center' });
 
-            // --- 3. TABEL RINGKASAN (LAYANAN, KOMPONEN, BIDANG) ---
+            // --- 3. BAGIAN A: TABEL TERPADU (LAYANAN, KOMPONEN, BIDANG) ---
             currentY += 10;
             doc.setFont("times", "bold"); doc.setFontSize(11);
-            doc.text("A. RINCIAN PELAKSANAAN LAYANAN", 15, currentY);
-            
-            // Konversi object ke array dan saring agar Pelanggaran & Prestasi fokus di tabel bawah saja
-            const dataLayanan = Object.entries(statData.layanan)
-                .filter(([key]) => key !== 'Pelanggaran' && key !== 'Prestasi')
-                .sort((a,b) => b[1] - a[1]);
+            doc.text("A. RINCIAN PELAKSANAAN LAYANAN", marginLR, currentY);
+
+            const dataLayanan = Object.entries(statData.layanan).filter(([key]) => key !== 'Pelanggaran' && key !== 'Prestasi').sort((a,b) => b[1] - a[1]);
             const dataKomponen = Object.entries(statData.komponen).sort((a,b) => b[1] - a[1]);
             const dataBidang = Object.entries(statData.bidang).sort((a,b) => b[1] - a[1]);
 
-            // Tabel Kiri: Jenis Layanan
-            doc.autoTable({
-                startY: currentY + 3,
-                head: [['Jenis Layanan BK', 'Frekuensi']],
-                body: dataLayanan,
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 25, halign: 'center' } },
-                margin: { left: 15 }
-            });
+            const maxRowsA = Math.max(dataLayanan.length, dataKomponen.length, dataBidang.length);
+            const tableBodyA = [];
 
-            const finalY_Layanan = doc.lastAutoTable.finalY;
+            for(let i = 0; i < maxRowsA; i++) {
+                tableBodyA.push([
+                    dataLayanan[i] ? dataLayanan[i][0] : '-', dataLayanan[i] ? dataLayanan[i][1] : '-',
+                    dataKomponen[i] ? dataKomponen[i][0] : '-', dataKomponen[i] ? dataKomponen[i][1] : '-',
+                    dataBidang[i] ? dataBidang[i][0] : '-', dataBidang[i] ? dataBidang[i][1] : '-'
+                ]);
+            }
 
-            // Tabel Kanan Atas: Komponen
-            doc.autoTable({
-                startY: currentY + 3,
-                head: [['Komponen Layanan', 'Frekuensi']],
-                body: dataKomponen,
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 25, halign: 'center' } },
-                margin: { left: 110 }
-            });
-
-            // Tabel Kanan Bawah: Bidang
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 5,
-                head: [['Bidang Layanan', 'Frekuensi']],
-                body: dataBidang,
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 0: { cellWidth: 55 }, 1: { cellWidth: 25, halign: 'center' } },
-                margin: { left: 110 } 
-            });
-
-            currentY = Math.max(finalY_Layanan, doc.lastAutoTable.finalY) + 10;
-
-            // --- 4. DEMOGRAFI SISWA (Semua Kelas Tampil) ---
-            const totalSiswaUnik = statData.students.length;
-            doc.setFont("times", "bold");
-            doc.text(`B. DEMOGRAFI SISWA TERBANTU (TOTAL: ${totalSiswaUnik} SISWA)`, 15, currentY);
-
-            // Sortir data kelas dari A ke Z
-            const classDataArray = Object.entries(statData.classes)
-                .map(([kls, count]) => [ `Kelas ${kls}`, count ])
-                .sort((a, b) => a[0].localeCompare(b[0]));
-
-            // Tabel Kiri: Demografi Kelas
-            doc.autoTable({
-                startY: currentY + 3,
-                head: [['Daftar Kelas', 'Individu Terlayani']],
-                body: classDataArray.length > 0 ? classDataArray : [['Belum ada data', '-']],
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 35, halign: 'center' } },
-                margin: { left: 15 }
-            });
-
-            // SIMPAN POSISI Y PALING BAWAH DARI TABEL KELAS
-            const finalY_Kelas = doc.lastAutoTable.finalY;
-
-            // Tabel Kanan: Demografi Jenis Kelamin
-            const genderData = [
-                ['Laki-laki (L)', statData.gender['Laki-laki']],
-                ['Perempuan (P)', statData.gender['Perempuan']]
-            ];
+            // Rumus Lebar Kolom Tabel A (6 Kolom)
+            const colJmlA = 15; // Lebar kolom "Jml"
+            const colTeksA = (contentWidth - (colJmlA * 3)) / 3; // Sisa ruang dibagi 3 sama rata
 
             doc.autoTable({
                 startY: currentY + 3,
-                head: [['Jenis Kelamin', 'Total Individu']],
-                body: genderData,
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 30, halign: 'center' } },
-                margin: { left: 115 } // Posisi di sebelah kanan tabel kelas
-            });
-
-            // SIMPAN POSISI Y PALING BAWAH DARI TABEL GENDER
-            const finalY_Gender = doc.lastAutoTable.finalY;
-
-            // --- TAMBAHKAN TABEL AKUMULASI TEPAT DI BAWAHNYA ---
-            const akumulasiData = [
-                ['Total Pelanggaran', `${statData.layanan['Pelanggaran'] || 0} Kasus`],
-                ['Total Prestasi', `${statData.layanan['Prestasi'] || 0} Prestasi`]
-            ];
-
-            doc.autoTable({
-                startY: finalY_Gender + 5, // Jarak 5mm di bawah tabel gender
-                head: [['Ringkasan Data', 'Total']],
-                body: akumulasiData,
+                showHead: 'firstPage',
+                head: [[
+                    { content: 'Jenis Layanan BK', styles: { halign: 'center' } }, { content: 'Jml', styles: { halign: 'center' } },
+                    { content: 'Komponen Layanan', styles: { halign: 'center' } }, { content: 'Jml', styles: { halign: 'center' } },
+                    { content: 'Bidang Layanan', styles: { halign: 'center' } }, { content: 'Jml', styles: { halign: 'center' } }
+                ]],
+                body: tableBodyA.length > 0 ? tableBodyA : [['-', '-', '-', '-', '-', '-']],
                 theme: 'grid', 
                 styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
                 columnStyles: { 
-                    0: { cellWidth: 40, fontStyle: 'bold' }, 
-                    1: { cellWidth: 30, halign: 'center' } 
+                    0: { cellWidth: colTeksA }, 1: { cellWidth: colJmlA, halign: 'center', fontStyle: 'bold' },
+                    2: { cellWidth: colTeksA }, 3: { cellWidth: colJmlA, halign: 'center', fontStyle: 'bold' },
+                    4: { cellWidth: colTeksA }, 5: { cellWidth: colJmlA, halign: 'center', fontStyle: 'bold' }
                 },
-                margin: { left: 115 } // Disamakan dengan posisi tabel gender di atasnya
+                margin: { left: marginLR, right: marginLR }
             });
 
-            const finalY_Akumulasi = doc.lastAutoTable.finalY;
-
-            // SEKARANG UPDATE PERHITUNGAN JARAK UNTUK BAGIAN C
-            currentY = Math.max(finalY_Kelas, finalY_Akumulasi) + 15;
-
-            // --- 5. DAFTAR NAMA SISWA (SORTIR ABJAD KELAS -> ABJAD NAMA) ---
-            if(currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 20; }
+            // --- 4. BAGIAN B: DEMOGRAFI SISWA (TABEL TERPADU) ---
+            currentY = doc.lastAutoTable.finalY + 10;
+            const totalSiswaUnik = statData.students.length;
             doc.setFont("times", "bold");
-            doc.text("C. DAFTAR RINCIAN SISWA TERBANTU", 15, currentY);
+            doc.text(`B. DEMOGRAFI SISWA TERBANTU (TOTAL: ${totalSiswaUnik} SISWA)`, marginLR, currentY);
 
-            // Sorting: Urutkan Kelas dulu, kalau Kelas sama urutkan Namanya
+            const classDataArray = Object.entries(statData.classes).map(([kls, count]) => [ `Kelas ${kls}`, count ]).sort((a, b) => a[0].localeCompare(b[0]));
+            
+            const rightSideDataB = [
+                ['Laki-laki (L)', statData.gender['Laki-laki'] || 0],
+                ['Perempuan (P)', statData.gender['Perempuan'] || 0],
+                ['Total Pelanggaran (Kasus)', statData.layanan['Pelanggaran'] || 0],
+                ['Total Prestasi (Siswa)', statData.layanan['Prestasi'] || 0]
+            ];
+
+            const maxRowsB = Math.max(classDataArray.length, rightSideDataB.length);
+            const tableBodyB = [];
+
+            for(let i = 0; i < maxRowsB; i++) {
+                tableBodyB.push([
+                    classDataArray[i] ? classDataArray[i][0] : '-', classDataArray[i] ? classDataArray[i][1] : '-',
+                    rightSideDataB[i] ? rightSideDataB[i][0] : '-', rightSideDataB[i] ? rightSideDataB[i][1] : '-'
+                ]);
+            }
+
+            // Rumus Lebar Kolom Tabel B (4 Kolom)
+            const colJmlB = 25; // Lebar kolom "Jml"
+            const colTeksB = (contentWidth - (colJmlB * 2)) / 2; // Sisa ruang dibagi 2 sama rata
+
+            doc.autoTable({
+                startY: currentY + 3,
+                showHead: 'firstPage',
+                head: [[
+                    { content: 'Daftar Kelas Terlayani', styles: { halign: 'center' } }, { content: 'Total', styles: { halign: 'center' } },
+                    { content: 'Demografi Jenis Kelamin & Catatan Khusus', styles: { halign: 'center' } }, { content: 'Total', styles: { halign: 'center' } }
+                ]],
+                body: tableBodyB.length > 0 ? tableBodyB : [['-', '-', '-', '-']],
+                theme: 'grid', 
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
+                columnStyles: { 
+                    0: { cellWidth: colTeksB }, 1: { cellWidth: colJmlB, halign: 'center', fontStyle: 'bold' },
+                    2: { cellWidth: colTeksB }, 3: { cellWidth: colJmlB, halign: 'center', fontStyle: 'bold' }
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
+
+            // --- 5. BAGIAN C: DAFTAR NAMA SISWA ---
+            currentY = doc.lastAutoTable.finalY + 15;
+            if(currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 20; }
+            
+            doc.setFont("times", "bold");
+            doc.text("C. DAFTAR RINCIAN SISWA TERBANTU", marginLR, currentY);
+
             const sortedStudents = statData.students.sort((a, b) => {
                 const classCompare = a.kelas.localeCompare(b.kelas);
                 if (classCompare !== 0) return classCompare;
@@ -4572,20 +4547,34 @@
             const studentTableBody = sortedStudents.map((s, index) => [
                 index + 1,
                 s.kelas !== '-' ? s.kelas : 'Lainnya',
-                s.jk !== '-' ? s.jk.charAt(0).toUpperCase() : '-', // Ambil L atau P saja
+                s.jk !== '-' ? s.jk.charAt(0).toUpperCase() : '-',
                 s.name,
                 `${s.count} Kali`
             ]);
 
+            // Rumus Lebar Kolom Tabel C (5 Kolom)
+            const colNo = 10;
+            const colKelas = 20;
+            const colLP = 15;
+            const colIntens = 35;
+            const colNama = contentWidth - (colNo + colKelas + colLP + colIntens); // Kolom nama mengisi SEMUA sisa ruang kosong
+
             doc.autoTable({
                 startY: currentY + 3,
+                showHead: 'everyPage', 
                 head: [['No', 'Kelas', 'L/P', 'Nama Siswa', 'Intensitas Layanan']],
                 body: studentTableBody.length > 0 ? studentTableBody : [['-', '-', '-', 'Belum ada data', '-']],
-                theme: 'grid', styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                theme: 'grid', 
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
                 headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
-                // Lebar kolom diatur presisi agar muat
-                columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 20, halign: 'center' }, 2: { cellWidth: 15, halign: 'center' }, 3: { cellWidth: 'auto' }, 4: { cellWidth: 35, halign: 'center' } },
-                margin: { left: 15, right: 15 }
+                columnStyles: { 
+                    0: { cellWidth: colNo, halign: 'center' }, 
+                    1: { cellWidth: colKelas, halign: 'center' }, 
+                    2: { cellWidth: colLP, halign: 'center' }, 
+                    3: { cellWidth: colNama }, 
+                    4: { cellWidth: colIntens, halign: 'center', fontStyle: 'bold' } 
+                },
+                margin: { left: marginLR, right: marginLR }
             });
 
             // --- 6. TANDA TANGAN (KEPSEK & GURU BK) ---
@@ -4597,19 +4586,22 @@
             const nipKepsek = s.nip_kepsek || "..................";
             const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
 
-            doc.text("Mengetahui,", 45, finalY, { align: 'center' });
-            doc.text("Kepala Sekolah", 45, finalY + 5, { align: 'center' });
-            doc.text(`Makassar, ${dateStr}`, pageWidth - 45, finalY, { align: 'center' });
-            doc.text("Guru Bimbingan Konseling", pageWidth - 45, finalY + 5, { align: 'center' });
+            const kiriX = centerX - 45;
+            const kananX = centerX + 45;
+
+            doc.text("Mengetahui,", kiriX, finalY, { align: 'center' });
+            doc.text("Kepala Sekolah", kiriX, finalY + 5, { align: 'center' });
+            doc.text(`Makassar, ${dateStr}`, kananX, finalY, { align: 'center' });
+            doc.text("Guru Bimbingan dan Konseling", kananX, finalY + 5, { align: 'center' });
             
             finalY += 25;
             doc.setFont("times", "bold"); 
-            doc.text(namaKepsek, 45, finalY, { align: 'center' });
-            doc.text(currentUser.nama, pageWidth - 45, finalY, { align: 'center' });
+            doc.text(namaKepsek, kiriX, finalY, { align: 'center' });
+            doc.text(currentUser.nama, kananX, finalY, { align: 'center' });
             
             doc.setFont("times", "normal"); 
-            doc.text(`NIP. ${nipKepsek}`, 45, finalY + 5, { align: 'center' });
-            doc.text(`NIP. ${currentUser.nip}`, pageWidth - 45, finalY + 5, { align: 'center' });
+            doc.text(`NIP. ${nipKepsek}`, kiriX, finalY + 5, { align: 'center' });
+            doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, finalY + 5, { align: 'center' });
 
             // OUTPUT DOKUMEN
             try { 
@@ -4621,7 +4613,7 @@
         }
 		
 		// =========================================================================
-        // FITUR DEWA: GENERATOR RPL KONSELING INDIVIDU (AI POWERED)
+        // FITUR DEWA: GENERATOR RPL KONSELING INDIVIDU (AI FULL-AUTOPILOT & MIN 3 POIN EVALUASI)
         // =========================================================================
         async function generateRPL_Individu(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
@@ -4629,49 +4621,69 @@
 
             // 1. Tampilkan Loading AI
             Swal.fire({ 
-                title: 'AI Sedang Meracik RPL...', 
-                html: 'Menyusun tujuan dan skenario konseling berdasarkan teori psikologi yang Anda pilih.', 
+                title: 'AI Menganalisis Kasus...', 
+                html: 'Menentukan pendekatan psikologi terbaik, teknik, dan skenario intervensi secara otomatis...', 
                 allowOutsideClick: false, 
                 didOpen: () => Swal.showLoading() 
             });
 
-            // Siapkan data untuk disuapkan ke AI
-            const masalah = item['Identifikasi_Masalah'] || 'Masalah pribadi/sosial/belajar/karir';
-            const pendekatan = item['Pendekatan'] || 'Eklektik / Sesuai Kebutuhan';
-            const teknik = item['Teknik_Konseling'] || 'Wawancara Konseling';
+            // Hanya butuh masalah dari inputan, sisanya biarkan AI yang berpikir!
+            const masalah = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || item['Masalah'] || item['Deskripsi_Masalah'] || 'Masalah pribadi/sosial/belajar/karir';
+            
+            // Format Tanggal TANPA Hari
+            const tglMentah = getItemDate(item);
+            const tglCetak = tglMentah ? new Date(tglMentah).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
-            // 2. Prompt Khusus untuk AI agar outputnya poin per poin
+            // 2. Prompt Cerdas (Super Prompting - Full Autopilot & Evaluasi Detail)
             const promptRPL = `
-                TUGAS: Anda adalah Ahli Bimbingan dan Konseling. Buatkan komponen Rencana Pelaksanaan Layanan (RPL) Konseling Individu berdasarkan data berikut:
+                TUGAS: Anda adalah Konselor Klinis Senior. Buatkan Rencana Pelaksanaan Layanan (RPL) Konseling Individu.
+                DATA KLIEN:
                 - Kasus/Masalah: ${masalah}
-                - Pendekatan: ${pendekatan}
-                - Teknik: ${teknik}
 
                 INSTRUKSI PENTING: 
+                - ANDA WAJIB MENGANALISIS MASALAH TERSEBUT, lalu MENENTUKAN SENDIRI "Pendekatan Konseling" (misal: CBT, Realita, SFBT, dll) dan "Teknik Konseling" yang paling ampuh.
                 - Susunlah setiap bagian dalam bentuk DAFTAR POIN MENGGUNAKAN HURUF (a., b., c., dst). 
                 - DILARANG menggunakan simbol peluru (bullet) seperti *, -, atau •.
-                - Pastikan langkah Inti benar-benar menjabarkan sintaks/tahapan dari teknik ${teknik}.
+                - Pada tahap [INTI], jabarkan skenario penerapan teknik yang Anda pilih secara spesifik dan nyata.
+                - KHUSUS PADA [EVALUASI_TINDAKLANJUT], Anda WAJIB membuat minimal 3 poin (a., b., c.) untuk masing-masing kategori (Evaluasi Proses, Evaluasi Hasil, dan Tindak Lanjut).
 
-                FORMAT JAWABAN WAJIB SEPERTI INI (Gunakan tag kurung siku persis seperti di bawah):
+                FORMAT JAWABAN WAJIB SEPERTI INI (Patuhi Tag Kurung Siku Ini):
+                [PENDEKATAN_TEKNIK]
+                Pendekatan Konseling: (Sebutkan Pendekatan yang Anda pilih)
+                Teknik Konseling: (Sebutkan Teknik spesifiknya)
+
                 [TUJUAN]
-                a. (tujuan pertama yang positif dan aplikatif)
-                b. (tujuan kedua...)
+                a. (Tujuan pengentasan masalah...)
+                b. (Tujuan spesifik kognitif/perilaku...)
                 
                 [AWAL]
-                a. Menyambut konseli dengan hangat dan mengatur tempat duduk yang nyaman (attending).
-                b. Membangun rapport dan menanyakan kabar.
-                c. (langkah selanjutnya terkait asas kerahasiaan dan penyampaian tujuan...)
+                a. Membangun rapport (hubungan baik) dan menanyakan kabar.
+                b. Menyepakati asas kerahasiaan dan menjelaskan tujuan konseling.
+                c. (Langkah eksplorasi awal masalah...)
                 
                 [INTI]
-                a. (langkah pertama penerapan teknik ${teknik} untuk menggali masalah ${masalah}...)
-                b. (langkah kedua...)
-                c. (langkah ketiga...)
-                d. (langkah keempat...)
+                a. (Skenario langkah pertama penerapan teknik yang Anda pilih...)
+                b. (Skenario langkah kedua intervensi...)
+                c. (Skenario langkah ketiga penguatan kognitif/perilaku...)
                 
                 [PENUTUP]
-                a. (langkah menyimpulkan sesi...)
-                b. (langkah mengevaluasi perasaan/kelegaan konseli...)
-                c. (langkah menetapkan tindak lanjut/komitmen...)
+                a. Menyimpulkan hasil sesi konseling.
+                b. Mengevaluasi perasaan dan kelegaan konseli (BMB3).
+                c. Menyepakati komitmen/rencana tindak lanjut dan terminasi.
+
+                [EVALUASI_TINDAKLANJUT]
+                Evaluasi Proses: 
+                a. (indikator 1 keterbukaan/antusiasme konseli...)
+                b. (indikator 2...)
+                c. (indikator 3...)
+                Evaluasi Hasil: 
+                a. (perubahan 1 pemahaman/perasaan/tindakan...)
+                b. (perubahan 2...)
+                c. (perubahan 3...)
+                Tindak Lanjut: 
+                a. (langkah 1 pemantauan pasca konseling...)
+                b. (langkah 2...)
+                c. (langkah 3...)
             `;
 
             try {
@@ -4682,10 +4694,12 @@
                 if(res && res.status === 'success') {
                     // Ekstrak jawaban AI menggunakan regex
                     const aiText = res.data;
-                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[AWAL\]/i) || [])[1]?.trim() || "Konseli mampu menyelesaikan permasalahannya dengan baik.";
-                    const tahapAwal = (aiText.match(/\[AWAL\]([\s\S]*?)\[INTI\]/i) || [])[1]?.trim() || "Membangun rapport dan menyepakati asas kerahasiaan.";
-                    const tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENUTUP\]/i) || [])[1]?.trim() || "Melakukan intervensi konseling sesuai pendekatan.";
-                    const tahapPenutup = (aiText.match(/\[PENUTUP\]([\s\S]*?)$/i) || [])[1]?.trim() || "Melakukan terminasi dan menyepakati tindak lanjut.";
+                    const pendekatanTeknik = (aiText.match(/\[PENDEKATAN_TEKNIK\]([\s\S]*?)\[TUJUAN\]/i) || [])[1]?.trim() || "Pendekatan: Eklektik\nTeknik: Wawancara Konseling";
+                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[AWAL\]/i) || [])[1]?.trim() || "Konseli mampu menyelesaikan permasalahannya.";
+                    const tahapAwal = (aiText.match(/\[AWAL\]([\s\S]*?)\[INTI\]/i) || [])[1]?.trim() || "-";
+                    const tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENUTUP\]/i) || [])[1]?.trim() || "-";
+                    const tahapPenutup = (aiText.match(/\[PENUTUP\]([\s\S]*?)\[EVALUASI_TINDAKLANJUT\]/i) || [])[1]?.trim() || "-";
+                    const evaluasiTindakLanjut = (aiText.match(/\[EVALUASI_TINDAKLANJUT\]([\s\S]*?)$/i) || [])[1]?.trim() || "-";
 
                     // 3. MULAI CETAK PDF
                     const { jsPDF } = window.jspdf;
@@ -4694,7 +4708,7 @@
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const centerX = pageWidth / 2;
 
-                    // -- KOP SURAT (Dinamis: Anti-Tabrak Alamat 2 Baris) --
+                    // -- KOP SURAT --
                     doc.setFont("times", "normal");
                     const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
                     const urlKanan = s.logo_kanan || ""; 
@@ -4707,19 +4721,15 @@
                     currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
                     
-                    // Cetak Alamat dengan pembungkus teks (wrapping)
                     currentY += 5; 
-                    doc.setFont("times", "normal"); 
-                    doc.setFontSize(10);
+                    doc.setFont("times", "normal"); doc.setFontSize(10);
                     const alamatText = s.alamat || "Alamat Sekolah Lengkap";
                     const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
                     doc.text(alamatSplit, centerX, currentY, { align: 'center' });
 
-                    // Hitung posisi Y baru berdasarkan jumlah baris alamat (4mm per baris)
                     const tinggiAlamat = alamatSplit.length * 4;
                     currentY += tinggiAlamat; 
                     
-                    // Garis Pembatas KOP (Sekarang aman di bawah alamat)
                     doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
                     doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
 
@@ -4732,27 +4742,27 @@
 
                     // -- A. IDENTITAS --
                     currentY += 5;
-                    
                     doc.autoTable({
                         startY: currentY,
+                        showHead: 'firstPage', // Anti Tabel Dobel
+                        pageBreak: 'auto',
                         head: [[{ content: 'A. IDENTITAS KEGIATAN', colSpan: 3, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
                         body: [
-                            ['1', 'Tahun Ajaran', item['Tahun_Ajar'] || s.tahun_ajar || '-'],
-                            ['2', 'Semester', item['Semester'] || s.semester || '-'],
-                            ['3', 'Tanggal Pelaksanaan', formatTanggalIndo(getItemDate(item))],
-                            ['4', 'Guru Bimbingan Konseling', `${currentUser.nama} (NIP. ${currentUser.nip || '-'})`],
-                            ['5', 'Komponen Layanan', item['Komponen_Layanan'] || '-'],
-                            ['6', 'Bidang Layanan', item['Bidang_Bimbingan'] || '-'],
-                            ['7', 'Nama Konseli', `${item['Nama_Siswa']} (Kelas ${item['Kelas']})`],
-                            ['8', 'Topik / Pokok Masalah', masalah],
-                            ['9', 'Pendekatan & Teknik', `${pendekatan} - ${teknik}`],
-                            ['10', 'Waktu & Tempat', `1 x 45 Menit di Ruang BK`]
+                            ['1', 'Nama Guru BK / Konselor', currentUser.nama || '-'],
+                            ['2', 'Komponen Layanan', item['Komponen_Layanan'] || 'Layanan Responsif'],
+                            ['3', 'Bidang Layanan', item['Bidang_Bimbingan'] || '-'],
+                            ['4', 'Tahun Ajaran / Semester', `${item['Tahun_Ajar'] || s.tahun_ajar || '-'} / ${item['Semester'] || s.semester || '-'}`],
+                            ['5', 'Nama Konseli', `${item['Nama_Siswa'] || 'Siswa'} (Kelas ${item['Kelas'] || '-'})`],
+                            ['6', 'Topik / Pokok Masalah', masalah],
+                            ['7', 'Pendekatan & Teknik', pendekatanTeknik], // Hasil Mikir AI Langsung Disuntik Kesini
+                            ['8', 'Waktu & Tempat', `${item['Durasi'] || '1 x 45 Menit'} di Ruang BK`],
+                            ['9', 'Tanggal Pelaksanaan', tglCetak]
                         ],
                         theme: 'grid',
                         styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
                         columnStyles: { 
                             0: { cellWidth: 10, halign: 'center' }, 
-                            1: { cellWidth: 55, fontStyle: 'bold' }, 
+                            1: { cellWidth: 50, fontStyle: 'bold' }, // Kolom kiri diperlebar agar rapi
                             2: { cellWidth: 'auto' } 
                         },
                         margin: { left: 15, right: 15 }
@@ -4761,6 +4771,8 @@
                     // -- B. TUJUAN --
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 4,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
                         head: [[{ content: 'B. TUJUAN LAYANAN', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
                         body: [[tujuan]],
                         theme: 'grid',
@@ -4771,11 +4783,13 @@
                     // -- C. LANGKAH KEGIATAN --
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 4,
-                        head: [[{ content: 'C. LANGKAH-LANGKAH KEGIATAN', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'C. TAHAP KEGIATAN KONSELING', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
                         body: [
-                            ['Tahap Awal\n(Pendahuluan)', tahapAwal],
-                            ['Tahap Inti\n(Kerja)', tahapInti],
-                            ['Tahap Penutup\n(Pengakhiran)', tahapPenutup]
+                            ['1. Tahap Awal\n(Pendahuluan)', tahapAwal],
+                            ['2. Tahap Inti\n(Kerja / Intervensi)', tahapInti],
+                            ['3. Tahap Penutup\n(Pengakhiran)', tahapPenutup]
                         ],
                         theme: 'grid',
                         styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
@@ -4789,50 +4803,31 @@
                     // -- D. EVALUASI DAN TINDAK LANJUT --
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 4,
-                        head: [[{ content: 'D. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
-                        body: [
-                            ['Evaluasi Proses', 'Memperhatikan keaktifan, keterbukaan, dan kenyamanan konseli selama sesi berlangsung.'],
-                            ['Evaluasi Hasil', item['Hasil'] || '-'],
-                            ['Tindak Lanjut', item['Tindak_Lanjut'] || item['Alternatif_Pemecahan'] || '-']
-                        ],
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'D. EVALUASI DAN TINDAK LANJUT', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'left', textColor: 0 } }]],
+                        body: [[evaluasiTindakLanjut]],
                         theme: 'grid',
                         styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                        columnStyles: { 
-                            0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' }, 
-                            1: { cellWidth: 'auto' } 
-                        },
                         margin: { left: 15, right: 15 }
                     });
 
-                    // Sinkronisasi posisi Y untuk Tanda Tangan
+                    // --- TANDA TANGAN (HANYA GURU BK - TANPA QR CODE / TANPA HARI) ---
                     currentY = doc.lastAutoTable.finalY + 15;
-                    const cekHalaman = (butuhSpasi) => { if(currentY + butuhSpasi > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; } };
-
-                    // -- TANDA TANGAN (Hanya Guru BK) --
-                    cekHalaman(40);
-                    const dateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+                    if(currentY + 40 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; }
                     
-                    // Posisikan di tengah-kanan (Pastikan font Normal)
                     doc.setFont("times", "normal"); doc.setFontSize(11);
-                    doc.text(`Makassar, ${dateStr}`, centerX + 25, currentY, { align: 'center' });
-                    doc.text("Guru Bimbingan Konseling", centerX + 25, currentY + 5, { align: 'center' });
+                    const kananX = pageWidth - 50; 
 
-                    // QR Code
-                    try {
-                        const qrText = `Dokumen Resmi RPL-BK\nNama: ${item['Nama_Siswa']}\nTanggal: ${formatTanggalIndo(getItemDate(item))}\nGuru BK: ${currentUser.nama}`;
-                        const qrImage = new QRious({ value: qrText, size: 100, level: 'H' }).toDataURL();
-                        doc.addImage(qrImage, 'PNG', centerX - 45, currentY - 2, 25, 25);
-                        doc.setFontSize(7); doc.text("Scan Validasi", centerX - 32.5, currentY + 26, { align: 'center' });
-                    } catch (e) {}
-
-                    currentY += 25;
-                    // Hanya Nama yang disetel Bold (garis bawah dihapus)
-                    doc.setFont("times", "bold"); doc.setFontSize(11);
-                    doc.text(currentUser.nama, centerX + 25, currentY, { align: 'center' });
+                    doc.text(`Makassar, ${tglCetak}`, kananX, currentY, { align: 'center' });
+                    doc.text("Guru Bimbingan dan Konseling", kananX, currentY + 5, { align: 'center' });
                     
-                    // Kembalikan ke Normal untuk baris NIP
+                    currentY += 32;
+                    doc.setFont("times", "bold"); 
+                    doc.text(currentUser.nama || "Nama Guru BK", kananX, currentY, { align: 'center' });
+                    
                     doc.setFont("times", "normal"); 
-                    doc.text(`NIP. ${currentUser.nip || '-'}`, centerX + 25, currentY + 5, { align: 'center' });
+                    doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, currentY + 5, { align: 'center' });
 
                     // -- OUTPUT --
                     Swal.close();
@@ -4840,7 +4835,7 @@
                         const blob = doc.output('blob'); 
                         window.open(URL.createObjectURL(blob), '_blank'); 
                     } catch (e) { 
-                        doc.save(`RPL_Konseling_${item['Nama_Siswa']}.pdf`); 
+                        doc.save(`RPL_Konseling_${item['Nama_Siswa'] || 'Individu'}.pdf`); 
                     }
 
                 } else {
@@ -4853,269 +4848,438 @@
             }
         }
 		
-		// --- FITUR DEWA: AI GENERATOR BKP & KKP (UPDATED: REAL DATA, TTD TENGAH & ANTI-OVERLAP) ---
-        async function generateRPL_Kelompok(id, jenis) {
+		// =========================================================================
+        // FITUR DEWA: GENERATOR RPL BIMBINGAN KELOMPOK (AI POWERED)
+        // =========================================================================
+        async function generateRPL_BimbinganKelompok(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
             if(!item) return;
 
-            Swal.fire({ title: 'AI Sedang Meracik RPL...', html: `Menyusun skenario ${jenis === 'BKP' ? 'Bimbingan' : 'Konseling'} Kelompok berdasarkan teori dinamika kelompok.`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ 
+                title: 'AI Meracik Bimbingan Kelompok...', 
+                html: 'Menyusun metode, media, skenario edukatif, dan instrumen evaluasi...', 
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
 
-            // Variabel Beda antara BKP dan KKP
-            const topik = jenis === 'BKP' ? (item['Topik_Layanan'] || 'Topik Umum') : (item['Identifikasi_Masalah'] || 'Masalah Pribadi Anggota');
+            // Ambil data dasar
+            const topik = item['Topik_Layanan'] || 'Topik Edukasi Umum';
             const anggota = item['Anggota_Kelompok_Siswa'] || 'Anggota Kelompok';
-            const pendekatan = item['Pendekatan'] || 'Dinamika Kelompok';
-            const bidangLayanan = item['Bidang_Bimbingan'] || item['Bidang_Layanan'] || '-';
+            const bidangLayanan = item['Bidang_Bimbingan'] || item['Bidang_Layanan'] || 'Pribadi/Sosial';
+            const komponenLayanan = item['Komponen_Layanan'] || item['Komponen'] || 'Layanan Dasar';
+            const waktu = item['Durasi'] || '1x45 Menit';
+            const tempat = item['Tempat'] || 'Ruang BK / Ruang Kelas';
             
-            // Komponen layanan murni mengambil dari isian input data item
-            const komponenLayanan = item['Komponen_Layanan'] || item['Komponen'] || '-';
+            // Format Tanggal TANPA Hari
+            const tglMentah = getItemDate(item);
+            const tglCetak = tglMentah ? new Date(tglMentah).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
-            let extraInstruksi = "";
-            let extraFormat = "";
-            if (jenis === 'BKP') {
-                extraInstruksi = "- Pada [INTI], WAJIB sertakan skenario aktivitas permainan kelompok (games) atau ice breaking edukatif yang relevan dengan topik agar suasana dinamis.\n- Tambahkan bagian Evaluasi Proses dan Evaluasi Hasil secara cerdas sesuai topik bahasan.";
-                extraFormat = "\n\n[EVALUASI_PROSES]\na. (analisis keaktifan/dinamika peserta...)\n\n[EVALUASI_HASIL]\na. (pemahaman/komitmen yang dicapai peserta...)";
-            } else {
-                extraInstruksi = "- Pada [INTI], fokuskan pada pemecahan masalah (problem-solving) menggunakan pendekatan konseling kelompok.";
-            }
-
-            // Instruksi Prompt Super Cerdas
             const promptRPL = `
-                TUGAS: Anda adalah Ahli Bimbingan dan Konseling. Buatkan komponen Rencana Pelaksanaan Layanan (RPL) ${jenis === 'BKP' ? 'Bimbingan Kelompok' : 'Konseling Kelompok'} berdasarkan data:
-                - Topik/Masalah: ${topik}
-                - Anggota: ${anggota.split(',').length} Siswa
+                TUGAS: Anda adalah Konselor Senior yang ahli merancang RPL Bimbingan Kelompok.
+                DATA LAYANAN:
+                - Topik/Materi: ${topik}
+                - Sasaran: ${anggota.split(',').length} Siswa
                 - Bidang Layanan: ${bidangLayanan}
                 - Komponen Layanan: ${komponenLayanan}
 
                 INSTRUKSI PENTING: 
-                - Susunlah setiap bagian dalam bentuk DAFTAR POIN MENGGUNAKAN HURUF (a., b., c., dst). 
-                ${extraInstruksi}
+                - Susunlah setiap bagian dalam bentuk DAFTAR POIN MENGGUNAKAN HURUF (a., b., c., dst). DILARANG menggunakan bullet (*, -).
+                - Tentukan Metode, Teknik, Media/Alat, dan Sumber Materi yang paling relevan.
+                - JABARKAN TAHAP KEGIATAN SECARA DETAIL, JELAS, DAN RAPI. Pada [INTI], WAJIB sertakan skenario aktivitas/games.
+                - Pada [EVALUASI_PROSES] dan [EVALUASI_HASIL] wajib buat minimal 3 poin.
 
-                FORMAT JAWABAN WAJIB SEPERTI INI (Gunakan tag kurung siku):
+                FORMAT JAWABAN WAJIB:
                 [TUJUAN]
-                a. (tujuan pertama...)
-                b. (tujuan kedua...)
+                a. (Tujuan Umum...)
+                b. (Tujuan Khusus 1...)
+                c. (Tujuan Khusus 2...)
                 
+                [METODE_MEDIA]
+                Metode/Teknik: (Sebutkan metode/teknik, misal: Diskusi Kelompok, Sosiodrama)
+                Media/Alat: (Sebutkan media/alat)
+                Sumber Materi: (Sebutkan referensi bacaan/buku/artikel)
+
                 [PEMBENTUKAN]
-                a. Mengucapkan salam, doa, dan membangun keakraban (ice breaking awal).
-                b. Menjelaskan tujuan dan asas kerahasiaan kelompok.
+                a. Mengucapkan salam, doa, dan membangun keakraban (ice breaking).
+                b. Menjelaskan pengertian, tujuan, dan asas bimbingan kelompok.
                 
                 [PERALIHAN]
-                a. Menanyakan kesiapan anggota kelompok untuk memasuki tahap selanjutnya.
-                b. Memberi contoh atau pengantar masuk ke tahap inti.
+                a. Menjelaskan kembali kegiatan kelompok.
+                b. Menanyakan kesiapan anggota.
 
                 [INTI]
-                a. (skenario langkah aktivitas/diskusi/games jika bimbingan kelompok...)
-                b. (langkah saling menanggapi antar anggota...)
-                c. (langkah penyelesaian/penguatan dari Guru BK...)
+                a. (Detail pemaparan materi / instruksi aktivitas...)
+                b. (Detail dinamika/diskusi anggota...)
+                c. (Refleksi dan penguatan materi...)
                 
                 [PENGAKHIRAN]
-                a. Meminta pesan dan kesan anggota kelompok setelah berkegiatan.
-                b. Menyimpulkan kegiatan dan merencanakan tindak lanjut.${extraFormat}
+                a. Meminta anggota menyimpulkan kegiatan (BMB3).
+                b. Merencanakan tindak lanjut dan doa penutup.
+
+                [EVALUASI_PROSES]
+                a. (Poin evaluasi proses 1...)
+                b. (Poin evaluasi proses 2...)
+                c. (Poin evaluasi proses 3...)
+
+                [EVALUASI_HASIL]
+                a. (Understanding...)
+                b. (Comfort...)
+                c. (Action...)
             `;
 
             try {
-                const res = await apiCall({ action: 'askAI', prompt: promptRPL, targetField: 'RPL Kelompok' }, 'POST', { action: 'askAI', prompt: promptRPL, targetField: 'RPL Kelompok' });
+                const res = await apiCall({ action: 'askAI', prompt: promptRPL, targetField: 'RPL BKP' }, 'POST', { action: 'askAI', prompt: promptRPL, targetField: 'RPL BKP' });
+                
                 if(res && res.status === 'success') {
                     const aiText = res.data;
-                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[PEMBENTUKAN\]/i) || [])[1]?.trim() || "-";
+                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[METODE_MEDIA\]/i) || [])[1]?.trim() || "-";
+                    const metodeMedia = (aiText.match(/\[METODE_MEDIA\]([\s\S]*?)\[PEMBENTUKAN\]/i) || [])[1]?.trim() || "-";
                     const tahapAwal = (aiText.match(/\[PEMBENTUKAN\]([\s\S]*?)\[PERALIHAN\]/i) || [])[1]?.trim() || "-";
                     const tahapPeralihan = (aiText.match(/\[PERALIHAN\]([\s\S]*?)\[INTI\]/i) || [])[1]?.trim() || "-";
-                    
-                    let tahapInti, tahapPenutup, evalProses = "-", evalHasil = "-";
-                    if (jenis === 'BKP') {
-                        tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENGAKHIRAN\]/i) || [])[1]?.trim() || "-";
-                        tahapPenutup = (aiText.match(/\[PENGAKHIRAN\]([\s\S]*?)\[EVALUASI_PROSES\]/i) || [])[1]?.trim() || "-";
-                        evalProses = (aiText.match(/\[EVALUASI_PROSES\]([\s\S]*?)\[EVALUASI_HASIL\]/i) || [])[1]?.trim() || "-";
-                        evalHasil = (aiText.match(/\[EVALUASI_HASIL\]([\s\S]*?)$/i) || [])[1]?.trim() || "-";
-                    } else {
-                        tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENGAKHIRAN\]/i) || [])[1]?.trim() || "-";
-                        tahapPenutup = (aiText.match(/\[PENGAKHIRAN\]([\s\S]*?)$/i) || [])[1]?.trim() || "-";
-                    }
+                    const tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENGAKHIRAN\]/i) || [])[1]?.trim() || "-";
+                    const tahapPenutup = (aiText.match(/\[PENGAKHIRAN\]([\s\S]*?)\[EVALUASI_PROSES\]/i) || [])[1]?.trim() || "-";
+                    const evalProses = (aiText.match(/\[EVALUASI_PROSES\]([\s\S]*?)\[EVALUASI_HASIL\]/i) || [])[1]?.trim() || "-";
+                    const evalHasil = (aiText.match(/\[EVALUASI_HASIL\]([\s\S]*?)$/i) || [])[1]?.trim() || "-";
 
-                    // CETAK PDF
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] });
                     const s = metaData.sekolah || {};
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const centerX = pageWidth / 2;
 
-                    // Format Tanggal TTD murni Tanggal Bulan Tahun tanpa hari
-                    const tglMentah = getItemDate(item);
-                    const tglCetak = tglMentah ? new Date(tglMentah).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
-
-                    // -- 1. KOP SURAT LENGKAP --
+                    // --- KOP SURAT ---
                     doc.setFont("times", "normal");
                     const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
                     const urlKanan = s.logo_kanan || ""; 
-                    if (urlKiri) { const imgData = await getBase64FromUrl(urlKiri); if (imgData) doc.addImage(imgData, 'PNG', 10, 10, 25, 25); }
-                    if (urlKanan) { const imgData2 = await getBase64FromUrl(urlKanan); if (imgData2) doc.addImage(imgData2, 'PNG', pageWidth - 35, 10, 25, 25); }
+                    if (urlKiri) { const imgD = await getBase64FromUrl(urlKiri); if (imgD) doc.addImage(imgD, 'PNG', 10, 10, 25, 25); }
+                    if (urlKanan) { const imgD2 = await getBase64FromUrl(urlKanan); if (imgD2) doc.addImage(imgD2, 'PNG', pageWidth - 35, 10, 25, 25); }
 
                     let currentY = 15;
                     doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
                     currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
-                    
-                    currentY += 5; 
-                    doc.setFont("times", "normal"); 
-                    doc.setFontSize(10);
-                    const alamatText = s.alamat || "Alamat Sekolah Lengkap";
-                    const alamatSplit = doc.splitTextToSize(alamatText, pageWidth - 80); 
+                    currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10);
+                    const alamatSplit = doc.splitTextToSize((s.alamat || "Alamat Sekolah"), pageWidth - 80); 
                     doc.text(alamatSplit, centerX, currentY, { align: 'center' });
-
-                    const tinggiAlamat = alamatSplit.length * 4;
-                    currentY += tinggiAlamat; 
-                    
+                    currentY += (alamatSplit.length * 4); 
                     doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
                     doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
                     
-                    // -- 2. JUDUL RPL --
+                    // --- JUDUL ---
                     currentY += 10;
                     doc.setFont("times", "bold"); doc.setFontSize(12);
                     doc.text(`RENCANA PELAKSANAAN LAYANAN BIMBINGAN DAN KONSELING`, centerX, currentY, { align: 'center' });
-                    currentY += 5;
-                    doc.text(`${jenis === 'BKP' ? 'BIMBINGAN' : 'KONSELING'} KELOMPOK`, centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.text(`BIMBINGAN KELOMPOK (BKP)`, centerX, currentY, { align: 'center' });
                     
+                    // --- TABEL A. IDENTITAS ---
                     currentY += 8;
                     doc.autoTable({
                         startY: currentY,
-                        showHead: 'first',
+                        showHead: 'firstPage', // PERBAIKAN: Mencegah tabel dobel saat pindah halaman
                         pageBreak: 'auto',
                         head: [[{ content: 'A. IDENTITAS KEGIATAN', colSpan: 3, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [
                             ['1', 'Nama Guru BK', currentUser.nama || '-'],
                             ['2', 'Komponen Layanan', komponenLayanan],
                             ['3', 'Bidang Layanan', bidangLayanan],
-                            ['4', 'Tahun Ajaran', item['Tahun_Ajar'] || s.tahun_ajar || '-'],
-                            ['5', 'Semester', item['Semester'] || s.semester || '-'],
-                            ['6', 'Topik / Masalah', topik],
-                            ['7', 'Anggota Kelompok', anggota],
-                            ['8', 'Waktu / Tempat', `${item['Durasi'] || '1x45 Menit'} di ${item['Tempat'] || 'Ruang BK'}`],
+                            ['4', 'Fungsi Layanan', 'Pemahaman dan Pencegahan'],
+                            ['5', 'Topik / Materi', topik],
+                            ['6', 'Tahun Ajaran / Semester', `${item['Tahun_Ajar'] || s.tahun_ajar || '-'} / ${item['Semester'] || s.semester || '-'}`],
+                            ['7', 'Sasaran / Anggota', anggota],
+                            ['8', 'Waktu / Tempat', `${waktu} di ${tempat}`],
                             ['9', 'Tanggal Pelaksanaan', tglCetak]
                         ],
-                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                        columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 45, fontStyle: 'bold' } },
+                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 55, fontStyle: 'bold' } }, 
                         margin: { left: 15, right: 15 }
                     });
 
+                    // --- B. TUJUAN ---
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 3,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
                         head: [[{ content: 'B. TUJUAN LAYANAN', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
-                        body: [[tujuan]],
-                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
+                        body: [[tujuan]], theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
                     });
 
+                    // --- C. METODE, MEDIA & SUMBER ---
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 3,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
-                        head: [[{ content: 'C. TAHAP KEGIATAN KELOMPOK', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        head: [[{ content: 'C. METODE, MEDIA/ALAT, DAN SUMBER MATERI', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [[metodeMedia]], theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
+                    });
+
+                    // --- D. TAHAP KEGIATAN ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'D. TAHAP KEGIATAN KELOMPOK', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [
                             ['1. Tahap Pembentukan', tahapAwal],
                             ['2. Tahap Peralihan', tahapPeralihan],
-                            ['3. Tahap Inti (Termasuk Games)', tahapInti],
+                            ['3. Tahap Inti\n(Aktivitas & Materi)', tahapInti],
                             ['4. Tahap Pengakhiran', tahapPenutup]
                         ],
                         theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                        columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' }, 1: { cellWidth: 'auto' } }, margin: { left: 15, right: 15 }
+                        columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' } }, margin: { left: 15, right: 15 }
                     });
 
-                    if (jenis === 'BKP') {
-                        doc.autoTable({
-                            startY: doc.lastAutoTable.finalY + 3,
-                            showHead: 'first',
-                            pageBreak: 'auto',
-                            head: [[{ content: 'D. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
-                            body: [
-                                ['Evaluasi Proses', evalProses],
-                                ['Evaluasi Hasil', evalHasil]
-                            ],
-                            theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                            columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' }, 1: { cellWidth: 'auto' } }, margin: { left: 15, right: 15 }
-                        });
-                    }
+                    // --- E. EVALUASI ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'E. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [ ['1. Evaluasi Proses', evalProses], ['2. Evaluasi Hasil', evalHasil] ],
+                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' } }, margin: { left: 15, right: 15 }
+                    });
 
-                    // --- RESTRUKTURISASI TANDA TANGAN: KONDISIONAL (BKP SEJAJAR / KKP GURU BK DI TENGAH) ---
+                    // --- TANDA TANGAN (TANPA QR CODE) ---
                     currentY = doc.lastAutoTable.finalY + 15;
                     if(currentY + 40 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; }
                     
                     doc.setFont("times", "normal"); doc.setFontSize(11);
-                    
-                    // Definisikan posisi koordinat X
-                    const kiriX = centerX - 50;
-                    const kananX = centerX + 50;
+                    const kiriX = centerX - 50; const kananX = centerX + 50;
 
-                    if (jenis === 'BKP') {
-                        // --- JIKA BIMBINGAN KELOMPOK (SEJAJAR KIRI & KANAN) ---
-                        // Sisi Kiri: Kepala Sekolah
-                        doc.text("Mengetahui,", kiriX, currentY, { align: 'center' });
-                        doc.text("Kepala Sekolah", kiriX, currentY + 5, { align: 'center' });
+                    doc.text("Mengetahui,", kiriX, currentY, { align: 'center' });
+                    doc.text("Kepala Sekolah", kiriX, currentY + 5, { align: 'center' });
+                    doc.text(`Makassar, ${tglCetak}`, kananX, currentY, { align: 'center' });
+                    doc.text("Guru Bimbingan Konseling", kananX, currentY + 5, { align: 'center' });
 
-                        // Sisi Kanan: Tanggal ditaruh tepat di atas Guru BK
-                        doc.text(`Makassar, ${tglCetak}`, kananX, currentY, { align: 'center' });
-                        doc.text("Guru Bimbingan Konseling", kananX, currentY + 5, { align: 'center' });
-                        
-                        // QR Code diposisikan di tengah-tengah (antara Kepsek & Guru BK)
-                        try {
-                            const qrText = `Dokumen Resmi RPL-BK Kelompok\nTopik: ${topik}\nTanggal: ${tglCetak}\nGuru BK: ${currentUser.nama}`;
-                            const qrImage = new QRious({ value: qrText, size: 100, level: 'H' }).toDataURL();
-                            doc.addImage(qrImage, 'PNG', centerX - 12.5, currentY + 2, 25, 25);
-                            doc.setFontSize(7); doc.text("Scan Validasi", centerX, currentY + 30, { align: 'center' });
-                            doc.setFontSize(11);
-                        } catch (e) {}
-
-                        currentY += 32;
-                        // Nama & NIP Kepala Sekolah (Kiri)
-                        doc.setFont("times", "bold"); 
-                        doc.text(s.kepsek || ".....................", kiriX, currentY, { align: 'center' }); 
-                        doc.setFont("times", "normal"); 
-                        doc.text(`NIP. ${s.nip_kepsek || '-'}`, kiriX, currentY + 5, { align: 'center' });
-
-                        // Nama & NIP Guru BK (Kanan)
-                        doc.setFont("times", "bold"); 
-                        doc.text(currentUser.nama, kananX, currentY, { align: 'center' });
-                        doc.setFont("times", "normal"); 
-                        doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, currentY + 5, { align: 'center' });
-
-                    } else {
-                        // --- JIKA KONSELING KELOMPOK (GURU BK DI TENGAH, QR CODE DI SAMPING KIRI NAMA) ---
-                        // Posisikan Teks Jabatan & Tanggal tepat di tengah halaman (centerX)
-                        doc.setFont("times", "normal"); doc.setFontSize(11);
-                        doc.text(`Makassar, ${tglCetak}`, centerX, currentY, { align: 'center' });
-                        doc.text("Guru Bimbingan Konseling", centerX, currentY + 5, { align: 'center' });
-
-                        // QR Code digeser ke samping kiri (centerX - 50) agar sejajar dengan ruang kosong tanda tangan
-                        try {
-                            const qrText = `Dokumen Resmi RPL-BK Kelompok\nTopik: ${topik}\nTanggal: ${tglCetak}\nGuru BK: ${currentUser.nama}`;
-                            const qrImage = new QRious({ value: qrText, size: 100, level: 'H' }).toDataURL();
-                            
-                            // Menggunakan Y (currentY + 2) agar posisinya pas di ruang kosong sebelum nama tercetak
-                            doc.addImage(qrImage, 'PNG', centerX - 50, currentY + 2, 23, 23);
-                            doc.setFontSize(7); 
-                            doc.setFontSize(11); // Kembalikan ke ukuran normal
-                        } catch (e) {}
-
-                        // Ditambah menjadi +28 agar teks nama melorot ke bawah, memberikan ruang vertikal aman untuk QR Code
-                        currentY += 28;
-                        
-                        // Nama Guru BK dicetak tebal tepat di tengah dokumen (Aman tidak tertutup QR Code)
-                        doc.setFont("times", "bold"); 
-                        doc.text(currentUser.nama, centerX, currentY, { align: 'center' });
-
-                        // NIP Guru BK kembali normal tepat di bawah nama
-                        doc.setFont("times", "normal"); 
-                        doc.text(`NIP. ${currentUser.nip || '-'}`, centerX, currentY + 5, { align: 'center' });
-                    }
+                    currentY += 32;
+                    doc.setFont("times", "bold"); 
+                    doc.text(s.kepsek || ".....................", kiriX, currentY, { align: 'center' }); 
+                    doc.text(currentUser.nama, kananX, currentY, { align: 'center' });
+                    doc.setFont("times", "normal"); 
+                    doc.text(`NIP. ${s.nip_kepsek || '-'}`, kiriX, currentY + 5, { align: 'center' });
+                    doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, currentY + 5, { align: 'center' });
 
                     Swal.close();
-                    try { window.open(URL.createObjectURL(doc.output('blob')), '_blank'); } catch (e) { doc.save(`RPL_${jenis}_${topik}.pdf`); }
+                    try { window.open(URL.createObjectURL(doc.output('blob')), '_blank'); } catch (e) { doc.save(`RPL_BKP.pdf`); }
                 } else { Swal.close(); tampilkanPesanErrorAI(res?.message); }
             } catch (err) { Swal.close(); tampilkanPesanErrorAI("Sirkuit AI terputus."); }
         }
-		
-		// --- FITUR DEWA: AI GENERATOR KONFERENSI KASUS (UPDATED: REAL DATA, TTD TENGAH & ANTI-OVERLAP) ---
+
+        // =========================================================================
+        // FITUR DEWA: GENERATOR RPL KONSELING KELOMPOK (AI POWERED)
+        // =========================================================================
+        async function generateRPL_KonselingKelompok(id) {
+            const item = activeDataList.find(x => x.ID_Unik === id);
+            if(!item) return;
+
+            Swal.fire({ 
+                title: 'AI Meracik Konseling Kelompok...', 
+                html: 'Menganalisis masalah, menentukan pendekatan, dan menyusun skenario intervensi...', 
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
+
+            const masalah = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || item['Topik'] || item['Masalah'] || item['Uraian_Masalah'] || item['Deskripsi_Masalah'] || '-';
+            const anggota = item['Anggota_Kelompok_Siswa'] || item['Nama_Siswa'] || item['Sasaran'] || '-';
+            const bidangLayanan = item['Bidang_Bimbingan'] || item['Bidang_Layanan'] || 'Pribadi/Sosial';
+            const waktu = item['Durasi'] || '1x45 Menit';
+            const tempat = item['Tempat'] || 'Ruang Konseling';
+            
+            // Format Tanggal TANPA Hari
+            const tglMentah = getItemDate(item);
+            const tglCetak = tglMentah ? new Date(tglMentah).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+
+            const promptRPL = `
+                TUGAS: Anda adalah Konselor Klinis Senior yang ahli merancang RPL Konseling Kelompok.
+                DATA LAYANAN:
+                - Fokus Masalah: ${masalah}
+                - Sasaran: ${anggota.split(',').length} Klien (Siswa)
+                - Bidang Layanan: ${bidangLayanan}
+
+                INSTRUKSI PENTING: 
+                - Susun setiap bagian dalam bentuk DAFTAR POIN (a., b., c., dst). DILARANG menggunakan bullet (*, -).
+                - Tentukan PENDEKATAN KONSELING dan TEKNIK KONSELING yang paling ampuh.
+                - JABARKAN TAHAP KEGIATAN SECARA DETAIL, JELAS, DAN RAPI. Pada [INTI], buat skenario penerapan teknik konseling.
+                - Wajib sebutkan Ikrar/Asas Kerahasiaan di tahap [PEMBENTUKAN].
+                - Pada [EVALUASI_PROSES] dan [EVALUASI_HASIL] wajib buat minimal 3 poin.
+
+                FORMAT JAWABAN WAJIB:
+                [TUJUAN]
+                a. (Tujuan pengentasan masalah...)
+                b. (Tujuan spesifik...)
+                
+                [PENDEKATAN_TEKNIK]
+                Pendekatan Konseling: (Sebutkan Pendekatan)
+                Teknik Konseling: (Sebutkan Teknik)
+                Media/Alat: (Lembar Kontrak, dsb jika ada)
+
+                [PEMBENTUKAN]
+                a. Membangun rasa aman (trust building).
+                b. Menjelaskan tujuan konseling.
+                c. Melaksanakan Ikrar Asas Kerahasiaan.
+                
+                [PERALIHAN]
+                a. Menjelaskan kembali peran anggota.
+                b. Menanyakan kesiapan untuk bercerita.
+
+                [INTI]
+                a. (Detail anggota saling mengungkapkan masalah...)
+                b. (Detail penerapan teknik konseling oleh Guru BK...)
+                c. (Detail intervensi dan penguatan kognitif/perilaku...)
+                
+                [PENGAKHIRAN]
+                a. Evaluasi perasaan setelah konseling.
+                b. Menyepakati komitmen dan rencana tindak lanjut.
+
+                [EVALUASI_PROSES]
+                a. (Keterbukaan klien...)
+                b. (Empati antar anggota...)
+                c. (Kelancaran penerapan teknik...)
+
+                [EVALUASI_HASIL]
+                a. (Pemahaman akar masalah...)
+                b. (Penurunan intensitas masalah...)
+                c. (Rencana tindakan...)
+            `;
+
+            try {
+                const res = await apiCall({ action: 'askAI', prompt: promptRPL, targetField: 'RPL KKP' }, 'POST', { action: 'askAI', prompt: promptRPL, targetField: 'RPL KKP' });
+                
+                if(res && res.status === 'success') {
+                    const aiText = res.data;
+                    const tujuan = (aiText.match(/\[TUJUAN\]([\s\S]*?)\[PENDEKATAN_TEKNIK\]/i) || [])[1]?.trim() || "-";
+                    const pendekatanTeknik = (aiText.match(/\[PENDEKATAN_TEKNIK\]([\s\S]*?)\[PEMBENTUKAN\]/i) || [])[1]?.trim() || "-";
+                    const tahapAwal = (aiText.match(/\[PEMBENTUKAN\]([\s\S]*?)\[PERALIHAN\]/i) || [])[1]?.trim() || "-";
+                    const tahapPeralihan = (aiText.match(/\[PERALIHAN\]([\s\S]*?)\[INTI\]/i) || [])[1]?.trim() || "-";
+                    const tahapInti = (aiText.match(/\[INTI\]([\s\S]*?)\[PENGAKHIRAN\]/i) || [])[1]?.trim() || "-";
+                    const tahapPenutup = (aiText.match(/\[PENGAKHIRAN\]([\s\S]*?)\[EVALUASI_PROSES\]/i) || [])[1]?.trim() || "-";
+                    const evalProses = (aiText.match(/\[EVALUASI_PROSES\]([\s\S]*?)\[EVALUASI_HASIL\]/i) || [])[1]?.trim() || "-";
+                    const evalHasil = (aiText.match(/\[EVALUASI_HASIL\]([\s\S]*?)$/i) || [])[1]?.trim() || "-";
+
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] });
+                    const s = metaData.sekolah || {};
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const centerX = pageWidth / 2;
+
+                    // --- KOP SURAT ---
+                    doc.setFont("times", "normal");
+                    const urlKiri = s.logo_kiri || s.logo_url || "https://drive.google.com/thumbnail?id=1Z6g-sCdw-k7W8dnw12NeagPkroLlmk-L"; 
+                    const urlKanan = s.logo_kanan || ""; 
+                    if (urlKiri) { const imgD = await getBase64FromUrl(urlKiri); if (imgD) doc.addImage(imgD, 'PNG', 10, 10, 25, 25); }
+                    if (urlKanan) { const imgD2 = await getBase64FromUrl(urlKanan); if (imgD2) doc.addImage(imgD2, 'PNG', pageWidth - 35, 10, 25, 25); }
+
+                    let currentY = 15;
+                    doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.setFont("times", "normal"); doc.setFontSize(10);
+                    const alamatSplit = doc.splitTextToSize((s.alamat || "Alamat Sekolah"), pageWidth - 80); 
+                    doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+                    currentY += (alamatSplit.length * 4); 
+                    doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+                    doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+                    
+                    // --- JUDUL ---
+                    currentY += 10;
+                    doc.setFont("times", "bold"); doc.setFontSize(12);
+                    doc.text(`RENCANA PELAKSANAAN LAYANAN BIMBINGAN DAN KONSELING`, centerX, currentY, { align: 'center' });
+                    currentY += 5; doc.text(`KONSELING KELOMPOK (KKP)`, centerX, currentY, { align: 'center' });
+                    
+                    // --- TABEL A. IDENTITAS ---
+                    currentY += 8;
+                    doc.autoTable({
+                        startY: currentY,
+                        showHead: 'firstPage', // PERBAIKAN: Mencegah tabel dobel
+                        pageBreak: 'auto',
+                        head: [[{ content: 'A. IDENTITAS KEGIATAN', colSpan: 3, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [
+                            ['1', 'Nama Guru BK / Konselor', currentUser.nama || '-'],
+                            ['2', 'Komponen Layanan', 'Layanan Responsif'],
+                            ['3', 'Bidang Layanan', bidangLayanan],
+                            ['4', 'Fungsi Layanan', 'Pengentasan dan Advokasi'],
+                            ['5', 'Fokus Masalah', masalah],
+                            ['6', 'Tahun Ajaran / Semester', `${item['Tahun_Ajar'] || s.tahun_ajar || '-'} / ${item['Semester'] || s.semester || '-'}`],
+                            ['7', 'Klien / Anggota Kelompok', anggota],
+                            ['8', 'Waktu / Tempat', `${waktu} di ${tempat}`],
+                            ['9', 'Tanggal Pelaksanaan', tglCetak]
+                        ],
+                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 55, fontStyle: 'bold' } },
+                        margin: { left: 15, right: 15 }
+                    });
+
+                    // --- B. TUJUAN ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'B. TUJUAN KONSELING', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [[tujuan]], theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
+                    });
+
+                    // --- C. PENDEKATAN & TEKNIK ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'C. PENDEKATAN DAN TEKNIK KONSELING', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [[pendekatanTeknik]], theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
+                    });
+
+                    // --- D. TAHAP KEGIATAN ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'D. TAHAP KEGIATAN KONSELING (SKENARIO)', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [
+                            ['1. Tahap Pembentukan\n(Eksplorasi)', tahapAwal],
+                            ['2. Tahap Transisi\n(Peralihan)', tahapPeralihan],
+                            ['3. Tahap Kerja\n(Intervensi Inti)', tahapInti],
+                            ['4. Tahap Terminasi\n(Pengakhiran)', tahapPenutup]
+                        ],
+                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' } }, margin: { left: 15, right: 15 }
+                    });
+
+                    // --- E. EVALUASI ---
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 3,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        head: [[{ content: 'E. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
+                        body: [ ['1. Evaluasi Proses', evalProses], ['2. Evaluasi Hasil', evalHasil] ],
+                        theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                        columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' } }, margin: { left: 15, right: 15 }
+                    });
+
+                    // --- TANDA TANGAN (HANYA GURU BK - TANPA QR CODE) ---
+                    currentY = doc.lastAutoTable.finalY + 15;
+                    if(currentY + 40 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; }
+                    
+                    doc.setFont("times", "normal"); doc.setFontSize(11);
+                    const kananX = pageWidth - 50; 
+
+                    doc.text(`Makassar, ${tglCetak}`, kananX, currentY, { align: 'center' });
+                    doc.text("Guru Bimbingan dan Konseling", kananX, currentY + 5, { align: 'center' });
+                    
+                    currentY += 32;
+                    doc.setFont("times", "bold"); 
+                    doc.text(currentUser.nama || "Nama Guru BK", kananX, currentY, { align: 'center' });
+                    
+                    doc.setFont("times", "normal"); 
+                    doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, currentY + 5, { align: 'center' });
+
+                    Swal.close();
+                    try { window.open(URL.createObjectURL(doc.output('blob')), '_blank'); } catch (e) { doc.save(`RPL_KKP.pdf`); }
+                } else { Swal.close(); tampilkanPesanErrorAI(res?.message); }
+            } catch (err) { Swal.close(); tampilkanPesanErrorAI("Sirkuit AI terputus."); }
+        }
+        
+        // --- FITUR DEWA: AI GENERATOR KONFERENSI KASUS (UPDATED: ANTI-OVERLAP, NO QRCODE, NO HARI, FIX TUJUAN) ---
         async function generateSkenario_Konferensi(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
             if(!item) return;
@@ -5130,6 +5294,7 @@
             const bidangLayanan = item['Bidang_Bimbingan'] || item['Bidang_Layanan'] || '-';
             const komponenLayanan = item['Komponen_Layanan'] || item['Komponen'] || '-';
 
+            // PROMPT DIPERKETAT: Agar AI tidak merusak tag [TUJUAN]
             const promptSkenario = `
                 TUGAS: Anda adalah Konselor Senior. Buatkan Skenario Pelaksanaan "Konferensi Kasus" untuk membahas kasus siswa bernama ${siswa}.
                 - Deskripsi Kasus: ${kasus}
@@ -5138,10 +5303,13 @@
                 - Komponen Layanan: ${komponenLayanan}
 
                 INSTRUKSI PENTING: 
-                Susun dalam bentuk poin-poin (a, b, c). Gunakan tag kurung siku berikut:
+                Susun dalam bentuk poin-poin (a., b., c.). DILARANG menggunakan bullet.
+                ANDA WAJIB MENGGUNAKAN TAG KURUNG SIKU BERIKUT TEPAT SEPERTI INI (DILARANG DIUBAH/DIBOLD/DITAMBAH TITIK DUA):
                 
                 [TUJUAN]
-                a. (tujuan pertemuan ini untuk apa...)
+                a. (tujuan 1 pertemuan ini untuk apa...)
+                b. (tujuan 2 pertemuan ini untuk apa...)
+                c. (tujuan 3 pertemuan ini untuk apa...)
                 
                 [SUSUNAN_ACARA]
                 a. Pembukaan oleh Kepala Sekolah / Guru BK.
@@ -5154,12 +5322,13 @@
                 a. Guru BK: (tugasnya apa di rapat ini...)
                 b. Wali Kelas / Guru Mapel: (tugasnya apa...)
                 c. Orang Tua / Wali: (harapan yang ingin digali dari orang tua...)
+                d. Kesiswaan / Kepala Sekolah : (Tugasnya apa...)
 
                 [EVALUASI_PROSES]
-                a. (analisis AI terhadap kolaborasi dan antusiasme pihak yang hadir...)
+                (analisis AI terhadap kolaborasi dan antusiasme pihak yang hadir...)
 
                 [EVALUASI_HASIL]
-                a. (analisis AI terhadap dampak/komitmen dari hasil rapat untuk perubahan siswa...)
+                (analisis AI terhadap dampak/komitmen dari hasil rapat untuk perubahan siswa...)
             `;
 
             try {
@@ -5214,30 +5383,30 @@
                     doc.text(`RENCANA PELAKSANAAN KONFERENSI KASUS`, centerX, currentY, { align: 'center' });
                     
                     currentY += 8;
+                    // PERBAIKAN: Mengganti 'first' menjadi 'firstPage' agar kolom judul kembali muncul
                     doc.autoTable({
                         startY: currentY,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
                         head: [[{ content: 'A. IDENTITAS KONFERENSI', colSpan: 3, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [
                             ['1', 'Nama Guru BK', currentUser.nama || '-'],
                             ['2', 'Komponen Layanan', komponenLayanan],
                             ['3', 'Bidang Layanan', bidangLayanan],
-                            ['4', 'Tahun Ajaran', item['Tahun_Ajar'] || s.tahun_ajar || '-'],
-                            ['5', 'Semester', item['Semester'] || s.semester || '-'],
-                            ['6', 'Kasus yang Dibahas', kasus],
-                            ['7', 'Nama Siswa (Kasus)', `${siswa} (Kelas ${item['Kelas'] || '-'})`],
-                            ['8', 'Pihak Terlibat', pihak],
-                            ['9', 'Waktu / Tempat', `${item['Durasi'] || '1x45 Menit'} di ${item['Tempat_Pertemuan'] || 'Ruang Rapat / BK'}`],
-                            ['10', 'Tanggal Pelaksanaan', tglCetak]
+                            ['4', 'Tahun Ajaran / Semester', `${item['Tahun_Ajar'] || s.tahun_ajar || '-'} / ${item['Semester'] || s.semester || '-'}`],
+                            ['5', 'Kasus yang Dibahas', kasus],
+                            ['6', 'Nama Siswa (Kasus)', `${siswa} (Kelas ${item['Kelas'] || '-'})`],
+                            ['7', 'Pihak Terlibat', pihak],
+                            ['8', 'Waktu / Tempat', `${item['Durasi'] || '1x45 Menit'} di ${item['Tempat_Pertemuan'] || 'Ruang Rapat / BK'}`],
+                            ['9', 'Tanggal Pelaksanaan', tglCetak]
                         ],
                         theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 2.5, lineColor: 0, lineWidth: 0.1, textColor: 0 },
-                        columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 45, fontStyle: 'bold' } }, margin: { left: 15, right: 15 }
+                        columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 50, fontStyle: 'bold' } }, margin: { left: 15, right: 15 }
                     });
 
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 3,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
                         head: [[{ content: 'B. TUJUAN KONFERENSI', styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [[tujuan]], theme: 'grid', styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 }, margin: { left: 15, right: 15 }
@@ -5245,7 +5414,7 @@
 
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 3,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
                         head: [[{ content: 'C. SUSUNAN ACARA & PERAN PIHAK', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [ ['Susunan Acara', acara], ['Peran Pihak Terlibat', peran] ],
@@ -5255,7 +5424,7 @@
 
                     doc.autoTable({
                         startY: doc.lastAutoTable.finalY + 3,
-                        showHead: 'first',
+                        showHead: 'firstPage',
                         pageBreak: 'auto',
                         head: [[{ content: 'D. EVALUASI DAN TINDAK LANJUT', colSpan: 2, styles: { fillColor: [230, 230, 230], fontStyle: 'bold', textColor: 0 } }]],
                         body: [ ['Evaluasi Proses', evalProses], ['Evaluasi Hasil', evalHasil] ],
@@ -5263,7 +5432,7 @@
                         columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold', valign: 'top' } }, margin: { left: 15, right: 15 }
                     });
 
-                    // --- RESTRUKTURISASI TANDA TANGAN: KONFERENSI KASUS (SEJAJAR & TANGGAL DI ATAS GURU BK) ---
+                    // --- RESTRUKTURISASI TANDA TANGAN: KONFERENSI KASUS (SEJAJAR, TANPA QRCODE) ---
                     currentY = doc.lastAutoTable.finalY + 15;
                     if(currentY + 40 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); currentY = 20; }
 
@@ -5279,16 +5448,7 @@
                     
                     // Sisi Kanan: Tanggal dipindah ke sini (Tepat di atas Guru BK)
                     doc.text(`Makassar, ${tglCetak}`, kananX, currentY, { align: 'center' });
-                    doc.text("Guru Bimbingan Konseling", kananX, currentY + 5, { align: 'center' });
-                    
-                    // QR Code/Validasi tepat di tengah sumbu halaman di antara dua tanda tangan
-                    try {
-                        const qrText = `Dokumen Konferensi Kasus\nSiswa: ${siswa}\nTanggal: ${tglCetak}\nGuru BK: ${currentUser.nama}`;
-                        const qrImage = new QRious({ value: qrText, size: 100, level: 'H' }).toDataURL();
-                        doc.addImage(qrImage, 'PNG', centerX - 12.5, currentY + 2, 25, 25);
-                        doc.setFontSize(7); doc.text("Scan Validasi", centerX, currentY + 30, { align: 'center' });
-                        doc.setFontSize(11);
-                    } catch (e) {}
+                    doc.text("Guru Bimbingan dan Konseling", kananX, currentY + 5, { align: 'center' });
 
                     currentY += 32;
                     // Nama & NIP Kepala Sekolah (Kiri)
@@ -5299,7 +5459,7 @@
 
                     // Nama & NIP Guru BK (Kanan)
                     doc.setFont("times", "bold"); 
-                    doc.text(currentUser.nama, kananX, currentY, { align: 'center' });
+                    doc.text(currentUser.nama || "Nama Guru BK", kananX, currentY, { align: 'center' });
                     doc.setFont("times", "normal"); 
                     doc.text(`NIP. ${currentUser.nip || '-'}`, kananX, currentY + 5, { align: 'center' });
 
