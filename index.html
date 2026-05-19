@@ -2259,7 +2259,10 @@
                     }
                 }
                 return textMatch && dateMatch;
-            }).reverse();
+            });
+
+            // URUTAN BARU KE LAMA (Terbaru di atas)
+            filteredData.sort((a, b) => new Date(getItemDate(b)) - new Date(getItemDate(a)));
 
             const container = document.getElementById('data-container');
             container.innerHTML = '';
