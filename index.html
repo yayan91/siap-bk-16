@@ -350,12 +350,15 @@
 
                 </div>
                 
-                <div class="w-full xl:w-72 relative">
-                    <div class="flex bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-                        <input type="text" id="global-student-search" placeholder="Cari Siswa..." class="w-full px-4 py-2 bg-transparent outline-none text-slate-700 dark:text-white text-sm">
-                        <button onclick="searchStudentHistory()" class="bg-blue-600 text-white px-4 hover:bg-blue-700 transition"><i class="fa-solid fa-search"></i></button>
-                    </div>
-                </div>
+               <div class="w-full xl:w-72 relative">
+					<div class="flex bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+						<input type="text" id="global-student-search" list="globalSiswaAuto" placeholder="Cari Siswa..." class="w-full px-4 py-2 bg-transparent outline-none text-slate-700 dark:text-white text-sm">
+						
+						<datalist id="globalSiswaAuto"></datalist>
+						
+						<button onclick="searchStudentHistory()" class="bg-blue-600 text-white px-4 hover:bg-blue-700 transition"><i class="fa-solid fa-search"></i></button>
+					</div>
+				</div>
             </div>
 
             <!-- EXECUTIVE SUMMARY CARDS (NEW) -->
@@ -1304,6 +1307,11 @@
 			
 			// Letakkan ini di dalam fungsi initApp() atau window.onload
 			document.getElementById('current-year').innerText = new Date().getFullYear();
+			// --- KODE UNTUK AUTOCOMPLETE PENCARIAN GLOBAL ---
+			const datalistGlobal = document.getElementById('globalSiswaAuto');
+			if (datalistGlobal && metaData && metaData.siswa) {
+				datalistGlobal.innerHTML = metaData.siswa.map(s => `<option value="${s.nama}">`).join('');
+			}
         }
 
         window.onload = () => {
@@ -6400,14 +6408,28 @@
 		}
 
 		// ==========================================
-        // FITUR CETAK BUKU SISWA (PROFIL PROFESIONAL UPDATED)
-        // ==========================================
+		// FITUR CETAK BUKU SISWA (PROFIL PROFESIONAL UPDATED)
+		// ==========================================
 		async function generateDanCetakBukuSiswa() {
 			const namaSiswa = document.getElementById('inputCetakBukuSiswa').value;
 			if (!namaSiswa) {
 				Swal.fire('Oops!', 'Silakan pilih nama siswa terlebih dahulu.', 'warning');
 				return;
 			}
+
+			// =========================================================================
+			// TRIK 1: BUKA TAB KOSONG DI AWAL (Solusi Pop-up Blocker HP)
+			// =========================================================================
+			let printWindow = window.open('', '_blank');
+			if (!printWindow) {
+				// Jika gagal membuka tab bahkan di awal, berarti browser sangat ketat
+				Swal.fire('Pop-up Diblokir', 'Browser HP Anda memblokir tab baru. Silakan izinkan Pop-up untuk aplikasi ini agar bisa mencetak.', 'warning');
+				return; 
+			}
+			// Isi sementara tab baru dengan tulisan loading agar layar tidak putih polos
+			printWindow.document.write('<h3 style="text-align:center; font-family:sans-serif; margin-top:20vh; color:#3b82f6;">Sedang menyusun Buku Pribadi Siswa...</h3><p style="text-align:center; font-family:sans-serif; color:#64748b;">Mohon tunggu sebentar, dokumen akan segera muncul di sini.</p>');
+			// =========================================================================
+
 
 			Swal.fire({
 				title: 'Menyusun Dokumen...',
@@ -6442,7 +6464,7 @@
 			const sheetsToSearch = [
 				'7_Layanan_Individu', '8_Layanan_Kelompok', '9_Bimbingan_Kelompok', '10_Konsultasi', '11_Layanan_Klasikal',
 				'12_Konferensi_Kasus', '13_Alih_Tangan_Kasus', '14_Mediasi', '15_Advokasi', '16_Dukungan_Sistem', 
-                '17_Catatan_Anekdot', '18_Kunjungan_Rumah', '19_Catatan_Pelanggaran', '20_Catatan_Prestasi', '21_Layanan_Kolaborasi'
+				'17_Catatan_Anekdot', '18_Kunjungan_Rumah', '19_Catatan_Pelanggaran', '20_Catatan_Prestasi', '21_Layanan_Kolaborasi'
 			];
 			
 			const labelsMap = {
@@ -6452,7 +6474,7 @@
 				'13_Alih_Tangan_Kasus': 'Alih Tangan', '14_Mediasi': 'Mediasi',
 				'15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan', 
 				'17_Catatan_Anekdot': 'C. Anekdot', '18_Kunjungan_Rumah': 'Home Visit',
-                '19_Catatan_Pelanggaran': 'Pelanggaran', '20_Catatan_Prestasi': 'Prestasi', '21_Layanan_Kolaborasi': 'Kolaborasi', '22_Layanan_Lintas_Kelas': 'Lintas Kelas'
+				'19_Catatan_Pelanggaran': 'Pelanggaran', '20_Catatan_Prestasi': 'Prestasi', '21_Layanan_Kolaborasi': 'Kolaborasi', '22_Layanan_Lintas_Kelas': 'Lintas Kelas'
 			};
 
 			Object.values(labelsMap).forEach(lbl => rekapCounts[lbl] = 0);
@@ -6473,10 +6495,10 @@
 
 							let tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'] || '-';
 							
-                            // UPDATED: Menambahkan Bentuk Pelanggaran & Nama Prestasi agar terbaca
+							// UPDATED: Menambahkan Bentuk Pelanggaran & Nama Prestasi agar terbaca
 							let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || 
-                                         item['Tujuan_Kunjungan'] || item['Deskripsi_Peristiwa'] || 
-                                         item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || item['Topik_Bahasan'] || '-';
+										 item['Tujuan_Kunjungan'] || item['Deskripsi_Peristiwa'] || 
+										 item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || item['Topik_Bahasan'] || '-';
 
 							riwayatHtml += `
 								<tr>
@@ -6528,24 +6550,24 @@
 							<td width="15%">${logoKiriBase64 ? `<img src="${logoKiriBase64}" width="70">` : ''}</td>
 							<td width="70%">
 								<div style="font-size: 14px;">${(s.pemerintah || 'PEMERINTAH KOTA').toUpperCase()}</div>
-								<div style=\"font-size: 14px;\">${(s.instansi || 'DINAS PENDIDIKAN').toUpperCase()}</div>
-								<div style=\"font-size: 18px; font-weight: bold;\">${(s.nama || 'NAMA SEKOLAH').toUpperCase()}</div>
-								<div style=\"font-size: 14px; font-weight: bold;\">${(s.judul_bk || 'BIMBINGAN DAN KONSELING').toUpperCase()}</div>
-								<div style=\"font-size: 10px; line-height: 1.4; max-width: 500px; margin: 0 auto;\">
+								<div style="font-size: 14px;">${(s.instansi || 'DINAS PENDIDIKAN').toUpperCase()}</div>
+								<div style="font-size: 18px; font-weight: bold;">${(s.nama || 'NAMA SEKOLAH').toUpperCase()}</div>
+								<div style="font-size: 14px; font-weight: bold;">${(s.judul_bk || 'BIMBINGAN DAN KONSELING').toUpperCase()}</div>
+								<div style="font-size: 10px; line-height: 1.4; max-width: 500px; margin: 0 auto;">
 									${(s.alamat || '').replace(/\n/g, '<br>')}
 								</div>
 							</td>
-							<td width=\"15%\">${logoKananBase64 ? `<img src="${logoKananBase64}" width="70">` : ''}</td>
+							<td width="15%">${logoKananBase64 ? `<img src="${logoKananBase64}" width="70">` : ''}</td>
 						</tr>
 					</table>
-					<div class=\"line-thin\"></div>
+					<div class="line-thin"></div>
 
-					<div class=\"title\">BUKU PRIBADI SISWA (REKAM JEJAK)</div>
+					<div class="title">BUKU PRIBADI SISWA (REKAM JEJAK)</div>
 
-					<div class=\"profil-container\">
-						<div class=\"foto-box\">PAS FOTO<br>3 X 4</div>
-						<table border=\"0\" style=\"font-size: 14px;\">
-							<tr><td width=\"150\">Nama Lengkap</td><td>:</td><td><b>${namaSiswa}</b></td></tr>
+					<div class="profil-container">
+						<div class="foto-box">PAS FOTO<br>3 X 4</div>
+						<table border="0" style="font-size: 14px;">
+							<tr><td width="150">Nama Lengkap</td><td>:</td><td><b>${namaSiswa}</b></td></tr>
 							<tr><td>NISN</td><td>:</td><td>${nisnSiswa}</td></tr>
 							<tr><td>Kelas</td><td>:</td><td>${kelasSiswa}</td></tr>
 							<tr><td>Jenis Kelamin</td><td>:</td><td>${jkSiswa}</td></tr>
@@ -6554,25 +6576,25 @@
 					</div>
 
 					<p><b>A. REKAPITULASI JUMLAH LAYANAN / PEMBINAAN</b></p>
-					<table class=\"table-rekap\">
+					<table class="table-rekap">
 						<thead>
 							<tr><th>Kategori Data</th><th>Intensitas</th></tr>
 						</thead>
 						<tbody>
-							${rekapHtml || '<tr><td colspan=\"2\" style=\"text-align:center; padding: 5px; border: 1px solid #000;\">Belum ada riwayat</td></tr>'}
+							${rekapHtml || '<tr><td colspan="2" style="text-align:center; padding: 5px; border: 1px solid #000;">Belum ada riwayat</td></tr>'}
 						</tbody>
 					</table>
 
 					<p><b>B. RINCIAN RIWAYAT LAYANAN & PERKEMBANGAN</b></p>
-					<table class=\"table-riwayat\">
+					<table class="table-riwayat">
 						<thead>
-							<tr><th width=\"5%\">No</th><th width=\"15%\">Tanggal</th><th width=\"25%\">Jenis Layanan</th><th width=\"55%\">Uraian / Keterangan</th></tr>
+							<tr><th width="5%">No</th><th width="15%">Tanggal</th><th width="25%">Jenis Layanan</th><th width="55%">Uraian / Keterangan</th></tr>
 						</thead>
 						<tbody>${riwayatHtml}</tbody>
 					</table>
 
-					<div class=\"ttd-container\">
-						<div style=\"text-align: center; width: 40%;\">Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}<br>Guru Bimbingan dan Konseling<br><br><br><br><b>${currentUser.nama}</b><br>NIP. ${currentUser.nip || '-'}</div>
+					<div class="ttd-container">
+						<div style="text-align: center; width: 40%;">Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}<br>Guru Bimbingan dan Konseling<br><br><br><br><b>${currentUser.nama}</b><br>NIP. ${currentUser.nip || '-'}</div>
 					</div>
 				</body>
 				</html>
@@ -6580,7 +6602,10 @@
 
 			Swal.close();
 			closeModalBukuSiswa();
-			const printWindow = window.open('', '_blank');
+			
+			// =========================================================================
+			// SUNTIKKAN HASILNYA KE TAB YANG SUDAH DIBUKA TADI
+			// =========================================================================
 			printWindow.document.open();
 			printWindow.document.write(printContent);
 			printWindow.document.close();
