@@ -2218,29 +2218,29 @@
 					});
 				}
 
-				// Render Pelanggaran
-				listPelanggaran.innerHTML = `
-					<div class="mb-4">
-						<h5 class="text-xs font-bold text-red-500 uppercase mb-2 border-b pb-1">Berdasarkan Jenis Pelanggaran</h5>
-						<div class="space-y-1">
-							${Object.entries(countJenis).map(([k, v]) => `
-								<div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
-									<span>${k}</span> <span class="font-bold">${v}</span>
-								</div>
-							`).join('')}
-						</div>
-					</div>
-					<div>
-						<h5 class="text-xs font-bold text-orange-500 uppercase mb-2 border-b pb-1">Berdasarkan Bentuk Pelanggaran</h5>
-						<div class="space-y-1">
-							${Object.entries(countBentuk).map(([k, v]) => `
-								<div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
-									<span>${k}</span> <span class="font-bold">${v}</span>
-								</div>
-							`).join('')}
-						</div>
-					</div>
-				`;
+				// Render Pelanggaran (Sudah diurutkan dari terbanyak)
+                listPelanggaran.innerHTML = `
+                    <div class="mb-4">
+                        <h5 class="text-xs font-bold text-red-500 uppercase mb-2 border-b pb-1">Berdasarkan Jenis Pelanggaran</h5>
+                        <div class="space-y-1">
+                            ${Object.entries(countJenis).sort((a,b) => b[1]-a[1]).map(([k, v]) => `
+                                <div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
+                                    <span>${k}</span> <span class="font-bold">${v}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-xs font-bold text-orange-500 uppercase mb-2 border-b pb-1">Berdasarkan Bentuk Pelanggaran</h5>
+                        <div class="space-y-1">
+                            ${Object.entries(countBentuk).sort((a,b) => b[1]-a[1]).map(([k, v]) => `
+                                <div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
+                                    <span>${k}</span> <span class="font-bold">${v}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
 
 				// 2. OLAH DATA PRESTASI (Total per Tingkat saja)
 				const idxPrestasi = sheets.indexOf('20_Catatan_Prestasi');
@@ -2253,17 +2253,16 @@
 					});
 				}
 
-				// Render Prestasi
 				listPrestasi.innerHTML = `
-					<div class="space-y-2">
-						${Object.entries(countTingkat).map(([k, v]) => `
-							<div class="flex justify-between items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl">
-								<span class="text-xs font-bold text-emerald-700 dark:text-emerald-300">Tingkat ${k}</span>
-								<span class="text-xs font-black bg-emerald-200 dark:bg-emerald-800 px-2 py-0.5 rounded">${v} Prestasi</span>
-							</div>
-						`).join('')}
-					</div>
-				`;
+                    <div class="space-y-2">
+                        ${Object.entries(countTingkat).sort((a,b) => b[1]-a[1]).map(([k, v]) => `
+                            <div class="flex justify-between items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl">
+                                <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300">Tingkat ${k}</span>
+                                <span class="text-xs font-black bg-emerald-200 dark:bg-emerald-800 px-2 py-0.5 rounded">${v} Prestasi</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
 			};
             // Eksekusi fungsinya
             renderKlasemenPelanggaranPrestasi();
@@ -5169,13 +5168,16 @@
 
             // --- TABEL D.1: DAFTAR PELANGGARAN SISWA ---
             if(currentY > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); currentY = 20; }
+            
+            // Cetak judul tabel terpisah dari autoTable agar tidak berulang
+            doc.setFont("times", "bold"); doc.setFontSize(10);
+            doc.text('Tabel D.1 Daftar Siswa dengan Catatan Pelanggaran', marginLR, currentY);
+            currentY += 3;
+
             doc.autoTable({
                 startY: currentY,
-                showHead: 'everyPage',
-                head: [
-                    [{ content: 'Tabel D.1 Daftar Siswa dengan Catatan Pelanggaran', colSpan: 5, styles: { halign: 'left', fillColor: [255,255,255], textColor: 0, fontStyle: 'bold' } }],
-                    ['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Pelanggaran']
-                ],
+                showHead: 'everyPage', // Sekarang hanya mengulang nama kolom (No, Nama, dll)
+                head: [['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Pelanggaran']],
                 body: bodyPelanggaran.length > 0 ? bodyPelanggaran : [['-', 'Belum ada catatan pelanggaran', '-', '-', '-']],
                 theme: 'grid',
                 styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
@@ -5194,13 +5196,16 @@
             
             // --- TABEL D.2: DAFTAR PRESTASI SISWA ---
             if(currentY > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); currentY = 20; }
+            
+            // Cetak judul tabel terpisah dari autoTable
+            doc.setFont("times", "bold"); doc.setFontSize(10);
+            doc.text('Tabel D.2 Daftar Siswa dengan Catatan Prestasi', marginLR, currentY);
+            currentY += 3;
+
             doc.autoTable({
                 startY: currentY,
                 showHead: 'everyPage',
-                head: [
-                    [{ content: 'Tabel D.2 Daftar Siswa dengan Catatan Prestasi', colSpan: 5, styles: { halign: 'left', fillColor: [255,255,255], textColor: 0, fontStyle: 'bold' } }],
-                    ['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Prestasi']
-                ],
+                head: [['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Prestasi']],
                 body: bodyPrestasi.length > 0 ? bodyPrestasi : [['-', 'Belum ada catatan prestasi', '-', '-', '-']],
                 theme: 'grid',
                 styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
