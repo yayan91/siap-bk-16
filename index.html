@@ -756,6 +756,37 @@
                 </div>
             </div>
 			
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-2">
+                
+                <div class="glass p-5 rounded-2xl shadow-lg border-t-4 border-red-500 flex flex-col h-[400px] relative overflow-hidden bg-white/60 dark:bg-slate-800/60">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2 z-10">
+                        <div>
+                            <h3 class="text-sm font-black text-red-600 dark:text-red-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-fire animate-pulse"></i> Tren Pelanggaran Siswa
+                            </h3>
+                            <p class="text-[10px] text-slate-500 mt-1">Peringkat berdasarkan Jenis & bentuk pelanggaran terbanyak</p>
+                        </div>
+                    </div>
+                    <div id="klasemen-pelanggaran-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-2 z-10">
+                        <p class="text-xs text-center text-slate-400 mt-10">Menganalisis tren pelanggaran...</p>
+                    </div>
+                </div>
+
+                <div class="glass p-5 rounded-2xl shadow-lg border-t-4 border-emerald-500 flex flex-col h-[400px] relative overflow-hidden bg-white/60 dark:bg-slate-800/60">
+                    <div class="flex justify-between items-center mb-4 border-b dark:border-white/10 border-slate-200 pb-2 z-10">
+                        <div>
+                            <h3 class="text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-trophy"></i> Hall of Fame (Prestasi)
+                            </h3>
+                            <p class="text-[10px] text-slate-500 mt-1">Daftar prestasi berdasarkan tingkatan</p>
+                        </div>
+                    </div>
+                    <div id="klasemen-prestasi-list" class="flex-1 overflow-y-auto custom-scroll space-y-3 pr-2 z-10">
+                        <p class="text-xs text-center text-slate-400 mt-10">Menganalisis data prestasi...</p>
+                    </div>
+                </div>
+            </div>
+			
         </section>
 
         <!-- 3. SERVICE DETAIL (WITH DATE FILTER & PAGINATION) -->
@@ -1003,7 +1034,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbw0b-JqwPiHGDRlhHdSOlTJipAvOOkvtXv6zKJiQzWefiiXsX5mMRTOZWo1PMSUPm47/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwahHWjmwTV9t5ScEfIwQkOuWyflqVFRcZjFLvzZWw85sLOnuE1hwmEoJ1dT5n29Wb6/exec"; 
 
         // State
         let currentUser = null;
@@ -1431,9 +1462,6 @@
             // ==========================================
 
             // 1. CALCULATE SUMMARY STATS
-            // ... (KODE LAMA BAPAK BERLANJUT KE BAWAH) ...
-
-            // 1. CALCULATE SUMMARY STATS
             let totalLayanan = 0;
             let siswaSet = new Set();
             let countsPerSheet = {};
@@ -1445,8 +1473,14 @@
 
             sheets.forEach((sheet, idx) => {
                 const data = results[idx];
-                totalLayanan += data.length;
+                
+                // Tetap simpan hitungan per sheet untuk grafik dan lencana
                 countsPerSheet[sheet] = data.length;
+
+                // --- SATPAM PENCEKAL: Abaikan Pelanggaran & Prestasi dari perhitungan utama ---
+                if (sheet === '19_Catatan_Pelanggaran' || sheet === '20_Catatan_Prestasi') return;
+
+                totalLayanan += data.length;
 
                 data.forEach(item => {
                     // Unique Student Count
@@ -1483,6 +1517,8 @@
             };
             
             for(let [key, val] of Object.entries(countsPerSheet)) {
+                // --- PENCEKAL KEDUA: Jangan jadikan Pelanggaran/Prestasi sebagai "Top Layanan" ---
+                if (key === '19_Catatan_Pelanggaran' || key === '20_Catatan_Prestasi') continue;
                 if(val > maxCount) { maxCount = val; topService = labelsMap[key]; }
             }
 
@@ -2062,7 +2098,7 @@
                 // Urutkan siswa dari yang paling sering (terbanyak)
                 const sortedStudents = Object.values(studentMap).sort((a,b) => b.count - a.count);
 
-                // Render ke List HTML
+                // Render ke List HTML (Hanya Nama, Kelas, dan Jumlah)
                 const listEl = document.getElementById(containerId);
                 if(listEl) {
                     listEl.innerHTML = '';
@@ -2073,10 +2109,12 @@
                             listEl.innerHTML += `
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700 hover:shadow-md hover:-translate-y-1 transition-all group cursor-pointer" onclick="document.getElementById('global-student-search').value='${s.name}'; searchStudentHistory();">
                                     <div class="flex-1 min-w-0 pr-3">
-                                        <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate group-hover:${iconColorClass} transition-colors">${s.name} <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Kls ${s.kelas}</span></h4>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate" title="${s.lastDesc}"><i class="fa-solid ${defaultIcon} opacity-70 mr-1 ${iconColorClass}"></i> ${s.lastDesc}</p>
+                                        <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate group-hover:${iconColorClass} transition-colors">
+                                            ${s.name} 
+                                            <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Kls ${s.kelas}</span>
+                                        </h4>
                                     </div>
-                                    <div class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold border border-gray-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm">
+                                    <div class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm">
                                         ${s.count}x
                                     </div>
                                 </div>
@@ -2160,6 +2198,76 @@
             // Jalankan fungsi rekap
             renderRekapKelas();
 			
+			// --- FITUR BARU: RENDER KLASEMEN PELANGGARAN & PRESTASI (REKAP DATA) ---
+			const renderKlasemenPelanggaranPrestasi = () => {
+				const listPelanggaran = document.getElementById('klasemen-pelanggaran-list');
+				const listPrestasi = document.getElementById('klasemen-prestasi-list');
+				if (!listPelanggaran || !listPrestasi) return;
+
+				// 1. OLAH DATA PELANGGARAN (Total Jenis & Total Bentuk)
+				const idxPelanggaran = sheets.indexOf('19_Catatan_Pelanggaran');
+				let countJenis = {};
+				let countBentuk = {};
+
+				if (idxPelanggaran !== -1 && results[idxPelanggaran]) {
+					results[idxPelanggaran].forEach(item => {
+						let j = item['Jenis_Pelanggaran'] || 'Lainnya';
+						let b = item['Bentuk_Pelanggaran'] || 'Lainnya';
+						countJenis[j] = (countJenis[j] || 0) + 1;
+						countBentuk[b] = (countBentuk[b] || 0) + 1;
+					});
+				}
+
+				// Render Pelanggaran
+				listPelanggaran.innerHTML = `
+					<div class="mb-4">
+						<h5 class="text-xs font-bold text-red-500 uppercase mb-2 border-b pb-1">Berdasarkan Jenis Pelanggaran</h5>
+						<div class="space-y-1">
+							${Object.entries(countJenis).map(([k, v]) => `
+								<div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
+									<span>${k}</span> <span class="font-bold">${v}</span>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+					<div>
+						<h5 class="text-xs font-bold text-orange-500 uppercase mb-2 border-b pb-1">Berdasarkan Bentuk Pelanggaran</h5>
+						<div class="space-y-1">
+							${Object.entries(countBentuk).map(([k, v]) => `
+								<div class="flex justify-between text-xs p-1.5 bg-slate-50 dark:bg-slate-700 rounded">
+									<span>${k}</span> <span class="font-bold">${v}</span>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+				`;
+
+				// 2. OLAH DATA PRESTASI (Total per Tingkat saja)
+				const idxPrestasi = sheets.indexOf('20_Catatan_Prestasi');
+				let countTingkat = {};
+
+				if (idxPrestasi !== -1 && results[idxPrestasi]) {
+					results[idxPrestasi].forEach(item => {
+						let t = item['Tingkat'] || 'Lainnya';
+						countTingkat[t] = (countTingkat[t] || 0) + 1;
+					});
+				}
+
+				// Render Prestasi
+				listPrestasi.innerHTML = `
+					<div class="space-y-2">
+						${Object.entries(countTingkat).map(([k, v]) => `
+							<div class="flex justify-between items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl">
+								<span class="text-xs font-bold text-emerald-700 dark:text-emerald-300">Tingkat ${k}</span>
+								<span class="text-xs font-black bg-emerald-200 dark:bg-emerald-800 px-2 py-0.5 rounded">${v} Prestasi</span>
+							</div>
+						`).join('')}
+					</div>
+				`;
+			};
+            // Eksekusi fungsinya
+            renderKlasemenPelanggaranPrestasi();
+			
         } // Penutup dari fungsi loadDashboardStats()
 
         // --- TIMELINE SEARCH ---
@@ -2213,19 +2321,19 @@
 				// UPDATED: Daftar kolom judul untuk layanan
 				let detail = h['Topik_Layanan'] || h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || 
 							   h['Pokok_Masalah'] || h['Nama_Kegiatan'] || h['Deskripsi_Peristiwa'] || 
-							   h['Tujuan_Kunjungan'] || h['Bentuk_Pelanggaran'] || h['Nama_Prestasi'] || h['Topik_Bahasan'] || 'Detail Layanan'; 
+							   h['Tujuan_Kunjungan'] || h['Jenis_Pelanggaran'] || h['Nama_Prestasi'] || h['Topik_Bahasan'] || 'Detail Layanan'; 
 				
 				// UPDATED: Daftar kolom isi/uraian
 				let textIsi = h['Identifikasi_Masalah'] || h['Deskripsi_Kasus'] || h['Pokok_Masalah'] || 
 							  h['Deskripsi_Peristiwa'] || h['Tujuan_Kunjungan'] || h['Bentuk_Pelanggaran'] || 
-							  h['Nama_Prestasi'] || h['Topik_Bahasan'] || '-';
+							  h['Tingkat'] || h['Topik_Bahasan'] || '-';
 				
 				if (detail === textIsi) {
 					textIsi = h['Tafsiran_Analisis'] || h['Hasil_Wawancara'] || h['Tindak_Lanjut'] || h['Pihak_Lain'] || h['Pihak_Keluarga'] || '-';
 				}
 
 				// Ambil Hasil & Status 
-				let hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Hasil_Advokasi'] || h['Kesepakatan'] || h['Tindak_Lanjut'] || '-';
+				let hasil = h['Hasil'] || h['Hasil_Keputusan'] || h['Hasil_Kesepakatan'] || h['Hasil_Advokasi'] || h['Kesepakatan'] || h['Tindak_Lanjut'] || h['Link_Sertifikat'] || '-';
 				let status = h['Status_Konseling'] || h['Status_Proses'] || h['Status_Mediasi'] || h['Status_Advokasi'] || h['Status_Rujukan'] || h['Status_Kasus'] || h['Status_Kunjungan'] || h['Status_Pembinaan'] || h['Hasil_Kolaborasi'] || h['Status_Kolaborasi'] || 'Selesai';
 
                 // --- OVERRIDE KHUSUS LAYANAN KOLABORASI ---
@@ -2234,6 +2342,16 @@
                     textIsi = "Tindak Lanjut: " + (h['Tindak_Lanjut'] || '-');
                     hasil = h['Hasil_Kolaborasi'] || '-';
                     status = h['Status_Kolaborasi'] || 'Selesai';
+                } else if (h.sheet === '19_Catatan_Pelanggaran') {
+                    detail = "Jenis: " + (h['Jenis_Pelanggaran'] || 'Pelanggaran');
+                    textIsi = "<b class='text-slate-700 dark:text-slate-300'>Bentuk:</b> " + (h['Bentuk_Pelanggaran'] || '-') + "<br><b class='text-slate-700 dark:text-slate-300 mt-1 inline-block'>Penjelasan:</b> " + (h['Penjelasan_Pelanggaran'] || '-');
+                    hasil = h['Tindak_Lanjut'] || '-';
+                    status = h['Status_Pembinaan'] || 'Diproses';
+                } else if (h.sheet === '20_Catatan_Prestasi') {
+                    detail = "🏆 " + (h['Nama_Prestasi'] || 'Prestasi Baru');
+                    textIsi = "<b class='text-slate-700 dark:text-slate-300'>Tingkat:</b> " + (h['Tingkat'] || '-') + "<br><b class='text-slate-700 dark:text-slate-300 mt-1 inline-block'>Penyelenggara:</b> " + (h['Penyelenggara'] || '-');
+                    hasil = h['Link_Sertifikat'] ? `<a href="${h['Link_Sertifikat'].startsWith('http') ? h['Link_Sertifikat'] : 'https://'+h['Link_Sertifikat']}" target="_blank" class="text-emerald-500 underline hover:text-emerald-600"><i class="fa-solid fa-link"></i> Lihat Bukti/Sertifikat</a>` : "Tercatat di sistem";
+                    status = "Selesai";
                 }
                 // ------------------------------------------
 				
@@ -2520,9 +2638,9 @@
                     if (item['Pihak_Keluarga']) paramsGrid.push(`<span class="flex items-center gap-1.5"><i class="fa-solid fa-people-roof text-amber-500"></i> Bertemu: ${item['Pihak_Keluarga']}</span>`);
 
                 } else if (currentSheet === '19_Catatan_Pelanggaran') {
-                    topBadge = `⚠️ Poin Pelanggaran`;
+                    topBadge = item['Jenis_Pelanggaran'] ? `⚠️ ${item['Jenis_Pelanggaran']}` : `⚠️ Pelanggaran`;
                     mainTitle = formatNamaKelas(item['Nama_Siswa'], item['Kelas']);
-                    uraianText = `Bentuk Pelanggaran: ${item['Bentuk_Pelanggaran'] || 'Belum diisi'}`;
+                    uraianText = `<span class="block mb-1.5"><b class="text-slate-800 dark:text-slate-200">Bentuk:</b> ${item['Bentuk_Pelanggaran'] || '-'}</span><span class="block"><b class="text-slate-800 dark:text-slate-200">Penjelasan:</b> ${item['Penjelasan_Pelanggaran'] || '-'}</span>`;
 
                 } else if (currentSheet === '20_Catatan_Prestasi') {
                     topBadge = item['Tingkat'] ? `🏆 Tingkat ${item['Tingkat']}` : `🏆 Prestasi`;
@@ -3010,7 +3128,7 @@
 					} else if (currentSheet === '18_Kunjungan_Rumah') {
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Pihak_Keluarga', 'Tujuan_Kunjungan', 'Hasil_Wawancara', 'Kesepakatan', 'Status_Kunjungan'];
 					} else if (currentSheet === '19_Catatan_Pelanggaran') {
-                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Bentuk_Pelanggaran', 'Tindak_Lanjut', 'Status_Pembinaan'];
+                        relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Jenis_Pelanggaran', 'Bentuk_Pelanggaran', 'Penjelasan_Pelanggaran', 'Status_Pembinaan'];
                     } else if (currentSheet === '20_Catatan_Prestasi') {
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Nama_Prestasi', 'Tingkat', 'Penyelenggara', 'Link_Sertifikat'];
 					} else if (currentSheet === '21_Layanan_Kolaborasi') {
@@ -3265,17 +3383,31 @@
             ];
 			
 			// 13. Pelanggaran
-            if(sheetName === '19_Catatan_Pelanggaran') return [
-                { key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date' },
-                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
-                { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
-                { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
-                { key: 'Kelas', label: 'Kelas', type: 'readonly' },
-                { key: 'NISN', label: 'NISN', type: 'readonly' },
-                { key: 'Bentuk_Pelanggaran', label: 'Bentuk Pelanggaran', type: 'textarea', placeholder: 'Contoh: Terlambat masuk, berkelahi, atribut tidak lengkap...' },
-                { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea', placeholder: 'Contoh: Teguran lisan, pembinaan...' },
-                { key: 'Status_Pembinaan', label: 'Status', type: 'select', options: ['Selesai', 'Perlu Konseling Lanjutan', 'Panggil Orangtua ke Sekolah', 'Panggil Konsultasi', 'Kunjungan Rumah'] }
-            ];
+			if(sheetName === '19_Catatan_Pelanggaran') return [
+				{ key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date', required: true },
+				{ key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026', required: true },
+				{ key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'], required: true },
+				{ key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa', required: true },
+				{ key: 'Kelas', label: 'Kelas', type: 'readonly' },
+				{ key: 'NISN', label: 'NISN', type: 'readonly' },
+				{ 
+					key: 'Jenis_Pelanggaran', 
+					label: 'Jenis Pelanggaran', 
+					type: 'select', // Diubah dari combobox ke select agar terkunci
+					options: 'jenisPelanggaran', 
+					required: true // Menambahkan validasi wajib isi
+				},
+				{ 
+					key: 'Bentuk_Pelanggaran', 
+					label: 'Bentuk Pelanggaran', 
+					type: 'select', // Diubah dari combobox ke select agar terkunci
+					options: 'bentukPelanggaran', 
+					required: true // Menambahkan validasi wajib isi
+				},
+				{ key: 'Penjelasan_Pelanggaran', label: 'Penjelasan Pelanggaran', type: 'textarea', placeholder: 'Ceritakan detail pelanggarannya...', required: true },
+				{ key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea', placeholder: 'Contoh: Teguran lisan, pembinaan...' },
+				{ key: 'Status_Pembinaan', label: 'Status', type: 'select', options: ['Selesai', 'Perlu Konseling Lanjutan', 'Panggil Orangtua ke Sekolah', 'Panggil Konsultasi', 'Kunjungan Rumah'], required: true }
+			];
 
             // 14. Prestasi
             if(sheetName === '20_Catatan_Prestasi') return [
@@ -3471,6 +3603,62 @@
                     input = document.createElement('input'); 
                     input.type = 'date'; input.className = baseClass + " cursor-pointer";
                     if(val) { let d = new Date(val); if(!isNaN(d)) input.value = d.toISOString().split('T')[0]; }
+				} else if (f.type === 'combobox') {
+                    // 1. Container Relative
+                    input = document.createElement('div');
+                    input.className = "relative w-full";
+                    
+                    // 2. Input Asli (Bisa ketik & cari)
+                    const actualInput = document.createElement('input');
+                    actualInput.type = "text";
+                    actualInput.name = f.key; 
+                    actualInput.className = baseClass + " pr-10 cursor-text"; 
+                    actualInput.value = val;
+                    actualInput.placeholder = f.placeholder || `Ketik atau pilih ${f.label.toLowerCase()}...`; 
+                    actualInput.autocomplete = "off";
+                    
+                    // 3. Ikon Panah Estetik
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = "absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400";
+                    iconDiv.innerHTML = `<i class="fa-solid fa-chevron-down"></i>`;
+                    
+                    // 4. Dropdown Menu Melayang
+                    const dropdown = document.createElement('div');
+                    dropdown.className = "absolute z-50 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden custom-scroll";
+                    
+                    input.appendChild(actualInput);
+                    input.appendChild(iconDiv);
+                    input.appendChild(dropdown);
+                    
+                    // 5. Logika Filter Data dari Backend
+                    let opts = [];
+                    if(typeof f.options === 'string') opts = metaData[f.options] || [];
+                    else opts = f.options || [];
+
+                    const renderOpts = (keyword) => {
+                        dropdown.innerHTML = '';
+                        const matches = opts.filter(o => String(o).toLowerCase().includes(keyword.toLowerCase()));
+                        
+                        if(matches.length === 0) {
+                            dropdown.innerHTML = `<div class="p-3 text-xs text-slate-500 text-center font-medium italic">Ketik untuk menambahkan data baru...</div>`;
+                            return;
+                        }
+                        
+                        matches.forEach(o => {
+                            const optDiv = document.createElement('div');
+                            optDiv.className = "p-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm border-b dark:border-slate-700/50 last:border-0 transition-colors font-semibold text-slate-700 dark:text-slate-200";
+                            optDiv.innerText = o;
+                            optDiv.onclick = () => {
+                                actualInput.value = o;
+                                dropdown.classList.add('hidden');
+                            };
+                            dropdown.appendChild(optDiv);
+                        });
+                    };
+
+                    actualInput.onkeyup = (e) => { dropdown.classList.remove('hidden'); renderOpts(e.target.value); };
+                    actualInput.onclick = () => { dropdown.classList.remove('hidden'); renderOpts(actualInput.value); };
+                    document.addEventListener('click', (e) => { if(!input.contains(e.target)) dropdown.classList.add('hidden'); });
                 } else if (f.type === 'multi-select-siswa') {
                     // Logic Multi-select persis seperti revisi 1
                     input = document.createElement('div');
@@ -4321,11 +4509,13 @@
                 '11_Layanan_Klasikal': 'Bim. Klasikal', '12_Konferensi_Kasus': 'Konferensi Kasus',
                 '13_Alih_Tangan_Kasus': 'Alih Tangan Kasus', '14_Mediasi': 'Mediasi',
                 '15_Advokasi': 'Advokasi', '16_Dukungan_Sistem': 'Dukungan Sistem','17_Catatan_Anekdot': 'Catatan Anekdot','18_Kunjungan_Rumah': 'Kunjungan Rumah',
-                '19_Catatan_Pelanggaran': 'Pelanggaran', '20_Catatan_Prestasi': 'Prestasi', '21_Layanan_Kolaborasi': 'Kolaborasi', '22_Layanan_Lintas_Kelas': 'Lintas Kelas'
+                '21_Layanan_Kolaborasi': 'Kolaborasi', '22_Layanan_Lintas_Kelas': 'Lintas Kelas'
             };
 
             // Menyedot data dari semua sheet di memori cache
             for(const [sheet, data] of Object.entries(cachedAllServices)) {
+                // BLOKIR PELANGGARAN & PRESTASI AGAR TIDAK MASUK JURNAL
+                if (sheet === '19_Catatan_Pelanggaran' || sheet === '20_Catatan_Prestasi') continue;
                 data.forEach(item => {
                     const dateVal = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
                     if(!dateVal) return;
@@ -4354,6 +4544,14 @@
                             displaySasaran = item['Sasaran_Kelas'] || '-';
                             uraian = `Tema: ${item['Topik_Tema_Kegiatan'] || '-'}\n\nEv. Proses: ${item['Evaluasi_Proses'] || '-'}\nEv. Hasil: ${item['Evaluasi_Hasil'] || '-'}`;
                             status = item['Status_Pelaksanaan'] || 'Terlaksana';
+						} else if (sheet === '19_Catatan_Pelanggaran') {
+                            // Khusus Pelanggaran: Gabung Jenis, Bentuk & Penjelasan
+                            uraian = `Jenis: ${item['Jenis_Pelanggaran'] || '-'}\nBentuk: ${item['Bentuk_Pelanggaran'] || '-'}\nPenjelasan: ${item['Penjelasan_Pelanggaran'] || '-'}`;
+                            status = item['Status_Pembinaan'] || '-';
+                        } else if (sheet === '20_Catatan_Prestasi') {
+                            // Khusus Prestasi
+                            uraian = `Prestasi: ${item['Nama_Prestasi'] || '-'}\nTingkat: ${item['Tingkat'] || '-'}\nPenyelenggara: ${item['Penyelenggara'] || '-'}`;
+                            status = "Tercatat (Selesai)";
                         } else {
                             status = item['Status_Konseling'] || item['Status_Proses'] || item['Status_Mediasi'] || item['Status_Advokasi'] || item['Status_Rujukan'] || item['Hasil_Kegiatan'] || item['Hasil_Kolaborasi'] || item['Status_Kolaborasi'] || 'Terlaksana';
                         }
@@ -4558,15 +4756,22 @@
         }
 
         async function processLaporanStatistik(filters) {
-            Swal.fire({ title: 'Menyusun Laporan...', html: 'Menganalisis data, menghitung grafik, dan memilah daftar siswa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Menyusun Laporan...', html: 'Menganalisis data, memisahkan pelanggaran & prestasi, serta memilah demografi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-            // 1. Inisialisasi Semua Kategori (Agar tetap tampil meski 0)
+            // 1. Inisialisasi Semua Kategori
             let countLayanan = {};
             let countBidang = { 'Pribadi': 0, 'Sosial': 0, 'Belajar': 0, 'Karir': 0, 'Pribadi Sosial': 0 };
             let countKomponen = { 'Layanan Dasar': 0, 'Layanan Peminatan': 0, 'Layanan Responsif': 0, 'Dukungan Sistem': 0 };
             let studentsMap = {}; 
             let classMap = {};
-			let countGender = { 'Laki-laki': 0, 'Perempuan': 0 };
+            let countGender = { 'Laki-laki': 0, 'Perempuan': 0 };
+
+            // Penampung khusus Bagian D (Pelanggaran & Prestasi)
+            let countJenisPel = {};
+            let countBentukPel = {};
+            let listPelanggaran = [];
+            let countTingkatPres = {};
+            let listPrestasi = [];
 
             // Inisialisasi Kelas agar semua kelas tampil (baca dari database siswa)
             if (metaData && metaData.siswa) {
@@ -4595,7 +4800,7 @@
 
             // Looping filter data
             for (const [sheet, data] of Object.entries(cachedAllServices)) {
-				if (!sheetLabels[sheet]) continue;
+                if (!sheetLabels[sheet]) continue;
                 data.forEach(item => {
                     // Filter Semester
                     if (filters.semester !== 'Semua' && item['Semester'] !== filters.semester) return;
@@ -4608,8 +4813,43 @@
                         if (endDate && itemDate > endDate) return;
                     }
 
-                    // A. Hitung Frekuensi Layanan
+                    // A. Hitung Frekuensi Semua Layanan
                     countLayanan[sheetLabels[sheet]]++;
+
+                    // --- PENGECUALIAN KHUSUS PELANGGARAN & PRESTASI ---
+                    if (sheet === '19_Catatan_Pelanggaran') {
+                        let j = item['Jenis_Pelanggaran'] || 'Lainnya';
+                        let b = item['Bentuk_Pelanggaran'] || 'Lainnya';
+                        countJenisPel[j] = (countJenisPel[j] || 0) + 1;
+                        countBentukPel[b] = (countBentukPel[b] || 0) + 1;
+
+                        let nama = item['Nama_Siswa'] || '-';
+                        let kelas = item['Kelas'] || '-';
+                        let jk = '-';
+                        if (metaData && metaData.siswa) {
+                            const ds = metaData.siswa.find(x => x.nama.toLowerCase() === nama.toLowerCase());
+                            if (ds) jk = (ds.kelamin || ds.Jenis_Kelamin || '-').toUpperCase().startsWith('P') ? 'P' : 'L';
+                        }
+                        listPelanggaran.push([nama, jk, kelas, j, b]);
+                        return; // Stop di sini, jangan masukkan ke demografi siswa terbantu
+                    }
+
+                    if (sheet === '20_Catatan_Prestasi') {
+                        let t = item['Tingkat'] || 'Lainnya';
+                        countTingkatPres[t] = (countTingkatPres[t] || 0) + 1;
+
+                        let nama = item['Nama_Siswa'] || '-';
+                        let kelas = item['Kelas'] || '-';
+                        let prestasi = item['Nama_Prestasi'] || '-';
+                        let jk = '-';
+                        if (metaData && metaData.siswa) {
+                            const ds = metaData.siswa.find(x => x.nama.toLowerCase() === nama.toLowerCase());
+                            if (ds) jk = (ds.kelamin || ds.Jenis_Kelamin || '-').toUpperCase().startsWith('P') ? 'P' : 'L';
+                        }
+                        listPrestasi.push([nama, jk, kelas, prestasi, t]);
+                        return; // Stop di sini, jangan masukkan ke demografi siswa terbantu
+                    }
+                    // --------------------------------------------------
 
                     // B. Hitung Komponen Layanan
                     let komp = item['Komponen_Layanan'];
@@ -4627,14 +4867,13 @@
                         }
                     }
 
-                    // D. Ekstrak Siswa (Abaikan Layanan Massal / Non-Siswa Individu)
+                    // D. Ekstrak Siswa (Sisa Layanan Murni BK)
                     if (sheet !== '16_Dukungan_Sistem' && sheet !== '10_Konsultasi' && sheet !== '22_Layanan_Lintas_Kelas') {
                         const addStudent = (rawName, rawClass) => {
                             if(!rawName || typeof rawName !== 'string') return;
                             let name = rawName.trim();
                             let c = rawClass ? String(rawClass).replace(/\s+/g, '').toUpperCase() : '-';
 
-                            // Handle format tag nama multi-select: "Nama (Kelas)"
                             if (name.includes('(') && name.includes(')')) {
                                 let parts = name.split('(');
                                 name = parts[0].trim();
@@ -4646,32 +4885,26 @@
                             
                             // JIKA SISWA UNIK (BARU PERTAMA KALI DITEMUKAN)
                             if (!studentsMap[key]) {
-                                // 1. Cari data gender
                                 let jk = '-';
                                 if (metaData && metaData.siswa) {
                                     const dataSiswa = metaData.siswa.find(x => x.nama.toLowerCase() === name.toLowerCase());
                                     if (dataSiswa) jk = dataSiswa.kelamin || '-';
                                 }
 
-                                // 2. Daftarkan siswa ke memori
                                 studentsMap[key] = { name: name, kelas: c, count: 0, jk: jk };
                                 
-                                // 3. TAMBAH STATISTIK KELAS (Hanya dihitung 1x per individu!)
                                 if (c !== '-') {
                                     if(classMap[c] === undefined) classMap[c] = 0;
                                     classMap[c]++;
                                 }
 
-                                // 4. TAMBAH STATISTIK GENDER (Hanya dihitung 1x per individu!)
                                 if(jk.toUpperCase().includes('L')) countGender['Laki-laki']++;
                                 else if(jk.toUpperCase().includes('P')) countGender['Perempuan']++;
                             }
                             
-                            // 5. TAMBAH INTENSITAS LAYANAN (Boleh berkali-kali setiap anak dapat layanan)
                             studentsMap[key].count++; 
                         };
 
-                        // Eksekusi data nama dari kolom
                         if(item.Nama_Siswa) addStudent(item.Nama_Siswa, item.Kelas);
                         if(item.Nama_Siswa_1) addStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
                         if(item.Nama_Siswa_2) addStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
@@ -4687,13 +4920,14 @@
                 komponen: countKomponen,
                 classes: classMap,
                 students: Object.values(studentsMap),
-				gender: countGender
+                gender: countGender,
+                pelanggaran: { jenis: countJenisPel, bentuk: countBentukPel, list: listPelanggaran },
+                prestasi: { tingkat: countTingkatPres, list: listPrestasi }
             };
 
             await printLaporanStatistikPDF(finalData, filters);
             Swal.close();
         }
-		
 
         async function printLaporanStatistikPDF(statData, filters) {
             const { jsPDF } = window.jspdf;
@@ -4704,7 +4938,7 @@
 
             // --- RUMUS MATEMATIKA PRESISI UNTUK LEBAR TABEL ---
             const marginLR = 15; // Margin Kiri & Kanan
-            const contentWidth = pageWidth - (marginLR * 2); // Total lebar area yang bisa dicetak (185.9 mm)
+            const contentWidth = pageWidth - (marginLR * 2); // Total lebar area yang bisa dicetak
 
             // --- 1. KOP SURAT ---
             doc.setFont("times", "normal");
@@ -4770,9 +5004,8 @@
                 ]);
             }
 
-            // Rumus Lebar Kolom Tabel A (6 Kolom)
-            const colJmlA = 15; // Lebar kolom "Jml"
-            const colTeksA = (contentWidth - (colJmlA * 3)) / 3; // Sisa ruang dibagi 3 sama rata
+            const colJmlA = 15; 
+            const colTeksA = (contentWidth - (colJmlA * 3)) / 3; 
 
             doc.autoTable({
                 startY: currentY + 3,
@@ -4794,7 +5027,7 @@
                 margin: { left: marginLR, right: marginLR }
             });
 
-            // --- 4. BAGIAN B: DEMOGRAFI SISWA (TABEL TERPADU) ---
+            // --- 4. BAGIAN B: DEMOGRAFI SISWA ---
             currentY = doc.lastAutoTable.finalY + 10;
             const totalSiswaUnik = statData.students.length;
             doc.setFont("times", "bold");
@@ -4819,9 +5052,8 @@
                 ]);
             }
 
-            // Rumus Lebar Kolom Tabel B (4 Kolom)
-            const colJmlB = 25; // Lebar kolom "Jml"
-            const colTeksB = (contentWidth - (colJmlB * 2)) / 2; // Sisa ruang dibagi 2 sama rata
+            const colJmlB = 25; 
+            const colTeksB = (contentWidth - (colJmlB * 2)) / 2; 
 
             doc.autoTable({
                 startY: currentY + 3,
@@ -4862,12 +5094,11 @@
                 `${s.count} Kali`
             ]);
 
-            // Rumus Lebar Kolom Tabel C (5 Kolom)
             const colNo = 10;
             const colKelas = 20;
             const colLP = 15;
             const colIntens = 35;
-            const colNama = contentWidth - (colNo + colKelas + colLP + colIntens); // Kolom nama mengisi SEMUA sisa ruang kosong
+            const colNama = contentWidth - (colNo + colKelas + colLP + colIntens); 
 
             doc.autoTable({
                 startY: currentY + 3,
@@ -4887,7 +5118,104 @@
                 margin: { left: marginLR, right: marginLR }
             });
 
-            // --- 6. TANDA TANGAN (KEPSEK & GURU BK) ---
+            // --- 6. BAGIAN D: REKAPITULASI PELANGGARAN & PRESTASI ---
+            currentY = doc.lastAutoTable.finalY + 15;
+            if(currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 20; }
+            
+            doc.setFont("times", "bold");
+            doc.text("D. REKAPITULASI PELANGGARAN DAN PRESTASI SISWA", marginLR, currentY);
+            currentY += 5;
+
+            // --- TABEL STATISTIK JENIS, BENTUK, DAN TINGKAT ---
+            const summaryBody = [];
+            Object.entries(statData.pelanggaran.jenis).sort((a,b)=>b[1]-a[1]).forEach(x => summaryBody.push(['Jenis Pelanggaran', x[0], `${x[1]} Kasus`]));
+            Object.entries(statData.pelanggaran.bentuk).sort((a,b)=>b[1]-a[1]).forEach(x => summaryBody.push(['Bentuk Pelanggaran', x[0], `${x[1]} Kasus`]));
+            Object.entries(statData.prestasi.tingkat).sort((a,b)=>b[1]-a[1]).forEach(x => summaryBody.push(['Tingkat Prestasi', x[0], `${x[1]} Prestasi`]));
+
+            doc.autoTable({
+                startY: currentY,
+                showHead: 'firstPage',
+                head: [['Kategori', 'Parameter / Keterangan', 'Total']],
+                body: summaryBody.length > 0 ? summaryBody : [['-', 'Belum ada data', '-']],
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: {cellWidth: 40, fontStyle: 'bold'}, 
+                    1: {cellWidth: 'auto'}, 
+                    2: {cellWidth: 30, halign:'center', fontStyle: 'bold'} 
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
+
+            currentY = doc.lastAutoTable.finalY + 10;
+
+            // --- GROUPING DATA SISWA UNTUK TABEL D.1 & D.2 ---
+            const pelMap = {};
+            statData.pelanggaran.list.forEach(p => {
+                const key = p[0].toLowerCase() + "|" + p[2]; 
+                if(!pelMap[key]) pelMap[key] = { nama: p[0], jk: p[1], kelas: p[2], total: 0 };
+                pelMap[key].total++;
+            });
+            const bodyPelanggaran = Object.values(pelMap).sort((a,b) => b.total - a.total).map((p, i) => [i + 1, p.nama, p.jk, p.kelas, `${p.total} Kasus`]);
+
+            const presMap = {};
+            statData.prestasi.list.forEach(p => {
+                const key = p[0].toLowerCase() + "|" + p[2];
+                if(!presMap[key]) presMap[key] = { nama: p[0], jk: p[1], kelas: p[2], total: 0 };
+                presMap[key].total++;
+            });
+            const bodyPrestasi = Object.values(presMap).sort((a,b) => b.total - a.total).map((p, i) => [i + 1, p.nama, p.jk, p.kelas, `${p.total} Prestasi`]);
+
+            // --- TABEL D.1: DAFTAR PELANGGARAN SISWA ---
+            if(currentY > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); currentY = 20; }
+            doc.autoTable({
+                startY: currentY,
+                showHead: 'everyPage',
+                head: [
+                    [{ content: 'Tabel D.1 Daftar Siswa dengan Catatan Pelanggaran', colSpan: 5, styles: { halign: 'left', fillColor: [255,255,255], textColor: 0, fontStyle: 'bold' } }],
+                    ['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Pelanggaran']
+                ],
+                body: bodyPelanggaran.length > 0 ? bodyPelanggaran : [['-', 'Belum ada catatan pelanggaran', '-', '-', '-']],
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: {cellWidth: 10, halign:'center'}, 
+                    1: {cellWidth: 'auto'}, 
+                    2: {cellWidth: 15, halign:'center'}, 
+                    3: {cellWidth: 20, halign:'center'},
+                    4: {cellWidth: 35, halign:'center', fontStyle: 'bold'}
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
+
+            currentY = doc.lastAutoTable.finalY + 10;
+            
+            // --- TABEL D.2: DAFTAR PRESTASI SISWA ---
+            if(currentY > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); currentY = 20; }
+            doc.autoTable({
+                startY: currentY,
+                showHead: 'everyPage',
+                head: [
+                    [{ content: 'Tabel D.2 Daftar Siswa dengan Catatan Prestasi', colSpan: 5, styles: { halign: 'left', fillColor: [255,255,255], textColor: 0, fontStyle: 'bold' } }],
+                    ['No', 'Nama Siswa', 'L/P', 'Kelas', 'Total Prestasi']
+                ],
+                body: bodyPrestasi.length > 0 ? bodyPrestasi : [['-', 'Belum ada catatan prestasi', '-', '-', '-']],
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: {cellWidth: 10, halign:'center'}, 
+                    1: {cellWidth: 'auto'}, 
+                    2: {cellWidth: 15, halign:'center'}, 
+                    3: {cellWidth: 20, halign:'center'},
+                    4: {cellWidth: 35, halign:'center', fontStyle: 'bold'}
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
+
+            // --- 7. TANDA TANGAN ---
             let finalY = doc.lastAutoTable.finalY + 15;
             if(finalY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); finalY = 30; }
 
@@ -6888,6 +7216,67 @@
                 }
             });
         };
+		
+		// --- LOGIKA SEARCHABLE DROPDOWN CUSTOM ---
+
+		// Fungsi menyusun opsi dropdown dari database
+		function renderDropdown(dropdownId, dataArray, inputId) {
+		  const dropdown = document.getElementById(dropdownId);
+		  dropdown.innerHTML = ""; // Bersihkan dulu
+		  
+		  if(dataArray && dataArray.length > 0) {
+			dataArray.forEach(item => {
+			  let div = document.createElement("div");
+			  div.className = "px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-white transition-colors";
+			  div.innerText = item;
+			  div.onclick = function() {
+				document.getElementById(inputId).value = item;
+				dropdown.classList.add("hidden"); // Tutup setelah dipilih
+			  };
+			  dropdown.appendChild(div);
+			});
+		  }
+		}
+
+		// Fungsi filter saat mengetik
+		function filterDropdown(inputId, dropdownId) {
+		  const inputVal = document.getElementById(inputId).value.toLowerCase();
+		  const dropdown = document.getElementById(dropdownId);
+		  const items = dropdown.getElementsByTagName("div");
+		  
+		  dropdown.classList.remove("hidden"); // Munculkan saat mengetik
+		  let adaYangCocok = false;
+		  
+		  for (let i = 0; i < items.length; i++) {
+			let teksOpsi = items[i].innerText.toLowerCase();
+			if (teksOpsi.indexOf(inputVal) > -1) {
+			  items[i].style.display = "";
+			  adaYangCocok = true;
+			} else {
+			  items[i].style.display = "none";
+			}
+		  }
+		  
+		  // Jika sedang mengetik dan tidak ada di database, biarkan dropdown tertutup (jadi teks bebas)
+		  if (!adaYangCocok) {
+			dropdown.classList.add("hidden");
+		  }
+		}
+
+		// Fungsi buka/tutup saat diklik
+		function toggleDropdown(dropdownId) {
+		  document.getElementById(dropdownId).classList.toggle("hidden");
+		}
+
+		// Menutup dropdown jika pengguna mengklik area luar
+		document.addEventListener('click', function(event) {
+		  if (!event.target.closest('.relative')) {
+			const dJenis = document.getElementById('jenisDropdown');
+			const dBentuk = document.getElementById('bentukDropdown');
+			if(dJenis) dJenis.classList.add('hidden');
+			if(dBentuk) dBentuk.classList.add('hidden');
+		  }
+		});
     </script>
 </body>
 </html>
