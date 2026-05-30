@@ -666,13 +666,20 @@
 					<h3 class="text-lg font-bold text-slate-600 dark:text-blue-200 uppercase tracking-widest text-center">Asesmen & Data Siswa</h3>
 					<div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
 				</div>
-				<div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
 					
 					<div onclick="openModalBukuSiswa()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-indigo-400 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
 						<div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-indigo-500/10">
 							<i class="fa-solid fa-book-open-reader text-3xl text-indigo-600 dark:text-indigo-200 group-hover:text-white transition-colors"></i>
 						</div>
 						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Buku Siswa</span>
+					</div>
+					
+					<div onclick="openModalSiswaAsuh()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-teal-500 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
+						<div class="w-16 h-16 rounded-2xl bg-teal-500/20 flex items-center justify-center group-hover:bg-teal-500 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-teal-500/10">
+							<i class="fa-solid fa-users-line text-3xl text-teal-600 dark:text-teal-200 group-hover:text-white transition-colors"></i>
+						</div>
+						<span class="text-sm md:text-base font-semibold dark:text-white text-slate-700 text-center z-10">Daftar Siswa Asuh</span>
 					</div>
 
 					<div onclick="openModalLaporanKelas()" class="glass hover:bg-white/20 dark:hover:bg-white/10 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 border-t-4 border-amber-500 btn-press group bg-white/60 dark:bg-transparent hover:-translate-y-1 hover:shadow-xl">
@@ -1029,6 +1036,54 @@
 					<span>Menunggu perintah pencarian...</span>
 				</div>
 			</div>
+		</div>
+	</div>
+	
+	<div id="modalSiswaAsuh" class="fixed inset-0 z-[100] hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300 flex flex-col max-h-[90vh]" id="modalSiswaAsuhContent">
+			
+			<div class="p-5 md:p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-teal-50 dark:bg-teal-900/30 shrink-0">
+				<div>
+					<h3 class="text-xl font-bold text-teal-800 dark:text-teal-300 flex items-center gap-2">
+						<i class="fa-solid fa-users-line"></i> Cetak Daftar Siswa Asuh
+					</h3>
+					<p class="text-xs text-teal-600 dark:text-teal-400 mt-1">Pilih kelas yang berada di bawah bimbingan Anda.</p>
+				</div>
+				<button onclick="closeModalSiswaAsuh()" class="text-gray-400 hover:text-red-500 transition-colors w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm">
+					<i class="fa-solid fa-times text-lg"></i>
+				</button>
+			</div>
+
+			<div class="p-5 md:p-6 flex-1 overflow-y-auto custom-scroll">
+				<div class="flex justify-between items-center mb-4">
+					<span class="text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Daftar Kelas</span>
+					
+					<label class="flex items-center cursor-pointer gap-2 group">
+						<span class="text-xs font-bold text-slate-500 group-hover:text-teal-600 transition-colors">Pilih Semua</span>
+						<div class="relative">
+							<input type="checkbox" id="togglePilihSemua" onchange="toggleSemuaKelasAsuh(this)" class="sr-only">
+							<div class="block bg-slate-300 dark:bg-slate-600 w-10 h-6 rounded-full transition-colors toggle-bg"></div>
+							<div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform transform"></div>
+						</div>
+					</label>
+				</div>
+				
+				<div id="grid-kelas-asuh" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+					</div>
+			</div>
+
+			<div class="p-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50 flex justify-end gap-3 shrink-0">
+				<button onclick="closeModalSiswaAsuh()" class="px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-medium btn-press">Batal</button>
+				<button onclick="generateSiswaAsuhPDF()" class="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/30 transition-all font-bold flex items-center gap-2 btn-press">
+					<i class="fa-solid fa-print"></i> Cetak Laporan
+				</button>
+			</div>
+			
+			<style>
+				/* Style tambahan khusus toggle */
+				#togglePilihSemua:checked ~ .toggle-bg { background-color: #0d9488; }
+				#togglePilihSemua:checked ~ .dot { transform: translateX(100%); }
+			</style>
 		</div>
 	</div>
 
@@ -7282,6 +7337,231 @@
 			if(dBentuk) dBentuk.classList.add('hidden');
 		  }
 		});
+		
+		// ==========================================
+		// FITUR CETAK DAFTAR SISWA ASUH
+		// ==========================================
+		
+		function openModalSiswaAsuh() {
+			const gridContainer = document.getElementById('grid-kelas-asuh');
+			document.getElementById('togglePilihSemua').checked = false; // Reset toggle
+			gridContainer.innerHTML = ''; // Bersihkan
+
+			if (metaData && metaData.siswa) {
+				// 1. Ekstrak nama kelas yang unik dan urutkan
+				const kelasSet = new Set();
+				metaData.siswa.forEach(s => {
+					if (s.kelas && s.kelas !== '-' && s.kelas !== 'NULL') kelasSet.add(s.kelas.trim());
+				});
+				
+				// Urutkan kelas dengan cerdas (angka dulu baru huruf)
+				const kelasArray = Array.from(kelasSet).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
+				// 2. Render Checkbox Modern (Warna Solid Saat Dipilih)
+				kelasArray.forEach(kls => {
+					gridContainer.innerHTML += `
+						<label class="cursor-pointer relative group">
+							<input type="checkbox" value="${kls}" class="peer sr-only checkbox-kelas-asuh" onchange="checkToggleSemuaStatus()" />
+							<div class="rounded-xl border-2 border-slate-200 dark:border-slate-700 px-4 py-3 bg-white dark:bg-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all duration-300 peer-checked:border-teal-500 peer-checked:bg-teal-500 peer-checked:text-white dark:peer-checked:bg-teal-600 dark:peer-checked:border-teal-400 shadow-sm peer-checked:shadow-lg peer-checked:shadow-teal-500/40 flex items-center justify-between">
+								<span class="font-bold text-sm tracking-wide text-slate-700 dark:text-slate-300 peer-checked:text-white dark:peer-checked:text-white transition-colors">${kls}</span>
+								<i class="fa-solid fa-circle-check opacity-0 peer-checked:opacity-100 text-white transition-all transform scale-50 peer-checked:scale-125 drop-shadow-md"></i>
+							</div>
+						</label>
+					`;
+				});
+			}
+
+			// Tampilkan Animasi Buka
+			document.getElementById('modalSiswaAsuh').classList.remove('hidden');
+			setTimeout(() => { document.getElementById('modalSiswaAsuhContent').classList.remove('scale-95', 'opacity-0'); }, 10);
+		}
+
+		function closeModalSiswaAsuh() {
+			document.getElementById('modalSiswaAsuhContent').classList.add('scale-95', 'opacity-0');
+			setTimeout(() => { document.getElementById('modalSiswaAsuh').classList.add('hidden'); }, 300);
+		}
+
+		// Fungsi Sakelar Pilih Semua
+		function toggleSemuaKelasAsuh(checkbox) {
+			const checkboxes = document.querySelectorAll('.checkbox-kelas-asuh');
+			checkboxes.forEach(cb => { cb.checked = checkbox.checked; });
+		}
+
+		// Fungsi agar sakelar 'Pilih Semua' mati otomatis jika ada satu kelas yang dibatalkan centangnya
+		function checkToggleSemuaStatus() {
+			const total = document.querySelectorAll('.checkbox-kelas-asuh').length;
+			const checked = document.querySelectorAll('.checkbox-kelas-asuh:checked').length;
+			document.getElementById('togglePilihSemua').checked = (total === checked && total > 0);
+		}
+
+		async function generateSiswaAsuhPDF() {
+			// 1. Ambil Kelas yang dicentang
+			const selectedCheckboxes = document.querySelectorAll('.checkbox-kelas-asuh:checked');
+			if (selectedCheckboxes.length === 0) {
+				Swal.fire('Pilih Kelas', 'Centang minimal satu kelas untuk dicetak.', 'warning');
+				return;
+			}
+			
+			const selectedClasses = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+			Swal.fire({ title: 'Menyusun Daftar Siswa...', html: 'Menggabungkan data dan menghitung demografi.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+			// 2. Siapkan jsPDF
+			const { jsPDF } = window.jspdf;
+			const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] });
+			const s = metaData.sekolah || {};
+			const pageWidth = doc.internal.pageSize.getWidth();
+			const centerX = pageWidth / 2;
+
+			// --- KOP SURAT ---
+			doc.setFont("times", "normal");
+			const urlKiri = s.logo_kiri || s.logo_url || ""; 
+			if (urlKiri) { const imgD = await getBase64FromUrl(urlKiri); if (imgD) doc.addImage(imgD, 'PNG', 10, 10, 25, 25); }
+			const urlKanan = s.logo_kanan || ""; 
+			if (urlKanan) { const imgD2 = await getBase64FromUrl(urlKanan); if (imgD2) doc.addImage(imgD2, 'PNG', pageWidth - 35, 10, 25, 25); }
+
+			let currentY = 15;
+			doc.setFontSize(12); doc.text((s.pemerintah || "PEMERINTAH KOTA").toUpperCase(), centerX, currentY, { align: 'center' });
+			currentY += 5; doc.text((s.instansi || "DINAS PENDIDIKAN").toUpperCase(), centerX, currentY, { align: 'center' });
+			currentY += 6; doc.setFont("times", "bold"); doc.setFontSize(14); doc.text((s.nama || "NAMA SEKOLAH").toUpperCase(), centerX, currentY, { align: 'center' });
+			currentY += 5; doc.setFontSize(12); doc.text((s.judul_bk || "BIMBINGAN DAN KONSELING").toUpperCase(), centerX, currentY, { align: 'center' });
+			currentY += 5; 
+			doc.setFont("times", "normal"); doc.setFontSize(10);
+			const alamatSplit = doc.splitTextToSize((s.alamat || "Alamat Sekolah Lengkap"), pageWidth - 80); 
+			doc.text(alamatSplit, centerX, currentY, { align: 'center' });
+			currentY += (alamatSplit.length * 4); 
+			doc.setLineWidth(0.8); doc.line(10, currentY, pageWidth - 10, currentY); 
+			doc.setLineWidth(0.3); doc.line(10, currentY + 1.2, pageWidth - 10, currentY + 1.2); 
+
+			// --- JUDUL DOKUMEN ---
+			currentY += 10;
+			doc.setFont("times", "bold"); doc.setFontSize(12);
+			doc.text(`DAFTAR SISWA ASUH BIMBINGAN DAN KONSELING`, centerX, currentY, { align: 'center' });
+			
+			currentY += 5;
+			doc.setFontSize(10);
+			doc.text(`TAHUN AJARAN: ${s.tahun_ajar || '-'}`, centerX, currentY, { align: 'center' });
+			
+			currentY += 5;
+			doc.setFont("times", "normal"); // Font normal, tidak bold
+			// currentUser.nama tidak di-toUpperCase() agar mengikuti huruf kapital/kecil aslinya dari database
+			doc.text(`Guru Bimbingan dan Konseling: ${currentUser.nama}`, centerX, currentY, { align: 'center' });
+			
+			currentY += 10;
+
+			// --- VARIABEL GRAND TOTAL ---
+			let grandTotalL = 0;
+			let grandTotalP = 0;
+			let grandTotalSiswa = 0;
+
+			// --- LOOPING PER KELAS ---
+			selectedClasses.forEach((kelas, idx) => {
+				
+				// Pastikan tidak menabrak batas bawah halaman sebelum mencetak judul kelas
+				if (currentY > doc.internal.pageSize.getHeight() - 40) {
+					doc.addPage();
+					currentY = 20;
+				}
+
+				// Saring siswa khusus kelas ini dan urutkan abjad
+				let siswaKelasIni = metaData.siswa.filter(student => student.kelas && student.kelas.trim() === kelas);
+				siswaKelasIni.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''));
+
+				// Hitung L/P kelas ini
+				let totalL = 0;
+				let totalP = 0;
+
+				const bodyData = siswaKelasIni.map((std, i) => {
+					let genderRaw = (std.kelamin || std.Jenis_Kelamin || '-').toUpperCase();
+					let jk = genderRaw.startsWith('P') ? 'P' : (genderRaw.startsWith('L') ? 'L' : '-');
+					
+					if (jk === 'L') { totalL++; grandTotalL++; }
+					else if (jk === 'P') { totalP++; grandTotalP++; }
+					
+					grandTotalSiswa++;
+
+					return [i + 1, std.nisn || '-', std.nama || '-', jk, std.kelas || '-', '']; // Kolom Keterangan Kosong
+				});
+
+				// Cetak Judul Kelas di atas Tabel
+				doc.setFont("times", "bold"); doc.setFontSize(11);
+				doc.text(`Kelas: ${kelas}`, 15, currentY);
+
+				// Tambahkan baris khusus "Rangkuman Kelas" di index paling bawah (Bottom Row)
+				let totalKelas = totalL + totalP;
+				bodyData.push([
+					{ content: `Rangkuman Kelas ${kelas} :   Laki-laki = ${totalL} Siswa,   Perempuan = ${totalP} Siswa   |   Total Siswa = ${totalKelas} Siswa`, colSpan: 6, styles: { halign: 'center', fontStyle: 'bold', fillColor: [240, 248, 255], textColor: [0, 100, 150] } } // FillColor biru sangat pudar agar elegan
+				]);
+
+				// Render Tabel Kelas
+				doc.autoTable({
+					startY: currentY + 3,
+					showHead: 'everyPage', // Header kolom ikut jika pindah halaman
+					head: [['No', 'NISN', 'Nama Lengkap Siswa', 'L/P', 'Kelas', 'Keterangan']],
+					body: bodyData,
+					theme: 'grid',
+					styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+					headStyles: { fillColor: [230, 230, 230], fontStyle: 'bold', halign: 'center', valign: 'middle' },
+					columnStyles: { 
+						0: { cellWidth: 10, halign: 'center' },
+						1: { cellWidth: 25, halign: 'center' },
+						2: { cellWidth: 'auto' }, // Nama ambil sisa ruang
+						3: { cellWidth: 12, halign: 'center' },
+						4: { cellWidth: 20, halign: 'center' },
+						5: { cellWidth: 35 } // Keterangan
+					},
+					margin: { left: 15, right: 15 }
+				});
+
+				// Update kursor Y untuk kelas berikutnya (diberi jarak spasi sedikit)
+				currentY = doc.lastAutoTable.finalY + 12;
+			});
+
+			// --- GRAND TOTAL AKBAR ---
+			if (currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 20; }
+			
+			doc.autoTable({
+				startY: currentY,
+				body: [
+					['Total Kelas yang Diasuh', `${selectedClasses.length} Kelas`],
+					['Total Semua Siswa Laki-laki (L)', `${grandTotalL} Siswa`],
+					['Total Semua Siswa Perempuan (P)', `${grandTotalP} Siswa`],
+					['Total Seluruh Siswa', `${grandTotalSiswa} Siswa`]
+				],
+				theme: 'grid',
+				styles: { font: "times", fontSize: 11, cellPadding: 3, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+				columnStyles: { 
+					0: { cellWidth: 80, fontStyle: 'bold', fillColor: [245, 245, 245] }, 
+					1: { cellWidth: 40, halign: 'center', fontStyle: 'bold' } 
+				},
+				margin: { left: 15 } // Rata kiri elegan
+			});
+
+			// --- TANDA TANGAN ---
+			let finalY = doc.lastAutoTable.finalY + 15;
+			if(finalY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); finalY = 30; }
+
+			doc.setFont("times", "normal"); doc.setFontSize(11);
+			doc.text(`Makassar, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}`, pageWidth - 50, finalY, { align: 'center' });
+			doc.text("Guru Bimbingan dan Konseling", pageWidth - 50, finalY + 5, { align: 'center' });
+			
+			finalY += 25;
+			doc.setFont("times", "bold"); 
+			doc.text(currentUser.nama, pageWidth - 50, finalY, { align: 'center' });
+			
+			doc.setFont("times", "normal"); 
+			doc.text(`NIP. ${currentUser.nip || '-'}`, pageWidth - 50, finalY + 5, { align: 'center' });
+
+			Swal.close();
+			closeModalSiswaAsuh();
+			try { 
+				const blob = doc.output('blob'); 
+				window.open(URL.createObjectURL(blob), '_blank'); 
+			} catch (e) { 
+				doc.save(`Daftar_Siswa_Asuh_BK.pdf`); 
+			}
+		}
+		
     </script>
 </body>
 </html>
