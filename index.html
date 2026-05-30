@@ -5274,6 +5274,118 @@
                 },
                 margin: { left: marginLR, right: marginLR }
             });
+			
+			// --- TABEL D.3: REKAP PER KELAS ---
+            let rekapKelas = {};
+            
+            // 1. Pancing (Pre-fill) semua kelas dari database agar muncul meski nilainya 0
+            Object.keys(statData.classes).forEach(kls => {
+                if (kls !== '-' && kls !== '') {
+                    rekapKelas[kls] = { pelanggaran: 0, prestasi: 0 };
+                }
+            });
+            
+            // 2. Hitung Pelanggaran per Kelas
+            statData.pelanggaran.list.forEach(p => {
+                let kls = p[2] || '-';
+                // Jaga-jaga jika ada input manual tanpa kelas di database
+                if (kls !== '-' && !rekapKelas[kls]) rekapKelas[kls] = { pelanggaran: 0, prestasi: 0 };
+                if (rekapKelas[kls]) rekapKelas[kls].pelanggaran++;
+            });
+            
+            // 3. Hitung Prestasi per Kelas
+            statData.prestasi.list.forEach(p => {
+                let kls = p[2] || '-';
+                if (kls !== '-' && !rekapKelas[kls]) rekapKelas[kls] = { pelanggaran: 0, prestasi: 0 };
+                if (rekapKelas[kls]) rekapKelas[kls].prestasi++;
+            });
+
+            // Urutkan kelas secara cerdas (angka dulu baru huruf, misal 8A lalu 8B)
+            const sortedRekapKelas = Object.entries(rekapKelas).sort((a, b) => a[0].localeCompare(b[0], undefined, {numeric: true}));
+            
+            const bodyD3 = sortedRekapKelas.map((item, index) => [
+                index + 1,
+                `Kelas ${item[0]}`,
+                `${item[1].pelanggaran} Kasus`,
+                `${item[1].prestasi} Prestasi`
+            ]);
+
+            currentY = doc.lastAutoTable.finalY + 10;
+            if(currentY > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); currentY = 20; }
+            
+            // Cetak judul tabel terpisah
+            doc.setFont("times", "bold"); doc.setFontSize(10);
+            doc.text('Tabel D.3 Rekapitulasi Pelanggaran dan Prestasi per Kelas', marginLR, currentY);
+            currentY += 3;
+
+            doc.autoTable({
+                startY: currentY,
+                showHead: 'everyPage', // Hanya mengulang header kolom
+                head: [['No', 'Nama Kelas', 'Total Pelanggaran', 'Total Prestasi']],
+                body: bodyD3.length > 0 ? bodyD3 : [['-', '-', '-', '-']],
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: {cellWidth: 15, halign:'center'}, 
+                    1: {cellWidth: 'auto', fontStyle: 'bold'}, 
+                    2: {cellWidth: 40, halign:'center'}, 
+                    3: {cellWidth: 40, halign:'center'}
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
+
+            // --- TABEL D.4: REKAP PER JENIS KELAMIN ---
+            let rekapJK = { 'L': { pelanggaran: 0, prestasi: 0 }, 'P': { pelanggaran: 0, prestasi: 0 } };
+            let totalPelanggaranAll = 0;
+            let totalPrestasiAll = 0;
+
+            statData.pelanggaran.list.forEach(p => {
+                let jk = p[1] === 'P' ? 'P' : 'L'; // Jika bukan P, anggap L
+                rekapJK[jk].pelanggaran++;
+                totalPelanggaranAll++;
+            });
+            statData.prestasi.list.forEach(p => {
+                let jk = p[1] === 'P' ? 'P' : 'L'; 
+                rekapJK[jk].prestasi++;
+                totalPrestasiAll++;
+            });
+
+            const bodyD4 = [
+                [1, 'Laki-laki (L)', `${rekapJK['L'].pelanggaran} Kasus`, `${rekapJK['L'].prestasi} Prestasi`],
+                [2, 'Perempuan (P)', `${rekapJK['P'].pelanggaran} Kasus`, `${rekapJK['P'].prestasi} Prestasi`],
+                // Baris Grand Total dengan warna latar belakang khusus
+                [
+                    { content: 'TOTAL KESELURUHAN', colSpan: 2, styles: { halign: 'center', fontStyle: 'bold', fillColor: [240, 240, 240] } }, 
+                    { content: `${totalPelanggaranAll} Kasus`, styles: { halign: 'center', fontStyle: 'bold', fillColor: [240, 240, 240] } }, 
+                    { content: `${totalPrestasiAll} Prestasi`, styles: { halign: 'center', fontStyle: 'bold', fillColor: [240, 240, 240] } }
+                ]
+            ];
+
+            currentY = doc.lastAutoTable.finalY + 10;
+            if(currentY > doc.internal.pageSize.getHeight() - 35) { doc.addPage(); currentY = 20; }
+            
+            // Cetak judul tabel terpisah
+            doc.setFont("times", "bold"); doc.setFontSize(10);
+            doc.text('Tabel D.4 Rekapitulasi Pelanggaran dan Prestasi Berdasarkan Jenis Kelamin', marginLR, currentY);
+            currentY += 3;
+
+            doc.autoTable({
+                startY: currentY,
+                showHead: 'everyPage',
+                head: [['No', 'Jenis Kelamin', 'Total Pelanggaran', 'Total Prestasi']],
+                body: bodyD4,
+                theme: 'grid',
+                styles: { font: "times", fontSize: 10, cellPadding: 2, lineColor: 0, lineWidth: 0.1, textColor: 0 },
+                headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: {cellWidth: 15, halign:'center'}, 
+                    1: {cellWidth: 'auto', fontStyle: 'bold'}, 
+                    2: {cellWidth: 40, halign:'center'}, 
+                    3: {cellWidth: 40, halign:'center'}
+                },
+                margin: { left: marginLR, right: marginLR }
+            });
 
             // --- 7. TANDA TANGAN ---
             let finalY = doc.lastAutoTable.finalY + 15;
