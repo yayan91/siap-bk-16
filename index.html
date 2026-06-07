@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIAP-BK | 16</title>
+    <title>SIAP-BK Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -333,6 +333,10 @@
                 </div>
                 
                 <div class="flex flex-col md:flex-row items-center gap-2 bg-slate-200 dark:bg-slate-800 p-1.5 rounded-xl shadow-inner w-full xl:w-auto">
+					
+					<select id="filter-tahun-ajar" onchange="applyDashboardFilter()" class="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-blue-500 transition shadow-sm cursor-pointer">
+						<option value="Semua">Semua Tahun Ajaran</option>
+					</select>
                     
                     <select id="dashboard-filter-type" onchange="toggleDateFilter()" class="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-4 py-2 rounded-lg text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-blue-500 transition shadow-sm cursor-pointer">
                         <option value="all">Semua Waktu</option>
@@ -809,15 +813,21 @@
                         </div>
                     </div>
                     
-                    <!-- NEW: DATE FILTER INPUTS -->
-                    <div class="flex flex-col md:flex-row gap-2 bg-white/50 dark:bg-slate-800/50 p-2 rounded-xl border border-gray-200 dark:border-slate-700 backdrop-blur-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-gray-500 uppercase">Filter Tgl:</span>
-                            <input type="date" id="filter-start" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
-                            <span class="text-xs">-</span>
-                            <input type="date" id="filter-end" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
-                        </div>
-                    </div>
+                    <!-- NEW: DATE FILTER INPUTS + TAHUN AJAR -->
+					<div class="flex flex-col md:flex-row gap-2 bg-white/50 dark:bg-slate-800/50 p-2 rounded-xl border border-gray-200 dark:border-slate-700 backdrop-blur-sm">
+						<div class="flex items-center gap-2">
+							<span class="text-xs font-bold text-gray-500 uppercase">T.A.:</span>
+							<select id="filter-tahun-ajar-service" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white focus:outline-none">
+								<option value="Semua">Semua</option>
+							</select>
+						</div>
+						<div class="flex items-center gap-2">
+							<span class="text-xs font-bold text-gray-500 uppercase">Tgl:</span>
+							<input type="date" id="filter-start" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
+							<span class="text-xs">-</span>
+							<input type="date" id="filter-end" onchange="renderDataList()" class="p-1 rounded border border-gray-300 text-xs text-slate-700 dark:bg-slate-700 dark:text-white">
+						</div>
+					</div>
 
                     <div class="flex gap-2 flex-wrap">
                         <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl text-sm font-bold shadow-lg transition btn-press flex items-center gap-2" title="Download Excel">
@@ -869,11 +879,16 @@
             <div class="flex-none mb-6">
                 <button onclick="goHome()" class="text-sm text-blue-500 hover:underline mb-2"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</button>
                 
-                <div class="flex justify-between items-center mt-2">
+                <div class="flex flex-wrap justify-between items-center mt-2 gap-3">
                     <h2 class="text-2xl font-bold dark:text-white text-slate-800">Riwayat Layanan Siswa</h2>
-                    <button id="btn-print-profile" class="hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:shadow-pink-500/30 transition hover:-translate-y-1 items-center gap-2">
-                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">Cetak Profil</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <select id="filter-tahun-profile" class="p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 hidden" id="filter-tahun-profile">
+                            <option value="Semua">Semua T.A.</option>
+                        </select>
+                        <button id="btn-print-profile" class="hidden bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:shadow-pink-500/30 transition hover:-translate-y-1 items-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">Cetak Profil</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="glass p-4 rounded-xl mt-4 flex items-center gap-4">
@@ -971,6 +986,12 @@
                 </button>
             </div>
             <div class="p-6 space-y-4">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tahun Ajaran:</label>
+				<select id="selectTahunAjarBuku" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+					<option value="Semua">-- Semua Tahun Ajaran --</option>
+				</select>
+			</div>
                 <div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Siswa yang akan dicetak:</label>
 					<input type="text" id="inputCetakBukuSiswa" list="siswaListBuku" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Ketik nama siswa...">
@@ -1003,6 +1024,12 @@
 				</button>
 			</div>
 			<div class="p-6 space-y-4">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tahun Ajaran:</label>
+				<select id="selectTahunAjarLaporan" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all">
+					<option value="Semua">-- Semua Tahun Ajaran --</option>
+				</select>
+			</div>
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Kelas yang akan dicetak:</label>
 					<input type="text" id="inputCetakLaporanKelas" list="kelasListLaporan" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all" placeholder="Ketik atau pilih kelas... (misal: 8A)">
@@ -1089,7 +1116,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwahHWjmwTV9t5ScEfIwQkOuWyflqVFRcZjFLvzZWw85sLOnuE1hwmEoJ1dT5n29Wb6/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzmzIndADl41Yz_JmZTaX87UVQZ1focmTQvBXVnDxtRghDPYMOFlzbmww_2mLOFEWoc/exec"; 
 
         // State
         let currentUser = null;
@@ -1383,6 +1410,12 @@
             const meta = await apiCall({ action: 'getMetadata' });
             if(meta && meta.status === 'success') {
                 metaData = meta;
+				// --- SUNTIKAN TAHUN AJARAN DINAMIS ---
+				const filterDashTahun = document.getElementById('filter-tahun-ajar');
+				if (filterDashTahun && metaData.tahunAjar && metaData.tahunAjar.length > 0) {
+					filterDashTahun.innerHTML = '<option value="Semua">Semua Tahun Ajaran</option>' + 
+						metaData.tahunAjar.map(t => `<option value="${t}">${t}</option>`).join('');
+				}
                 if(meta.sekolah.logo_url) {
                     document.getElementById('header-logo').src = meta.sekolah.logo_url;
                     document.querySelector('#page-login img').src = meta.sekolah.logo_url;
@@ -1471,12 +1504,15 @@
             // KODE BARU: FILTER SEMESTER & RENTANG TANGGAL
             // ==========================================
             const filterType = document.getElementById('dashboard-filter-type') ? document.getElementById('dashboard-filter-type').value : 'all';
+			const filterTahun = document.getElementById('filter-tahun-ajar') ? document.getElementById('filter-tahun-ajar').value : 'Semua';
             const startDateVal = document.getElementById('dash-date-start') ? document.getElementById('dash-date-start').value : '';
             const endDateVal = document.getElementById('dash-date-end') ? document.getElementById('dash-date-end').value : '';
             
             // Kita timpa sementara variabel 'results' khusus untuk hitungan dashboard ini
             results = results.map(sheetData => {
                 return sheetData.filter(item => {
+					// PENCEKAL TAHUN AJARAN
+					if (filterTahun !== 'Semua' && item['Tahun_Ajar'] !== filterTahun) return false;
                     // 1. Jika Semua Waktu, loloskan
                     if (filterType === 'all') return true; 
 
@@ -2364,6 +2400,15 @@
             if(history.length === 0) { Swal.fire("Info", "Tidak ada riwayat.", "info"); return; }
             history.sort((a, b) => new Date(b._date) - new Date(a._date));
 
+            // Isi dropdown tahun ajaran di halaman profil
+            const selProfile = document.getElementById('filter-tahun-profile');
+            if (selProfile && metaData.tahunAjar) {
+                selProfile.innerHTML = '<option value="Semua">Semua T.A.</option>' +
+                    metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+                selProfile.classList.remove('hidden');
+                selProfile.classList.add('flex');
+            }
+
             const container = document.getElementById('timeline-container');
             container.innerHTML = '';
             document.getElementById('profile-name').innerText = toProperCase(keyword);
@@ -2432,7 +2477,18 @@
             const printBtn = document.getElementById('btn-print-profile');
             printBtn.classList.remove('hidden');
             printBtn.classList.add('flex');
-            printBtn.onclick = () => printStudentProfile(history, toProperCase(keyword));
+            printBtn.onclick = () => {
+                const tahunProfile = document.getElementById('filter-tahun-profile')?.value || 'Semua';
+                // Filter history sesuai tahun ajaran yang dipilih saat cetak
+                const filteredHistory = tahunProfile === 'Semua' 
+                    ? history 
+                    : history.filter(h => h['Tahun_Ajar'] === tahunProfile);
+                if (filteredHistory.length === 0) {
+                    Swal.fire("Kosong", "Tidak ada data untuk tahun ajaran yang dipilih.", "warning");
+                    return;
+                }
+                printStudentProfile(filteredHistory, toProperCase(keyword), tahunProfile);
+            };
         }
 
         // --- SERVICE LIST ---
@@ -2441,8 +2497,15 @@
             currentTitle = title;
             document.getElementById('service-title').innerText = title;
             document.getElementById('service-search').value = ''; 
-            document.getElementById('filter-start').value = '';
-            document.getElementById('filter-end').value = '';
+			document.getElementById('filter-start').value = '';
+			document.getElementById('filter-end').value = '';
+
+			// Isi & reset dropdown tahun ajaran ke tahun aktif
+			const selService = document.getElementById('filter-tahun-ajar-service');
+			if (selService && metaData.tahunAjar) {
+				selService.innerHTML = '<option value="Semua">Semua T.A.</option>' +
+					metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+			}
             currentPage = 1;
             rowsPerPage = 10;
             document.getElementById('rows-per-page').value = "10";
@@ -2462,25 +2525,29 @@
         function renderDataList() {
             // Filter
             const search = document.getElementById('service-search').value.toLowerCase();
-            const startStr = document.getElementById('filter-start').value;
-            const endStr = document.getElementById('filter-end').value;
-            const startDate = startStr ? new Date(startStr) : null;
-            const endDate = endStr ? new Date(endStr) : null;
+			const startStr = document.getElementById('filter-start').value;
+			const endStr = document.getElementById('filter-end').value;
+			const startDate = startStr ? new Date(startStr) : null;
+			const endDate = endStr ? new Date(endStr) : null;
+			const filterTahunService = document.getElementById('filter-tahun-ajar-service')?.value || 'Semua';
 
-            filteredData = activeDataList.filter(item => {
-                let textMatch = true;
-                if (search) { const text = Object.values(item).join(' ').toLowerCase(); textMatch = text.includes(search); }
-                let dateMatch = true;
-                if (startDate || endDate) {
-                    const dStr = getItemDate(item);
-                    if (dStr) {
-                        const itemDate = new Date(dStr);
-                        if (startDate && itemDate < startDate) dateMatch = false;
-                        if (endDate && itemDate > endDate) dateMatch = false;
-                    }
-                }
-                return textMatch && dateMatch;
-            });
+			filteredData = activeDataList.filter(item => {
+				// Filter Tahun Ajaran
+				if (filterTahunService !== 'Semua' && item['Tahun_Ajar'] !== filterTahunService) return false;
+
+				let textMatch = true;
+				if (search) { const text = Object.values(item).join(' ').toLowerCase(); textMatch = text.includes(search); }
+				let dateMatch = true;
+				if (startDate || endDate) {
+					const dStr = getItemDate(item);
+					if (dStr) {
+						const itemDate = new Date(dStr);
+						if (startDate && itemDate < startDate) dateMatch = false;
+						if (endDate && itemDate > endDate) dateMatch = false;
+					}
+				}
+				return textMatch && dateMatch;
+			});
 
             // URUTAN BARU KE LAMA (Terbaru di atas)
             filteredData.sort((a, b) => new Date(getItemDate(b)) - new Date(getItemDate(a)));
@@ -2846,17 +2913,25 @@
         }
 
         function printRecap() {
-            if(filteredData.length === 0) { Swal.fire("Kosong", "Tidak ada data untuk dicetak.", "warning"); return; }
-            const sDate = document.getElementById('filter-start').value;
-            const eDate = document.getElementById('filter-end').value;
-            let periode = "";
-            if(sDate && eDate) {
-                const d1 = new Date(sDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-                const d2 = new Date(eDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-                periode = `Periode: ${d1} s.d. ${d2}`;
-            }
-            generatePDF([...filteredData].reverse(), `Rekapitulasi_${currentTitle}`, true, periode);
-        }
+			if(filteredData.length === 0) { Swal.fire("Kosong", "Tidak ada data untuk dicetak.", "warning"); return; }
+			const sDate = document.getElementById('filter-start').value;
+			const eDate = document.getElementById('filter-end').value;
+			const tahunService = document.getElementById('filter-tahun-ajar-service')?.value || 'Semua';
+
+			// Susun label tahun ajaran
+			const labelTA = tahunService === 'Semua' ? 'Semua Tahun Ajaran' : `Tahun Ajaran ${tahunService}`;
+
+			// Susun label periode tanggal
+			let labelPeriode = "";
+			if(sDate && eDate) {
+				const d1 = new Date(sDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+				const d2 = new Date(eDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+				labelPeriode = ` | Periode: ${d1} s.d. ${d2}`;
+			}
+
+			const periode = `${labelTA}${labelPeriode}`;
+			generatePDF([...filteredData].reverse(), `Rekapitulasi_${currentTitle}`, true, periode);
+		}
 
         function printItem(id) {
             const item = activeDataList.find(x => x.ID_Unik === id);
@@ -3140,12 +3215,6 @@
                 // === MODE REKAP ===
 				doc.setFont("times", "bold"); doc.setFontSize(12);
 				doc.text(`REKAPITULASI KEGIATAN ${currentTitle.toUpperCase()}`, centerX, startY, { align: 'center' });
-				
-				// Tambahan Tahun Ajaran
-				const tahunAjarText = s.tahun_ajar ? `TAHUN AJARAN ${s.tahun_ajar}` : "TAHUN AJARAN -";
-				startY += 5; 
-				doc.setFontSize(11); 
-				doc.text(tahunAjarText, centerX, startY, { align: 'center' });
 
 				if(subTitle) { startY += 5; doc.setFontSize(11); doc.setFont("times", "italic"); doc.text(subTitle, centerX, startY, { align: 'center' }); }
                 
@@ -3350,7 +3419,7 @@
 
         // --- FORM ---
         function getFieldsConfig(sheetName) { 
-            const common = [{ key: 'Tanggal_Layanan', label: 'Tanggal Layanan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }];
+            const common = [{ key: 'Tanggal_Layanan', label: 'Tanggal Layanan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }];
             
             // Variabel standar untuk Komponen & Bidang Layanan BK agar rapi
             const komponenBK = ['Layanan Dasar', 'Layanan Peminatan', 'Layanan Responsif', 'Dukungan Sistem'];
@@ -3369,7 +3438,7 @@
             if(sheetName === '10_Konsultasi') return [...common, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 45 Menit / 1x45' }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Nama_Konsulti', label: 'Nama Konsulti (Orang Tua/Guru/Siswa)', type: 'text' }, { key: 'Status_Konsulti', label: 'Status Konsulti', type: 'select', options: ['Siswa', 'Orang Tua', 'Guru Mapel', 'Wali Kelas', 'Lainnya'] }, { key: 'Nama_Konsultan_GuruBK', label: 'Nama Konsultan (Guru BK)', type: 'text', value: currentUser.nama }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK }, { key: 'Uraian_Topik', label: 'Uraian Topik', type: 'textarea' }, { key: 'Hasil_Konsultasi', label: 'Hasil Konsultasi', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
 			
             // 5. Layanan Klasikal
-            if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 45 Menit / 1x45' }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
+            if(sheetName === '11_Layanan_Klasikal') return [{ key: 'Tanggal', label: 'Tanggal', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 45 Menit / 1x45' }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Sasaran_Layanan', label: 'Sasaran (Kelas)', type: 'text' }, { key: 'Jumlah_Peserta', label: 'Jumlah Peserta', type: 'number' }, { key: 'Topik_Layanan', label: 'Topik Layanan', type: 'text' }, { key: 'Bidang_Layanan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK }, { key: 'Metode_Layanan', label: 'Metode', type: 'text' }, { key: 'Media_Sumber', label: 'Media / Sumber', type: 'text' }, { key: 'Tujuan_Layanan', label: 'Tujuan', type: 'textarea' }, { key: 'Aspek_Layanan', label: 'Aspek', type: 'select', options: 'aspek' }, { key: 'Capaian_Layanan', label: 'Capaian', type: 'textarea' }, { key: 'Evaluasi_Tindak_Lanjut', label: 'Evaluasi & Tindak Lanjut', type: 'textarea' }, { key: 'Dokumentasi_Link', label: 'Link Dokumentasi (Foto/Drive)', type: 'text' }];
 			
             // 6. Konferensi Kasus (DITAMBAHKAN BIDANG BIMBINGAN)
             if(sheetName === '12_Konferensi_Kasus') return [...common, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 60 Menit / 2 Jam' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK }, { key: 'Nama_Siswa', label: 'Nama Siswa (Kasus)', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terlibat', label: 'Pihak Terlibat (Ortu/Kepsek)', type: 'text' }, { key: 'Tempat_Pertemuan', label: 'Tempat Pertemuan', type: 'text' }, { key: 'Deskripsi_Kasus', label: 'Deskripsi Kasus', type: 'textarea' }, { key: 'Hasil_Keputusan', label: 'Hasil Keputusan (Berita Acara)', type: 'textarea' }, { key: 'Tindak_Lanjut', label: 'Tindak Lanjut', type: 'textarea' }];
@@ -3397,12 +3466,12 @@
             if(sheetName === '15_Advokasi') return [...common, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 45 Menit' }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK }, { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' }, { key: 'Kelas', label: 'Kelas', type: 'readonly' }, { key: 'NISN', label: 'NISN', type: 'readonly' }, { key: 'Pihak_Terkait', label: 'Pihak Terkait (Yang melanggar hak)', type: 'text' }, { key: 'Kronologi_Masalah', label: 'Kronologi Kejadian', type: 'textarea' }, { key: 'Bentuk_Advokasi', label: 'Bentuk Advokasi / Pembelaan', type: 'textarea' }, { key: 'Hasil_Advokasi', label: 'Hasil Advokasi', type: 'textarea' }, { key: 'Status_Advokasi', label: 'Status', type: 'select', options: ['Berjalan', 'Selesai'] }];
 			
             // 10. Dukungan Sistem
-            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 3 Jam / 1 Hari' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'textarea' }];
+            if(sheetName === '16_Dukungan_Sistem') return [{ key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' }, { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' }, { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] }, { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 3 Jam / 1 Hari' }, { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK }, { key: 'Nama_Kegiatan', label: 'Nama Kegiatan (MGBK/Diklat/Rapat)', type: 'text' }, { key: 'Penyelenggara', label: 'Penyelenggara', type: 'text' }, { key: 'Peran_GuruBK', label: 'Peran Guru BK', type: 'select', options: ['Peserta', 'Panitia', 'Narasumber'] }, { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' }, { key: 'Deskripsi_Kegiatan', label: 'Deskripsi Singkat', type: 'textarea' }, { key: 'Hasil_Kegiatan', label: 'Hasil / Output', type: 'textarea' }];
 			
 			// 11. Catatan Anekdot
             if(sheetName === '17_Catatan_Anekdot') return [
                 { key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date' },
-                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' },
                 { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
                 { key: 'Waktu_Kejadian', label: 'Waktu Kejadian', type: 'text', placeholder: 'Contoh: Jam Istirahat, Pergantian Jam' },
                 { key: 'Tempat_Kejadian', label: 'Tempat Kejadian', type: 'text', placeholder: 'Contoh: Kantin, Ruang Kelas' },
@@ -3419,7 +3488,7 @@
 			// 12. Kunjungan Rumah
             if(sheetName === '18_Kunjungan_Rumah') return [
                 { key: 'Tanggal_Layanan', label: 'Tanggal Kunjungan', type: 'date' },
-                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' },
                 { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
                 { key: 'Waktu_Kunjungan', label: 'Waktu Kunjungan', type: 'text', placeholder: 'Contoh: 14.00 - 15.30 WITA' },
                 { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
@@ -3439,7 +3508,7 @@
 			// 13. Pelanggaran
 			if(sheetName === '19_Catatan_Pelanggaran') return [
 				{ key: 'Tanggal_Layanan', label: 'Tanggal Kejadian', type: 'date', required: true },
-				{ key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026', required: true },
+				{ key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' },
 				{ key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'], required: true },
 				{ key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa', required: true },
 				{ key: 'Kelas', label: 'Kelas', type: 'readonly' },
@@ -3466,7 +3535,7 @@
             // 14. Prestasi
             if(sheetName === '20_Catatan_Prestasi') return [
                 { key: 'Tanggal_Layanan', label: 'Tanggal Pencapaian', type: 'date' },
-                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' },
                 { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
                 { key: 'Nama_Siswa', label: 'Nama Siswa', type: 'select', options: 'siswa' },
                 { key: 'Kelas', label: 'Kelas', type: 'readonly' },
@@ -3499,7 +3568,7 @@
 			// 16. Layanan Lintas Kelas / Kelas Besar
             if(sheetName === '22_Layanan_Lintas_Kelas') return [
                 { key: 'Tanggal_Kegiatan', label: 'Tanggal Kegiatan', type: 'date' },
-                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'text', placeholder: 'Contoh: 2025/2026' },
+                { key: 'Tahun_Ajar', label: 'Tahun Ajaran', type: 'select', options: 'tahunAjar' },
                 { key: 'Semester', label: 'Semester', type: 'select', options: ['Ganjil', 'Genap'] },
                 { key: 'Durasi', label: 'Durasi Waktu', type: 'text', placeholder: 'Contoh: 2 Jam Pelajaran / 90 Menit' },
                 { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text', placeholder: 'Contoh: Aula Sekolah, Lapangan, Ruang Serbaguna' },
@@ -4183,7 +4252,7 @@
         }
 		
 		// --- FITUR PREMIUM: GENERATE PDF PROFIL PSIKOLOGIS SISWA ---
-        async function printStudentProfile(historyData, studentName) {
+        async function printStudentProfile(historyData, studentName, tahunAjar = 'Semua') {
             showToast("Menyiapkan Dokumen Profil...", "info");
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [215.9, 330.2] }); // F4
@@ -4264,7 +4333,7 @@
                     ['Nama Siswa', studentName],
                     ['Kelas', kelasSiswa],
                     ['Jenis Kelamin', jkSiswa], // Sekarang akan muncul teks lengkap
-                    ['Tahun Ajaran', `${s.tahun_ajar || '-'} (Semester ${s.semester || '-'})`],
+                    ['Tahun Ajaran', tahunAjar === 'Semua' ? 'Semua Tahun Ajaran' : tahunAjar],
                     ['Total Kasus', `${historyData.length} Riwayat Layanan`],
                     ['Tanggal Cetak', new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})]
                 ],
@@ -4512,23 +4581,30 @@
             Swal.fire({
                 title: '<span class="text-emerald-600 dark:text-emerald-400 font-black tracking-wide">PENGATURAN JURNAL</span>',
                 html: `
-                    <div class="text-left mt-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl mb-4 border border-blue-100 dark:border-blue-800 flex gap-3 items-start">
-                            <i class="fa-solid fa-wand-magic-sparkles text-blue-500 mt-0.5"></i>
-                            <p class="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">Sistem akan otomatis menyatukan dan mengurutkan data dari 10 jenis layanan berdasarkan rentang waktu yang Anda pilih.</p>
-                        </div>
-                        <div class="flex flex-col gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Mulai Tanggal</label>
-                                <input type="date" id="jurnal-start" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Sampai Tanggal</label>
-                                <input type="date" id="jurnal-end" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
-                            </div>
-                        </div>
-                    </div>
-                `,
+					<div class="text-left mt-4">
+						<div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-xl mb-4 border border-blue-100 dark:border-blue-800 flex gap-3 items-start">
+							<i class="fa-solid fa-wand-magic-sparkles text-blue-500 mt-0.5"></i>
+							<p class="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">Sistem akan otomatis menyatukan dan mengurutkan data dari 10 jenis layanan berdasarkan rentang waktu yang Anda pilih.</p>
+						</div>
+						<div class="flex flex-col gap-4">
+							<div>
+								<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tahun Ajaran</label>
+								<select id="jurnal-tahun-ajar" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none cursor-pointer">
+									<option value="Semua">-- Semua Tahun Ajaran --</option>
+									${(metaData.tahunAjar || []).map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('')}
+								</select>
+							</div>
+							<div>
+								<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Mulai Tanggal</label>
+								<input type="date" id="jurnal-start" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
+							</div>
+							<div>
+								<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Sampai Tanggal</label>
+								<input type="date" id="jurnal-end" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 shadow-sm outline-none">
+							</div>
+						</div>
+					</div>
+				`,
                 icon: 'none',
                 showCancelButton: true,
                 confirmButtonText: '<i class="fa-solid fa-gears mr-2"></i> Buat Laporan',
@@ -4540,17 +4616,18 @@
                     cancelButton: 'px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition-all mx-2 btn-press'
                 },
                 preConfirm: () => {
-                    const s = document.getElementById('jurnal-start').value;
-                    const e = document.getElementById('jurnal-end').value;
-                    if (!s || !e) { Swal.showValidationMessage('Tentukan rentang tanggalnya, sahabat!'); return false; }
-                    return { start: s, end: e };
-                }
+					const s = document.getElementById('jurnal-start').value;
+					const e = document.getElementById('jurnal-end').value;
+					const ta = document.getElementById('jurnal-tahun-ajar').value;
+					if (!s || !e) { Swal.showValidationMessage('Tentukan rentang tanggalnya, sahabat!'); return false; }
+					return { start: s, end: e, tahunAjar: ta };
+				}
             }).then((result) => {
-                if (result.isConfirmed) processJurnalData(result.value.start, result.value.end);
+                if (result.isConfirmed) processJurnalData(result.value.start, result.value.end, result.value.tahunAjar);
             });
         }
 
-        async function processJurnalData(startDateStr, endDateStr) {
+        async function processJurnalData(startDateStr, endDateStr, tahunAjar = 'Semua') {
             Swal.fire({ title: 'Menjahit Dokumen...', html: 'Menyatukan data dan merapihkan tabel Jurnal.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             let allData = [];
@@ -4572,6 +4649,8 @@
                 if (sheet === '19_Catatan_Pelanggaran' || sheet === '20_Catatan_Prestasi') continue;
                 data.forEach(item => {
                     const dateVal = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+					// Filter Tahun Ajaran
+					if (tahunAjar !== 'Semua' && item['Tahun_Ajar'] !== tahunAjar) return;
                     if(!dateVal) return;
                     const itemDate = new Date(dateVal);
                     
@@ -4630,11 +4709,11 @@
                 return;
             }
 
-            await printJurnalPDF(allData, startDateStr, endDateStr);
+            await printJurnalPDF(allData, startDateStr, endDateStr, tahunAjar);
             Swal.close();
         }
 
-        async function printJurnalPDF(data, sDateStr, eDateStr) {
+        async function printJurnalPDF(data, sDateStr, eDateStr, tahunAjar = 'Semua') {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [330.2, 215.9] }); // Kertas F4 Landscape
             const s = metaData.sekolah || {};
@@ -4686,7 +4765,9 @@
             doc.text("LAPORAN JURNAL KEGIATAN LAYANAN BIMBINGAN DAN KONSELING", centerX, currentY, { align: 'center' });
             
             // Tambahan Tahun Ajaran
-            const tahunAjarText = s.tahun_ajar ? `TAHUN AJARAN ${s.tahun_ajar}` : "TAHUN AJARAN -";
+            const tahunAjarText = tahunAjar === 'Semua' 
+				? `TAHUN AJARAN: SEMUA TAHUN AJARAN` 
+				: `TAHUN AJARAN ${tahunAjar}`;
             currentY += 6;
             doc.setFontSize(11);
             doc.text(tahunAjarText, centerX, currentY, { align: 'center' });
@@ -4762,31 +4843,38 @@
             Swal.fire({
                 title: '<span class="text-purple-600 dark:text-purple-400 font-black tracking-wide">STATISTIK KINERJA</span>',
                 html: `
-                    <div class="text-left mt-4 space-y-4">
-                        <div class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-xl mb-2 border border-purple-100 dark:border-purple-800 flex gap-3 items-start">
-                            <i class="fa-solid fa-wand-magic-sparkles text-purple-500 mt-0.5"></i>
-                            <p class="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">Pilih parameter untuk menghasilkan Laporan Eksekutif. Jika rentang tanggal dikosongkan, AI akan membaca semua waktu pada semester tersebut.</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Filter Semester</label>
-                            <select id="stat-semester" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none cursor-pointer">
-                                <option value="Semua">-- Semua Semester --</option>
-                                <option value="Ganjil">Semester Ganjil</option>
-                                <option value="Genap">Semester Genap</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Dari Tgl (Opsional)</label>
-                                <input type="date" id="stat-start" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none">
-                            </div>
-                            <div class="flex-1">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Sampai (Opsional)</label>
-                                <input type="date" id="stat-end" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none">
-                            </div>
-                        </div>
-                    </div>
-                `,
+					<div class="text-left mt-4 space-y-4">
+						<div class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-xl mb-2 border border-purple-100 dark:border-purple-800 flex gap-3 items-start">
+							<i class="fa-solid fa-wand-magic-sparkles text-purple-500 mt-0.5"></i>
+							<p class="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">Pilih parameter untuk menghasilkan Laporan Eksekutif. Jika rentang tanggal dikosongkan, AI akan membaca semua waktu pada semester tersebut.</p>
+						</div>
+						<div>
+							<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tahun Ajaran</label>
+							<select id="stat-tahun-ajar" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none cursor-pointer">
+								<option value="Semua">-- Semua Tahun Ajaran --</option>
+								${(metaData.tahunAjar || []).map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('')}
+							</select>
+						</div>
+						<div>
+							<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Filter Semester</label>
+							<select id="stat-semester" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none cursor-pointer">
+								<option value="Semua">-- Semua Semester --</option>
+								<option value="Ganjil">Semester Ganjil</option>
+								<option value="Genap">Semester Genap</option>
+							</select>
+						</div>
+						<div class="flex gap-2">
+							<div class="flex-1">
+								<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Dari Tgl (Opsional)</label>
+								<input type="date" id="stat-start" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none">
+							</div>
+							<div class="flex-1">
+								<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Sampai (Opsional)</label>
+								<input type="date" id="stat-end" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 shadow-sm outline-none">
+							</div>
+						</div>
+					</div>
+				`,
                 icon: 'none',
                 showCancelButton: true,
                 confirmButtonText: '<i class="fa-solid fa-print mr-2"></i> Cetak Dokumen',
@@ -4798,12 +4886,13 @@
                     cancelButton: 'px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition-all mx-2 btn-press'
                 },
                 preConfirm: () => {
-                    return {
-                        semester: document.getElementById('stat-semester').value,
-                        start: document.getElementById('stat-start').value,
-                        end: document.getElementById('stat-end').value
-                    }
-                }
+				return {
+					tahunAjar: document.getElementById('stat-tahun-ajar').value,
+					semester: document.getElementById('stat-semester').value,
+					start: document.getElementById('stat-start').value,
+					end: document.getElementById('stat-end').value
+				}
+			}
             }).then((res) => {
                 if (res.isConfirmed) processLaporanStatistik(res.value);
             });
@@ -4856,6 +4945,8 @@
             for (const [sheet, data] of Object.entries(cachedAllServices)) {
                 if (!sheetLabels[sheet]) continue;
                 data.forEach(item => {
+					// Filter Tahun Ajaran
+					if (filters.tahunAjar !== 'Semua' && item['Tahun_Ajar'] !== filters.tahunAjar) return;
                     // Filter Semester
                     if (filters.semester !== 'Semua' && item['Semester'] !== filters.semester) return;
                     
@@ -5028,7 +5119,8 @@
             
             currentY += 5;
             let textSemester = filters.semester === 'Semua' ? 'Ganjil dan Genap' : filters.semester;
-            let periodeStr = `Semester: ${textSemester}`;
+            const tahunAjarLabel = filters.tahunAjar === 'Semua' ? 'Semua Tahun Ajaran' : `Tahun Ajaran ${filters.tahunAjar}`;
+			let periodeStr = `${tahunAjarLabel} | Semester: ${textSemester}`;
             
             if(filters.start && filters.end) {
                 const d1 = new Date(filters.start).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
@@ -6337,10 +6429,20 @@
                 title: '<span class="text-blue-600 font-black">REKAM JEJAK LAYANAN SISWA</span>',
                 html: `
                     <p class="text-sm text-slate-500 mb-4">Lacak riwayat pembinaan siswa lintas layanan.</p>
-                    <input list="siswa-list-360" id="input-siswa-360" class="w-full p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:border-blue-500 bg-white dark:bg-slate-800 dark:text-white text-left font-semibold shadow-inner outline-none" placeholder="🔍 Ketik nama siswa...">
-                    <datalist id="siswa-list-360">
-                        ${datalistOptions}
-                    </datalist>
+                    <div class="mb-3 text-left">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tahun Ajaran</label>
+                        <select id="input-tahun-360" class="w-full p-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                            <option value="Semua">-- Semua Tahun Ajaran --</option>
+                            ${(metaData.tahunAjar || []).map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="text-left">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Nama Siswa</label>
+                        <input list="siswa-list-360" id="input-siswa-360" class="w-full p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:border-blue-500 bg-white dark:bg-slate-800 dark:text-white text-left font-semibold shadow-inner outline-none" placeholder="🔍 Ketik nama siswa...">
+                        <datalist id="siswa-list-360">
+                            ${datalistOptions}
+                        </datalist>
+                    </div>
                 `,
                 showCancelButton: true,
                 confirmButtonText: '<i class="fa-solid fa-radar text-white mr-2"></i> Lacak Riwayat',
@@ -6352,15 +6454,16 @@
                 buttonsStyling: false,
                 preConfirm: () => {
                     const val = document.getElementById('input-siswa-360').value;
+                    const tahun = document.getElementById('input-tahun-360').value;
                     if(!val) Swal.showValidationMessage("Ketik nama siswa terlebih dahulu!");
-                    return val.split(' (')[0].trim(); // Ambil namanya saja jika formatnya "Nama (Kelas)"
+                    return { nama: val.split(' (')[0].trim(), tahunAjar: tahun };
                 }
             }).then((res) => {
-                if(res.isConfirmed) processBukuPribadi(res.value);
+                if(res.isConfirmed) processBukuPribadi(res.value.nama, res.value.tahunAjar);
             });
         }
 
-        function processBukuPribadi(studentName) {
+        function processBukuPribadi(studentName, tahunAjar = 'Semua') {
             Swal.fire({ title: 'Melacak Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
             let history = [];
@@ -6389,6 +6492,9 @@
             // Menyelam ke 10 layanan mencari nama siswa
             for (const [sheet, data] of Object.entries(cachedAllServices)) {
 				data.forEach(item => {
+					// Filter tahun ajaran
+					if (tahunAjar !== 'Semua' && item['Tahun_Ajar'] !== tahunAjar) return;
+
 					const checkMatch = (val) => val && String(val).toLowerCase().includes(searchName);
 
 					if (checkMatch(item.Nama_Siswa) || checkMatch(item.Nama_Siswa_1) || checkMatch(item.Nama_Siswa_2) || 
@@ -6494,11 +6600,15 @@
             Swal.fire({
                 html: htmlContent,
                 showCloseButton: true,
-                showConfirmButton: false,
+                showConfirmButton: history.length > 0,
+                confirmButtonText: '<i class="fa-solid fa-file-pdf mr-2"></i> Cetak PDF',
+                confirmButtonColor: '#7c3aed',
                 width: '850px',
                 customClass: {
                     popup: 'rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 p-2 md:p-6'
                 }
+            }).then(result => {
+                if (result.isConfirmed) printStudentProfile(history, studentName, tahunAjar);
             });
         }
 		
@@ -6564,6 +6674,12 @@
 
         // 1. Fungsi Membuka Modal (Sekarang otomatis mengisi daftar nama siswa)
 		function openModalBukuSiswa() {
+			// ISIAN DROPDOWN TAHUN AJARAN
+			const selBuku = document.getElementById('selectTahunAjarBuku');
+			if (selBuku && metaData.tahunAjar) {
+				selBuku.innerHTML = '<option value="Semua">-- Semua Tahun Ajaran --</option>' +
+					metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+			}
 			// Isi datalist siswa agar muncul saat diketik
 			const datalist = document.getElementById('siswaListBuku');
 			if (metaData && metaData.siswa) {
@@ -6589,6 +6705,12 @@
 		// FITUR CETAK LAPORAN KELAS
 		// ==========================================
 		function openModalLaporanKelas() {
+			// ISIAN DROPDOWN TAHUN AJARAN
+			const selLaporan = document.getElementById('selectTahunAjarLaporan');
+			if (selLaporan && metaData.tahunAjar) {
+				selLaporan.innerHTML = '<option value="Semua">-- Semua Tahun Ajaran --</option>' +
+					metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+			}
 			const datalist = document.getElementById('kelasListLaporan');
 			if (metaData && metaData.siswa) {
 				const kelasSet = new Set();
@@ -6612,6 +6734,7 @@
 
 		async function generateLaporanKelasPDF() {
 			try { // SISTEM PELINDUNG ANTI-ERROR DIMULAI
+				const tahunAjarLaporan = document.getElementById('selectTahunAjarLaporan')?.value || 'Semua';
 				const targetKelas = document.getElementById('inputCetakLaporanKelas').value.trim();
 				if (!targetKelas) { Swal.fire('Oops!', 'Silakan pilih atau ketik kelas terlebih dahulu.', 'warning'); return; }
 				if (!cachedAllServices || !metaData || !metaData.siswa) { Swal.fire('Tunggu', 'Sistem sedang menyiapkan data...', 'info'); return; }
@@ -6635,6 +6758,8 @@
 				sheetsToSearch.forEach(sheet => {
 					if (cachedAllServices && cachedAllServices[sheet]) {
 						cachedAllServices[sheet].forEach(item => {
+							// ✅ Filter tahun ajaran di tempat yang benar (item sudah ada)
+							if (tahunAjarLaporan !== 'Semua' && item['Tahun_Ajar'] !== tahunAjarLaporan) return;
 							let isMatchKelas = false;
 							let siswaTerlibat = []; 
 
@@ -6727,7 +6852,8 @@
 				doc.text(`LAPORAN REKAPITULASI LAYANAN KELAS`, centerX, currentY, { align: 'center' });
 				currentY += 5;
 				doc.setFont("times", "bold");
-				doc.text(`KELAS: ${targetKelas.toUpperCase()} | TAHUN AJARAN: ${s.tahun_ajar || '-'}`, centerX, currentY, { align: 'center' });
+				const labelTALaporan = tahunAjarLaporan === 'Semua' ? 'SEMUA TAHUN AJARAN' : tahunAjarLaporan;
+				doc.text(`KELAS: ${targetKelas.toUpperCase()} | TAHUN AJARAN: ${labelTALaporan}`, centerX, currentY, { align: 'center' });
 
 				// TABEL A: DAFTAR SISWA (Versi Anti-Double Total)
 				currentY += 10;
@@ -6911,6 +7037,7 @@
 		// FITUR CETAK BUKU SISWA (MENGGUNAKAN MESIN jsPDF SEPERTI JURNAL - 100% SUPPORT HP)
 		// ==========================================
 		async function generateDanCetakBukuSiswa() {
+			const tahunAjarBuku = document.getElementById('selectTahunAjarBuku')?.value || 'Semua';
 			const namaSiswa = document.getElementById('inputCetakBukuSiswa').value;
 			if (!namaSiswa) {
 				Swal.fire('Oops!', 'Silakan pilih nama siswa terlebih dahulu.', 'warning');
@@ -6962,7 +7089,9 @@
 			sheetsToSearch.forEach(sheet => {
 				if (cachedAllServices && cachedAllServices[sheet]) {
 					cachedAllServices[sheet].forEach(item => {
-						const match = item['Nama_Siswa'] === namaSiswa || 
+						// ✅ Filter tahun ajaran di tempat yang benar (item sudah ada)
+						if (tahunAjarBuku !== 'Semua' && item['Tahun_Ajar'] !== tahunAjarBuku) return;
+						const match = item['Nama_Siswa'] === namaSiswa ||
 									  item['Nama_Siswa_1'] === namaSiswa || 
 									  (item['Anggota_Kelompok_Siswa'] && item['Anggota_Kelompok_Siswa'].includes(namaSiswa));
 
@@ -7097,7 +7226,7 @@
 			printRow("NISN", nisnSiswa);
 			printRow("Kelas", kelasSiswa);
 			printRow("Jenis Kelamin", jkSiswa);
-			printRow("Tahun Ajaran", `${s.tahun_ajar || '-'} / ${s.semester || '-'}`);
+			printRow("Tahun Ajaran", `${tahunAjarBuku === 'Semua' ? (s.tahun_ajar || '-') : tahunAjarBuku}`);
 
 			// Menentukan posisi Y setelah blok profil (ambil yang paling bawah antara foto atau biodata)
 			currentY = Math.max(fotoY + 45, bioY + 5); 
