@@ -428,6 +428,59 @@
                 </div>
             </div>
 			
+			<!-- STATISTIK AKTIVITAS SAYA -->
+			<div id="statistik-aktivitas" class="glass rounded-2xl p-5 mb-6 shadow-lg border-l-4 border-teal-500 hide animate-slide-in">
+				<div class="flex flex-wrap justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4 gap-2">
+					<h3 class="text-sm md:text-base font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center gap-2">
+						<i class="fa-solid fa-chart-simple animate-pulse"></i> Statistik Aktivitas Saya
+					</h3>
+					<span id="badge-aktivitas-guru" class="text-[10px] bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 px-2 py-1 rounded font-bold border border-teal-200 dark:border-teal-800"></span>
+				</div>
+
+				<!-- Filter Rentang Tanggal -->
+				<div class="flex flex-wrap gap-2 mb-4 items-end">
+					<div>
+						<label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Dari Tanggal</label>
+						<input type="date" id="aktivitas-start" class="p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-teal-500">
+					</div>
+					<div>
+						<label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Sampai Tanggal</label>
+						<input type="date" id="aktivitas-end" class="p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-teal-500">
+					</div>
+					<button onclick="renderAktivitasSaya()" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+						<i class="fa-solid fa-magnifying-glass"></i> Cari
+					</button>
+					<button onclick="resetAktivitasHariIni()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+						<i class="fa-solid fa-rotate-left"></i> Hari Ini
+					</button>
+				</div>
+
+				<!-- Ringkasan Angka -->
+				<div class="grid grid-cols-3 gap-3 mb-4">
+					<div class="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-3 text-center border border-teal-100 dark:border-teal-800">
+						<p id="aktivitas-total" class="text-2xl font-black text-teal-600 dark:text-teal-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Total Layanan</p>
+					</div>
+					<div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center border border-blue-100 dark:border-blue-800">
+						<p id="aktivitas-jenis" class="text-2xl font-black text-blue-600 dark:text-blue-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Jenis Layanan</p>
+					</div>
+					<div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 text-center border border-purple-100 dark:border-purple-800">
+						<p id="aktivitas-harian" class="text-2xl font-black text-purple-600 dark:text-purple-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Rata-rata/Hari</p>
+					</div>
+				</div>
+
+				<!-- Tersibuk & Rincian -->
+				<div id="aktivitas-tersibuk" class="text-xs text-slate-500 dark:text-slate-400 mb-3 hidden">
+					<i class="fa-solid fa-fire text-orange-500 mr-1"></i>
+					<span id="aktivitas-tersibuk-text"></span>
+				</div>
+				<div id="aktivitas-rincian" class="space-y-2 max-h-[200px] overflow-y-auto custom-scroll pr-1">
+					<p class="text-xs text-center text-slate-400">Memuat aktivitas...</p>
+				</div>
+			</div>
+			
 			<div id="hot-zone-klasemen" class="glass rounded-2xl p-5 mb-6 shadow-lg border-l-4 border-orange-500 hide animate-slide-in">
                 <div class="flex justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4">
                     <h3 class="text-sm md:text-base font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-2">
@@ -540,6 +593,21 @@
                 </div>
             </div>
 			
+			<!-- GRAFIK TREN BULANAN -->
+			<div id="tren-bulanan-wrapper" class="glass rounded-2xl p-5 mb-8 shadow-lg border-l-4 border-cyan-500 hide animate-slide-in">
+				<div class="flex flex-wrap justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4 gap-3">
+					<h3 class="text-sm md:text-base font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+						<i class="fa-solid fa-chart-line animate-pulse"></i> Tren Layanan Bulanan
+					</h3>
+					<select id="filter-tren-tahun" onchange="renderTrenBulanan()" class="text-xs font-bold p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+						<option value="Semua">Semua Tahun Ajaran</option>
+					</select>
+				</div>
+				<div class="h-64 w-full">
+					<canvas id="trenBulananChart"></canvas>
+				</div>
+			</div>
+
 			<div class="mb-8 flex justify-center">
                 <button onclick="runAiForecast()" class="group relative px-8 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-500/20 hover:scale-105 transition-all duration-300 btn-press flex items-center gap-3 overflow-hidden">
                     <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-700 -skew-x-12"></div>
@@ -1082,6 +1150,12 @@
 			</div>
 
 			<div class="p-5 md:p-6 flex-1 overflow-y-auto custom-scroll">
+				<div class="mb-4">
+					<label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tahun Ajaran</label>
+					<select id="selectTahunAjarAsuh" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-teal-500 outline-none transition-all">
+						<option value="Semua">-- Semua Tahun Ajaran --</option>
+					</select>
+				</div>
 				<div class="flex justify-between items-center mb-4">
 					<span class="text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Daftar Kelas</span>
 					
@@ -1453,10 +1527,235 @@
             const res = await apiCall({ action: 'getData', sheetName: sheet, username: currentUser.username });
             return res && res.status === 'success' ? res.data : [];
         };
+		
+		// =============================================
+        // STATISTIK AKTIVITAS SAYA
+        // =============================================
+        function resetAktivitasHariIni() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('aktivitas-start').value = today;
+            document.getElementById('aktivitas-end').value = today;
+            renderAktivitasSaya();
+        }
+
+        function renderAktivitasSaya() {
+            if (!cachedAllServices || !currentUser) return;
+
+            const startVal = document.getElementById('aktivitas-start').value;
+            const endVal   = document.getElementById('aktivitas-end').value;
+            if (!startVal || !endVal) {
+                Swal.fire('Lengkapi Tanggal', 'Isi rentang tanggal terlebih dahulu.', 'warning');
+                return;
+            }
+
+            const startDate = new Date(startVal); startDate.setHours(0,0,0,0);
+            const endDate   = new Date(endVal);   endDate.setHours(23,59,59,999);
+            if (startDate > endDate) {
+                Swal.fire('Tanggal Salah', 'Tanggal mulai tidak boleh lebih dari tanggal akhir.', 'warning');
+                return;
+            }
+
+            const excludedSheets = ['19_Catatan_Pelanggaran', '20_Catatan_Prestasi', '17_Catatan_Anekdot'];
+            const sheetLabels = {
+                '7_Layanan_Individu': 'Konseling Individu',
+                '8_Layanan_Kelompok': 'Konseling Kelompok',
+                '9_Bimbingan_Kelompok': 'Bim. Kelompok',
+                '10_Konsultasi': 'Konsultasi',
+                '11_Layanan_Klasikal': 'Klasikal',
+                '12_Konferensi_Kasus': 'Konferensi Kasus',
+                '13_Alih_Tangan_Kasus': 'Alih Tangan',
+                '14_Mediasi': 'Mediasi',
+                '15_Advokasi': 'Advokasi',
+                '16_Dukungan_Sistem': 'Dukungan Sistem',
+                '18_Kunjungan_Rumah': 'Kunjungan Rumah',
+                '21_Layanan_Kolaborasi': 'Kolaborasi',
+                '22_Layanan_Lintas_Kelas': 'Lintas Kelas'
+            };
+
+            // Hitung data
+            let totalLayanan  = 0;
+            let countPerJenis = {};
+            let countPerHari  = {};
+
+            for (const [sheet, data] of Object.entries(cachedAllServices)) {
+                if (excludedSheets.includes(sheet)) continue;
+                data.forEach(item => {
+                    // Filter hanya milik guru yang login
+                    if (item['Created_By'] !== currentUser.username) return;
+
+                    const tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                    if (!tgl) return;
+                    const d = new Date(tgl); d.setHours(0,0,0,0);
+                    if (isNaN(d.getTime()) || d < startDate || d > endDate) return;
+
+                    totalLayanan++;
+
+                    // Hitung per jenis
+                    const label = sheetLabels[sheet] || sheet;
+                    countPerJenis[label] = (countPerJenis[label] || 0) + 1;
+
+                    // Hitung per hari
+                    const hariKey = tgl.split('T')[0] || tgl;
+                    countPerHari[hariKey] = (countPerHari[hariKey] || 0) + 1;
+                });
+            }
+
+            // Hitung statistik turunan
+            const jumlahJenis  = Object.keys(countPerJenis).length;
+            const jumlahHariAktif = Object.keys(countPerHari).length;
+            
+            // Hitung selisih hari dalam rentang
+            const selisihHari = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
+            const rataHarian  = jumlahHariAktif > 0 ? (totalLayanan / selisihHari).toFixed(1) : 0;
+
+            // Hari tersibuk
+            let hariterSibuk = null, maxHari = 0;
+            Object.entries(countPerHari).forEach(([tgl, cnt]) => {
+                if (cnt > maxHari) { maxHari = cnt; hariterSibuk = tgl; }
+            });
+
+            // Update angka ringkasan
+            document.getElementById('aktivitas-total').innerText  = totalLayanan;
+            document.getElementById('aktivitas-jenis').innerText  = jumlahJenis;
+            document.getElementById('aktivitas-harian').innerText = rataHarian;
+
+            // Label badge rentang
+            const fmt = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const isSameDay = startVal === endVal;
+            document.getElementById('badge-aktivitas-guru').innerText = isSameDay
+                ? fmt(startVal)
+                : `${fmt(startVal)} — ${fmt(endVal)}`;
+
+            // Hari tersibuk
+            const tersibukEl = document.getElementById('aktivitas-tersibuk');
+            if (hariterSibuk && !isSameDay) {
+                document.getElementById('aktivitas-tersibuk-text').innerText =
+                    `Hari tersibuk: ${new Date(hariterSibuk).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} (${maxHari} layanan)`;
+                tersibukEl.classList.remove('hidden');
+            } else {
+                tersibukEl.classList.add('hidden');
+            }
+
+            // Rincian per jenis layanan
+            const rincianEl = document.getElementById('aktivitas-rincian');
+            if (totalLayanan === 0) {
+                const isToday = startVal === new Date().toISOString().split('T')[0] && isSameDay;
+                rincianEl.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-4 opacity-60">
+                        <i class="fa-solid fa-mug-hot text-2xl text-slate-400 mb-2"></i>
+                        <p class="text-xs text-center text-slate-400">${isToday ? 'Belum ada layanan hari ini. Semangat!' : 'Tidak ada layanan pada rentang tanggal ini.'}</p>
+                    </div>`;
+                return;
+            }
+
+            // Urutkan jenis dari terbanyak
+            const sortedJenis = Object.entries(countPerJenis).sort((a, b) => b[1] - a[1]);
+            const colors = ['teal','blue','purple','orange','pink','indigo','green','red','cyan','amber'];
+
+            rincianEl.innerHTML = sortedJenis.map(([label, count], i) => {
+                const pct  = Math.round((count / totalLayanan) * 100);
+                const color = colors[i % colors.length];
+                return `
+                    <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                        <div class="w-8 h-8 rounded-lg bg-${color}-100 dark:bg-${color}-900/30 flex items-center justify-center shrink-0">
+                            <span class="text-xs font-black text-${color}-600 dark:text-${color}-400">${count}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">${label}</p>
+                            <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mt-1">
+                                <div class="bg-${color}-500 h-1.5 rounded-full transition-all duration-500" style="width:${pct}%"></div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-400 shrink-0">${pct}%</span>
+                    </div>`;
+            }).join('');
+        }
 
         function toggleChartType() {
             chartType = chartType === 'bar' ? 'doughnut' : 'bar';
             loadDashboardStats();
+        }
+		
+		// =============================================
+        // GRAFIK TREN BULANAN
+        // =============================================
+        function renderTrenBulanan() {
+            if (!cachedAllServices) return;
+
+            const filterTahun = document.getElementById('filter-tren-tahun')?.value || 'Semua';
+            const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+            
+            // Hitung jumlah layanan per bulan
+            const countPerBulan = Array(12).fill(0);
+            const excludedSheets = ['19_Catatan_Pelanggaran', '20_Catatan_Prestasi', '17_Catatan_Anekdot'];
+
+            for (const [sheet, data] of Object.entries(cachedAllServices)) {
+                if (excludedSheets.includes(sheet)) continue;
+                data.forEach(item => {
+                    if (filterTahun !== 'Semua' && item['Tahun_Ajar'] !== filterTahun) return;
+                    const tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                    if (!tgl) return;
+                    const d = new Date(tgl);
+                    if (isNaN(d.getTime())) return;
+                    countPerBulan[d.getMonth()]++;
+                });
+            }
+
+            // Tampilkan wrapper
+            const wrapper = document.getElementById('tren-bulanan-wrapper');
+            wrapper.classList.remove('hide');
+
+            // Destroy chart lama jika ada
+            if (window.myTrenChart) { window.myTrenChart.destroy(); window.myTrenChart = null; }
+
+            const ctx = document.getElementById('trenBulananChart').getContext('2d');
+            const maxVal = Math.max(...countPerBulan, 1);
+
+            window.myTrenChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: BULAN,
+                    datasets: [{
+                        label: 'Jumlah Layanan',
+                        data: countPerBulan,
+                        fill: true,
+                        tension: 0.4,
+                        borderColor: 'rgba(6, 182, 212, 1)',
+                        backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                        pointBackgroundColor: countPerBulan.map(v =>
+                            v === maxVal ? 'rgba(239,68,68,1)' : 'rgba(6,182,212,1)'
+                        ),
+                        pointRadius: countPerBulan.map(v => v === maxVal ? 7 : 4),
+                        pointHoverRadius: 8,
+                        borderWidth: 2.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.parsed.y} layanan`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', stepSize: 1, precision: 0 },
+                            grid: { color: 'rgba(148,163,184,0.1)' },
+                            border: { display: false }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
         }
 		
 		// --- PENGENDALI SMART FILTER DASHBOARD ---
@@ -1576,7 +1875,8 @@
                 data.forEach(item => {
                     // Unique Student Count
                     if(item.Nama_Siswa) siswaSet.add(item.Nama_Siswa);
-                    if(item.Nama_Siswa_1) siswaSet.add(item.Nama_Siswa_1);
+                    if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(n => { const nama = n.trim().split(' (')[0].trim(); if(nama) siswaSet.add(nama); });
+                    if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(n => { const nama = n.trim().split(' (')[0].trim(); if(nama) siswaSet.add(nama); });
                     
                     // Status Count (DIPERBAIKI: Hanya cek yang punya field status)
                     const statusVal = item.Status_Konseling || item.Status_Proses || item.Status_Rujukan || item.Status_Mediasi || item.Status_Advokasi;
@@ -1703,8 +2003,15 @@
                     const names = [];
                     // Kumpulkan semua variabel yang mungkin berisi nama siswa
                     if(item.Nama_Siswa) names.push({ name: item.Nama_Siswa, kls: item.Kelas });
-                    if(item.Nama_Siswa_1) names.push({ name: item.Nama_Siswa_1, kls: item.Kelas_1 || item.Kelas });
-                    if(item.Nama_Siswa_2) names.push({ name: item.Nama_Siswa_2, kls: item.Kelas_2 || item.Kelas });
+                    // Split koma untuk mendukung format multi-siswa mediasi: "Andi (X-A), Budi (X-B)"
+                    if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(n => {
+                        const parts = n.trim().match(/^(.+?)\s*\(([^)]+)\)$/);
+                        names.push(parts ? { name: parts[1].trim(), kls: parts[2].trim() } : { name: n.trim(), kls: item.Kelas_1 || item.Kelas });
+                    });
+                    if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(n => {
+                        const parts = n.trim().match(/^(.+?)\s*\(([^)]+)\)$/);
+                        names.push(parts ? { name: parts[1].trim(), kls: parts[2].trim() } : { name: n.trim(), kls: item.Kelas_2 || item.Kelas });
+                    });
                     
                     names.forEach(n => {
                         if(!n.name) return;
@@ -1806,6 +2113,18 @@
                     } : { y: { display: false }, x: { display: false } }
                 }
             });
+			
+			// Isi dropdown tren bulanan & render
+            const selTren = document.getElementById('filter-tren-tahun');
+            if (selTren && metaData.tahunAjar) {
+                selTren.innerHTML = '<option value="Semua">Semua Tahun Ajaran</option>' +
+                    metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+            }
+            renderTrenBulanan();
+			
+			// Tampilkan statistik aktivitas & set default hari ini
+            document.getElementById('statistik-aktivitas').classList.remove('hide');
+            resetAktivitasHariIni();
 
             // --- note+++ LOGIKA DAFTAR SISWA TERBANTU & RINCIAN LAYANAN ---
             
@@ -1893,8 +2212,8 @@
 
                     // Lempar semua kemungkinan field nama siswa ke fungsi pemroses
                     if(item.Nama_Siswa) processStudent(item.Nama_Siswa, item.Kelas);
-                    if(item.Nama_Siswa_1) processStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
-                    if(item.Nama_Siswa_2) processStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                    if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(n => processStudent(n.trim(), ''));
+					if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(n => processStudent(n.trim(), ''));
                     if(item.Anggota_Kelompok_Siswa) processStudent(item.Anggota_Kelompok_Siswa, item.Kelas); 
                 });
             });
@@ -1985,8 +2304,9 @@
                         };
 
                         if(item.Nama_Siswa) addClassData(item.Nama_Siswa, item.Kelas);
-                        if(item.Nama_Siswa_1) addClassData(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
-                        if(item.Nama_Siswa_2) addClassData(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                        // Split koma untuk format multi-siswa mediasi: "Andi (X-A), Budi (X-B)"
+                        if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(m => addClassData(m.trim(), ''));
+                        if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(m => addClassData(m.trim(), ''));
                         if(item.Anggota_Kelompok_Siswa) {
                             item.Anggota_Kelompok_Siswa.split(',').forEach(m => addClassData(m, item.Kelas));
                         }
@@ -2019,8 +2339,9 @@
 
                         // Hanya jalankan fungsi jika field namanya tidak kosong
                         if(item.Nama_Siswa) addStudentToBidang(item.Nama_Siswa);
-                        if(item.Nama_Siswa_1) addStudentToBidang(item.Nama_Siswa_1);
-                        if(item.Nama_Siswa_2) addStudentToBidang(item.Nama_Siswa_2);
+                        // Split koma untuk format multi-siswa mediasi: "Andi (X-A), Budi (X-B)"
+                        if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(m => addStudentToBidang(m.trim()));
+                        if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(m => addStudentToBidang(m.trim()));
                         if(item.Anggota_Kelompok_Siswa) item.Anggota_Kelompok_Siswa.split(',').forEach(m => addStudentToBidang(m));
                     }
                 });
@@ -2389,8 +2710,17 @@
 
             for(const [sheet, data] of Object.entries(cachedAllServices)) {
                 data.forEach(item => {
-                    const names = (item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Nama_Siswa_2'] || item['Anggota_Kelompok_Siswa'] || item['Nama_Konsulti'] || item['Sasaran_Layanan'] || '').toLowerCase();
-                    if(names.includes(keyword)) {
+                    // Gabungkan semua field nama jadi satu string untuk pencarian
+                    // Nama_Siswa_1 & Nama_Siswa_2 digabung KEDUANYA (bukan pakai ||)
+                    const nameParts = [
+                        item['Nama_Siswa'] || '',
+                        item['Nama_Siswa_1'] || '',
+                        item['Nama_Siswa_2'] || '',
+                        item['Anggota_Kelompok_Siswa'] || '',
+                        item['Nama_Konsulti'] || '',
+                        item['Sasaran_Layanan'] || ''
+                    ].join(' ').toLowerCase();
+                    if(nameParts.includes(keyword)) {
                         const conf = sheetLabels[sheet] || { label: 'Lainnya', color: 'gray' };
                         history.push({ ...item, _type: conf, _date: getItemDate(item) || '0000-00-00' });
                     }
@@ -2724,7 +3054,9 @@
 
                 } else if (currentSheet === '14_Mediasi') {
                     topBadge = `⚖️ Mediasi`;
-                    mainTitle = `${item['Nama_Siswa_1'] || 'Pihak 1'} & ${item['Nama_Siswa_2'] || 'Pihak 2'}`;
+                    const pihak1 = (item['Nama_Siswa_1'] || 'Pihak 1').split(',').map(n => n.trim().split(' (')[0]).join(', ');
+                    const pihak2 = (item['Nama_Siswa_2'] || 'Pihak 2').split(',').map(n => n.trim().split(' (')[0]).join(', ');
+                    mainTitle = `${pihak1} ⚖️ ${pihak2}`;
                     uraianText = item['Pokok_Masalah'] || 'Pokok masalah belum diisi';
 
                 } else if (currentSheet === '15_Advokasi') {
@@ -3239,7 +3571,6 @@
                     } else if (currentSheet === '13_Alih_Tangan_Kasus') {
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Pihak_Penerima', 'Alasan_Rujukan', 'Hasil_Rujukan', 'Status_Rujukan'];
                     } else if (currentSheet === '14_Mediasi') {
-                        // Untuk mediasi, kita tampilkan Pihak 1 dan Pihak 2
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa_1', 'Nama_Siswa_2', 'Pokok_Masalah', 'Hasil_Kesepakatan', 'Status_Mediasi'];
                     } else if (currentSheet === '15_Advokasi') {
                         relevantKeys = ['Tanggal_Layanan', 'Nama_Siswa', 'Kelas', 'Pihak_Terkait', 'Kronologi_Masalah', 'Hasil_Advokasi', 'Status_Advokasi'];
@@ -3309,6 +3640,10 @@
                 
                 let currentY = startY + 15;
                 const excludedKeys = ['ID_Unik', 'rowIndex', 'Created_By'];
+                // Untuk mediasi, sembunyikan Kelas_1 & Kelas_2 karena sudah menyatu di Nama_Siswa_1/2
+                if (currentSheet === '14_Mediasi') {
+                    excludedKeys.push('Kelas_1', 'Kelas_2');
+                }
                 const keys = Object.keys(item).filter(k => !excludedKeys.includes(k));
                 
                 const bodyData = keys.map(key => {
@@ -3453,10 +3788,8 @@
                 { key: 'Tempat', label: 'Tempat Kegiatan', type: 'text' },
                 { key: 'Komponen_Layanan', label: 'Komponen Layanan', type: 'select', options: komponenBK },
                 { key: 'Bidang_Bimbingan', label: 'Bidang Bimbingan', type: 'select', options: bidangBK },
-                { key: 'Nama_Siswa_1', label: 'Pihak 1 (Siswa)', type: 'select', options: 'siswa' }, 
-                { key: 'Kelas_1', label: 'Kelas Pihak 1', type: 'readonly' }, 
-                { key: 'Nama_Siswa_2', label: 'Pihak 2 (Siswa Lawan)', type: 'select', options: 'siswa' }, 
-                { key: 'Kelas_2', label: 'Kelas Pihak 2', type: 'readonly' }, 
+                { key: 'Nama_Siswa_1', label: 'Pihak 1 (Siswa — bisa lebih dari 1)', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa pihak 1...' }, 
+                { key: 'Nama_Siswa_2', label: 'Pihak 2 (Siswa — bisa lebih dari 1)', type: 'multi-select-siswa', placeholder: 'Ketik nama siswa pihak 2...' }, 
                 { key: 'Pokok_Masalah', label: 'Pokok Masalah', type: 'textarea' }, 
                 { key: 'Hasil_Kesepakatan', label: 'Isi Perjanjian Damai', type: 'textarea' }, 
                 { key: 'Status_Mediasi', label: 'Status', type: 'select', options: ['Berhasil Damai', 'Gagal', 'Perlu Tindak Lanjut'] }
@@ -4656,9 +4989,18 @@
                     
                     if (itemDate >= startDate && itemDate <= endDate) {
                         // Mencari kecocokan variabel target sasaran
-                        let sasaran = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Anggota_Kelompok_Siswa'] || item['Nama_Konsulti'] || item['Sasaran_Layanan'] || item['Pihak_Terlibat'] || item['Nama_Kegiatan'] || '-';
-                        let kelas = item['Kelas'] || item['Kelas_1'] || '';
-                        let displaySasaran = (kelas && sasaran !== '-') ? `${sasaran}\n(Kls: ${kelas})` : sasaran;
+                        let sasaran, displaySasaran;
+                        if (sheet === '14_Mediasi') {
+                            // Format multi-siswa: tampilkan Pihak 1 & Pihak 2 terpisah baris
+                            const p1 = item['Nama_Siswa_1'] || 'Pihak 1';
+                            const p2 = item['Nama_Siswa_2'] || 'Pihak 2';
+                            displaySasaran = `P1: ${p1}\nP2: ${p2}`;
+                            sasaran = displaySasaran;
+                        } else {
+                            sasaran = item['Nama_Siswa'] || item['Nama_Siswa_1'] || item['Anggota_Kelompok_Siswa'] || item['Nama_Konsulti'] || item['Sasaran_Layanan'] || item['Pihak_Terlibat'] || item['Nama_Kegiatan'] || '-';
+                            let kelas = item['Kelas'] || item['Kelas_1'] || '';
+                            displaySasaran = (kelas && sasaran !== '-') ? `${sasaran}\n(Kls: ${kelas})` : sasaran;
+                        }
                         
                         // Mencari kecocokan variabel inti laporan
                         let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || item['Uraian_Topik'] || item['Deskripsi_Kegiatan'] || item['Deskripsi_Peristiwa'] || item['Tujuan_Kunjungan'] || item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || item['Topik_Bahasan'] ||'-';
@@ -5051,8 +5393,9 @@
                         };
 
                         if(item.Nama_Siswa) addStudent(item.Nama_Siswa, item.Kelas);
-                        if(item.Nama_Siswa_1) addStudent(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
-                        if(item.Nama_Siswa_2) addStudent(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+                        // Split koma untuk mendukung format multi-siswa mediasi: "Andi (X-A), Budi (X-B)"
+                        if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(n => addStudent(n.trim(), ''));
+                        if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(n => addStudent(n.trim(), ''));
                         if(item.Anggota_Kelompok_Siswa) item.Anggota_Kelompok_Siswa.split(',').forEach(m => addStudent(m, item.Kelas));
                     }
                 });
@@ -6801,19 +7144,39 @@
 								// Abaikan sistem/konsultasi umum yang tidak spesifik kelas
 							} else {
 								if(item.Nama_Siswa) cekDanTambahSiswa(item.Nama_Siswa, item.Kelas);
-								if(item.Nama_Siswa_1) cekDanTambahSiswa(item.Nama_Siswa_1, item.Kelas_1 || item.Kelas);
-								if(item.Nama_Siswa_2) cekDanTambahSiswa(item.Nama_Siswa_2, item.Kelas_2 || item.Kelas);
+								if(item.Nama_Siswa_1) item.Nama_Siswa_1.split(',').forEach(m => cekDanTambahSiswa(m.trim(), ''));
+								if(item.Nama_Siswa_2) item.Nama_Siswa_2.split(',').forEach(m => cekDanTambahSiswa(m.trim(), ''));
 								if(item.Anggota_Kelompok_Siswa) item.Anggota_Kelompok_Siswa.split(',').forEach(m => cekDanTambahSiswa(m, item.Kelas));
 							}
 
 							if (isMatchKelas) {
 								let tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'] || '-';
-								let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || item['Tujuan_Kunjungan'] || item['Deskripsi_Peristiwa'] || item['Topik_Bahasan'] || '-';
+
+								// Uraian spesifik per jenis layanan
+								let uraian = '-';
+								if (sheet === '7_Layanan_Individu')        uraian = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || '-';
+								else if (sheet === '8_Layanan_Kelompok')   uraian = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || '-';
+								else if (sheet === '9_Bimbingan_Kelompok') uraian = item['Topik_Layanan'] || item['Tujuan_Layanan'] || '-';
+								else if (sheet === '10_Konsultasi')        uraian = item['Uraian_Topik'] || item['Topik_Layanan'] || '-';
+								else if (sheet === '11_Layanan_Klasikal')  uraian = item['Topik_Layanan'] || item['Capaian_Layanan'] || '-';
+								else if (sheet === '12_Konferensi_Kasus')  uraian = item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || '-';
+								else if (sheet === '13_Alih_Tangan_Kasus') uraian = item['Alasan_Rujukan'] || item['Deskripsi_Kasus'] || '-';
+								else if (sheet === '14_Mediasi')           uraian = item['Pokok_Masalah'] || item['Hasil_Kesepakatan'] || '-';
+								else if (sheet === '15_Advokasi')          uraian = item['Kronologi_Masalah'] || item['Bentuk_Advokasi'] || '-';
+								else if (sheet === '16_Dukungan_Sistem')   uraian = item['Nama_Kegiatan'] || item['Deskripsi_Kegiatan'] || '-';
+								else if (sheet === '17_Catatan_Anekdot')   uraian = item['Deskripsi_Peristiwa'] || item['Tafsiran_Analisis'] || '-';
+								else if (sheet === '18_Kunjungan_Rumah')   uraian = item['Tujuan_Kunjungan'] || item['Hasil_Wawancara'] || '-';
+								else if (sheet === '19_Catatan_Pelanggaran') uraian = item['Jenis_Pelanggaran'] ? `${item['Jenis_Pelanggaran']}: ${item['Bentuk_Pelanggaran'] || '-'}` : item['Bentuk_Pelanggaran'] || '-';
+								else if (sheet === '20_Catatan_Prestasi')  uraian = item['Nama_Prestasi'] ? `${item['Nama_Prestasi']} (${item['Tingkat'] || '-'})` : '-';
+								else if (sheet === '21_Layanan_Kolaborasi') uraian = item['Topik_Bahasan'] || item['Hasil_Kolaborasi'] || '-';
+								else if (sheet === '22_Layanan_Lintas_Kelas') uraian = item['Topik_Tema_Kegiatan'] || item['Topik_Layanan'] || '-';
+								else uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || '-';
+
 								daftarRekapLayanan.push({
 									layanan: labelsMap[sheet] || sheet,
 									tanggal: formatTanggalIndo(tgl),
 									uraian: String(uraian),
-									siswa: siswaTerlibat.join(', ')
+									siswa: siswaTerlibat
 								});
 							}
 						});
@@ -6921,7 +7284,26 @@
 						groupedLayanan[rkp.layanan] = { jumlah: 0, rincian: [] };
 					}
 					groupedLayanan[rkp.layanan].jumlah++;
-					groupedLayanan[rkp.layanan].rincian.push(`• **${rkp.tanggal}**: ${rkp.uraian}\n(Siswa: **${rkp.siswa}**)`);
+
+					// Format nama siswa: penomoran jika lebih dari 1, tanpa nomor jika hanya 1
+					const siswaArr = Array.isArray(rkp.siswa)
+						? rkp.siswa.filter(n => n && n.trim())
+						: (rkp.siswa ? String(rkp.siswa).split(',').map(n => n.trim()).filter(Boolean) : []);
+
+					let siswaFormatted = '';
+					if (siswaArr.length === 0) {
+						siswaFormatted = '-';
+					} else if (siswaArr.length === 1) {
+						// Hanya 1 siswa — tanpa nomor urut
+						siswaFormatted = `**${siswaArr[0]}**`;
+					} else {
+						// Lebih dari 1 — pakai penomoran
+						siswaFormatted = siswaArr.map((n, i) => `${i + 1}. **${n}**`).join('\n');
+					}
+
+					groupedLayanan[rkp.layanan].rincian.push(
+						`**${rkp.tanggal}**\n${rkp.uraian}\nSiswa: ${siswaArr.length > 1 ? '\n' : ''}${siswaFormatted}`
+					);
 				});
 
 				const dataBagianB = Object.keys(groupedLayanan).map((key, i) => {
@@ -7092,7 +7474,8 @@
 						// ✅ Filter tahun ajaran di tempat yang benar (item sudah ada)
 						if (tahunAjarBuku !== 'Semua' && item['Tahun_Ajar'] !== tahunAjarBuku) return;
 						const match = item['Nama_Siswa'] === namaSiswa ||
-									  item['Nama_Siswa_1'] === namaSiswa || 
+									  (item['Nama_Siswa_1'] && item['Nama_Siswa_1'].includes(namaSiswa)) ||
+									  (item['Nama_Siswa_2'] && item['Nama_Siswa_2'].includes(namaSiswa)) ||
 									  (item['Anggota_Kelompok_Siswa'] && item['Anggota_Kelompok_Siswa'].includes(namaSiswa));
 
 						if (match) {
@@ -7118,9 +7501,44 @@
 									year: 'numeric'
 								});
 							}
-							let uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || 
-										 item['Tujuan_Kunjungan'] || item['Deskripsi_Peristiwa'] || 
-										 item['Bentuk_Pelanggaran'] || item['Nama_Prestasi'] || item['Topik_Bahasan'] || '-';
+							// Uraian spesifik per jenis layanan agar tidak ada yang tampil '-'
+							let uraian = '-';
+							const namaLayananItem = labelsMap[sheet] || sheet;
+							if (sheet === '7_Layanan_Individu') {
+								uraian = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || '-';
+							} else if (sheet === '8_Layanan_Kelompok') {
+								uraian = item['Identifikasi_Masalah'] || item['Topik_Layanan'] || '-';
+							} else if (sheet === '9_Bimbingan_Kelompok') {
+								uraian = item['Topik_Layanan'] || item['Tujuan_Layanan'] || '-';
+							} else if (sheet === '10_Konsultasi') {
+								uraian = item['Uraian_Topik'] || item['Topik_Layanan'] || '-';
+							} else if (sheet === '11_Layanan_Klasikal') {
+								uraian = item['Topik_Layanan'] || item['Capaian_Layanan'] || '-';
+							} else if (sheet === '12_Konferensi_Kasus') {
+								uraian = item['Deskripsi_Kasus'] || item['Pokok_Masalah'] || '-';
+							} else if (sheet === '13_Alih_Tangan_Kasus') {
+								uraian = item['Alasan_Rujukan'] || item['Deskripsi_Kasus'] || '-';
+							} else if (sheet === '14_Mediasi') {
+								uraian = item['Pokok_Masalah'] || item['Hasil_Kesepakatan'] || '-';
+							} else if (sheet === '15_Advokasi') {
+								uraian = item['Kronologi_Masalah'] || item['Bentuk_Advokasi'] || '-';
+							} else if (sheet === '16_Dukungan_Sistem') {
+								uraian = item['Nama_Kegiatan'] || item['Deskripsi_Kegiatan'] || '-';
+							} else if (sheet === '17_Catatan_Anekdot') {
+								uraian = item['Deskripsi_Peristiwa'] || item['Tafsiran_Analisis'] || '-';
+							} else if (sheet === '18_Kunjungan_Rumah') {
+								uraian = item['Tujuan_Kunjungan'] || item['Hasil_Wawancara'] || '-';
+							} else if (sheet === '19_Catatan_Pelanggaran') {
+								uraian = item['Jenis_Pelanggaran'] ? `${item['Jenis_Pelanggaran']}: ${item['Bentuk_Pelanggaran'] || '-'}` : item['Bentuk_Pelanggaran'] || '-';
+							} else if (sheet === '20_Catatan_Prestasi') {
+								uraian = item['Nama_Prestasi'] ? `${item['Nama_Prestasi']} (${item['Tingkat'] || '-'})` : '-';
+							} else if (sheet === '21_Layanan_Kolaborasi') {
+								uraian = item['Topik_Bahasan'] || item['Hasil_Kolaborasi'] || '-';
+							} else if (sheet === '22_Layanan_Lintas_Kelas') {
+								uraian = item['Topik_Tema_Kegiatan'] || item['Topik_Layanan'] || '-';
+							} else {
+								uraian = item['Topik_Layanan'] || item['Identifikasi_Masalah'] || item['Deskripsi_Kasus'] || '-';
+							}
 
 							// Simpan data mentah beserta timestamp di posisi paling akhir sementara waktu
 							riwayatData.push([tgl, namaLayanan, uraian, timestamp]);
@@ -7585,7 +8003,14 @@
 		
 		function openModalSiswaAsuh() {
 			const gridContainer = document.getElementById('grid-kelas-asuh');
-			document.getElementById('togglePilihSemua').checked = false; // Reset toggle
+			document.getElementById('togglePilihSemua').checked = false;
+
+			// Isi dropdown tahun ajaran
+			const selAsuh = document.getElementById('selectTahunAjarAsuh');
+			if (selAsuh && metaData.tahunAjar) {
+				selAsuh.innerHTML = '<option value="Semua">-- Semua Tahun Ajaran --</option>' +
+					metaData.tahunAjar.map(t => `<option value="${t}" ${t === (metaData.sekolah?.tahun_ajar || '') ? 'selected' : ''}>${t}</option>`).join('');
+			} // Reset toggle
 			gridContainer.innerHTML = ''; // Bersihkan
 
 			if (metaData && metaData.siswa) {
@@ -7681,7 +8106,9 @@
 			
 			currentY += 5;
 			doc.setFontSize(10);
-			doc.text(`TAHUN AJARAN: ${s.tahun_ajar || '-'}`, centerX, currentY, { align: 'center' });
+			const tahunAsuh = document.getElementById('selectTahunAjarAsuh')?.value || 'Semua';
+			const labelTahunAsuh = tahunAsuh === 'Semua' ? 'SEMUA TAHUN AJARAN' : tahunAsuh;
+			doc.text(`TAHUN AJARAN ${labelTahunAsuh}`, centerX, currentY, { align: 'center' });
 			
 			currentY += 5;
 			doc.setFont("times", "normal"); // Font normal, tidak bold
