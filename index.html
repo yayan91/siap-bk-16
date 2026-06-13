@@ -481,6 +481,68 @@
 				</div>
 			</div>
 			
+			<!-- STATISTIK PELANGGARAN & PRESTASI -->
+			<div id="statistik-pelanggaran-prestasi" class="glass rounded-2xl p-5 mb-6 shadow-lg border-t-4 border-rose-500 hide animate-slide-in">
+				<div class="flex flex-wrap justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4 gap-2">
+					<h3 class="text-sm md:text-base font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-2">
+						<i class="fa-solid fa-scale-balanced animate-pulse"></i> Pantauan Pelanggaran & Prestasi
+					</h3>
+					<span id="badge-pp-tanggal" class="text-[10px] bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-2 py-1 rounded font-bold border border-rose-200 dark:border-rose-800"></span>
+				</div>
+
+				<!-- Filter Rentang Tanggal -->
+				<div class="flex flex-wrap gap-2 mb-5 items-end">
+					<div>
+						<label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Dari Tanggal</label>
+						<input type="date" id="filter-pp-start" class="p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+					</div>
+					<div>
+						<label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Sampai Tanggal</label>
+						<input type="date" id="filter-pp-end" class="p-2 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+					</div>
+					<button onclick="renderPelanggaranPrestasi()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+						<i class="fa-solid fa-magnifying-glass"></i> Cari
+					</button>
+					<button onclick="resetFilterPP()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+						<i class="fa-solid fa-rotate-left"></i> Hari Ini
+					</button>
+				</div>
+
+				<!-- Ringkasan Angka -->
+				<div class="grid grid-cols-3 gap-3 mb-6">
+					<div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center border border-red-100 dark:border-red-800">
+						<p id="stat-pp-total-pelanggaran" class="text-2xl font-black text-red-600 dark:text-red-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Total Pelanggaran</p>
+					</div>
+					<div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3 text-center border border-emerald-100 dark:border-emerald-800">
+						<p id="stat-pp-total-prestasi" class="text-2xl font-black text-emerald-600 dark:text-emerald-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Total Prestasi</p>
+					</div>
+					<div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3 text-center border border-orange-100 dark:border-orange-800">
+						<p id="stat-pp-rata-pelanggaran" class="text-2xl font-black text-orange-600 dark:text-orange-400">0</p>
+						<p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Rata-rata Pelanggaran/Hari</p>
+					</div>
+				</div>
+
+				<!-- Grid 2 Kolom -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-200 dark:border-slate-700 pt-5">
+					<!-- Kolom Kiri: Pelanggaran -->
+					<div class="flex flex-col">
+						<h4 class="text-xs font-bold text-red-500 uppercase border-b border-red-200 dark:border-red-800 pb-2 mb-3 flex items-center gap-2">
+							<i class="fa-solid fa-triangle-exclamation"></i> Daftar Pelanggaran
+						</h4>
+						<div id="list-pp-pelanggaran" class="space-y-3 max-h-[300px] overflow-y-auto custom-scroll pr-2"></div>
+					</div>
+					<!-- Kolom Kanan: Prestasi -->
+					<div class="flex flex-col border-t border-slate-200 dark:border-slate-700 md:border-t-0 md:border-l md:pl-4 pt-4 md:pt-0">
+						<h4 class="text-xs font-bold text-emerald-500 uppercase border-b border-emerald-200 dark:border-emerald-800 pb-2 mb-3 flex items-center gap-2">
+							<i class="fa-solid fa-medal"></i> Daftar Prestasi
+						</h4>
+						<div id="list-pp-prestasi" class="space-y-3 max-h-[300px] overflow-y-auto custom-scroll pr-2"></div>
+					</div>
+				</div>
+			</div>
+			
 			<div id="hot-zone-klasemen" class="glass rounded-2xl p-5 mb-6 shadow-lg border-l-4 border-orange-500 hide animate-slide-in">
                 <div class="flex justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4">
                     <h3 class="text-sm md:text-base font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-2">
@@ -492,6 +554,7 @@
                     <p class="text-xs text-center text-slate-400">Menganalisis data kelas...</p>
                 </div>
             </div>
+			
 
             <div id="bidang-layanan-klasemen" class="glass rounded-2xl p-5 mb-8 shadow-lg border-l-4 border-purple-500 hide animate-slide-in">
                 <div class="flex justify-between items-center border-b dark:border-white/10 border-slate-200 pb-3 mb-4">
@@ -1528,6 +1591,125 @@
             return res && res.status === 'success' ? res.data : [];
         };
 		
+		function resetFilterPP() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filter-pp-start').value = today;
+            document.getElementById('filter-pp-end').value = today;
+            renderPelanggaranPrestasi();
+        }
+
+        function renderPelanggaranPrestasi() {
+            if (!cachedAllServices) return;
+
+            const startVal = document.getElementById('filter-pp-start').value;
+            const endVal   = document.getElementById('filter-pp-end').value;
+            if (!startVal || !endVal) {
+                Swal.fire('Lengkapi Tanggal', 'Isi rentang tanggal terlebih dahulu.', 'warning');
+                return;
+            }
+
+            const startDate = new Date(startVal); startDate.setHours(0,0,0,0);
+            const endDate   = new Date(endVal);   endDate.setHours(23,59,59,999);
+            if (startDate > endDate) {
+                Swal.fire('Tanggal Salah', 'Tanggal mulai tidak boleh lebih dari tanggal akhir.', 'warning');
+                return;
+            }
+
+            // Label badge rentang
+            const fmt = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const isSameDay = startVal === endVal;
+            document.getElementById('badge-pp-tanggal').innerText = isSameDay ? fmt(startVal) : `${fmt(startVal)} — ${fmt(endVal)}`;
+
+            let filteredPelanggaran = [];
+            let filteredPrestasi = [];
+
+            // 1. Ambil data Pelanggaran
+            const dataPelanggaran = cachedAllServices['19_Catatan_Pelanggaran'] || [];
+            dataPelanggaran.forEach(item => {
+                const tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                if (!tgl) return;
+                const d = new Date(tgl); d.setHours(0,0,0,0);
+                if (isNaN(d.getTime()) || d < startDate || d > endDate) return;
+                filteredPelanggaran.push(item);
+            });
+
+            // 2. Ambil data Prestasi
+            const dataPrestasi = cachedAllServices['20_Catatan_Prestasi'] || [];
+            dataPrestasi.forEach(item => {
+                const tgl = item['Tanggal_Layanan'] || item['Tanggal'] || item['Tanggal_Kegiatan'];
+                if (!tgl) return;
+                const d = new Date(tgl); d.setHours(0,0,0,0);
+                if (isNaN(d.getTime()) || d < startDate || d > endDate) return;
+                filteredPrestasi.push(item);
+            });
+
+            // Hitung Statistik
+            const totalPelanggaran = filteredPelanggaran.length;
+            const totalPrestasi = filteredPrestasi.length;
+            const selisihHari = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
+            const rataPelanggaran = (totalPelanggaran / selisihHari).toFixed(1);
+
+            document.getElementById('stat-pp-total-pelanggaran').innerText = totalPelanggaran;
+            document.getElementById('stat-pp-total-prestasi').innerText = totalPrestasi;
+            document.getElementById('stat-pp-rata-pelanggaran').innerText = rataPelanggaran;
+
+            // Render List Pelanggaran
+            const listPel = document.getElementById('list-pp-pelanggaran');
+            if (totalPelanggaran === 0) {
+                listPel.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-shield-check text-2xl text-green-500 mb-2 block"></i>Tidak ada pelanggaran</div>';
+            } else {
+                listPel.innerHTML = filteredPelanggaran.map(item => {
+                    const nama = item['Nama_Siswa'] || '-';
+                    const kelas = item['Kelas'] || '-';
+                    const bentuk = item['Bentuk_Pelanggaran'] || '-';
+                    return `
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-red-100 dark:border-red-900/30 shadow-sm hover:-translate-y-1 transition-transform cursor-pointer" onclick="document.getElementById('global-student-search').value='${nama}'; searchStudentHistory();">
+                            <div class="w-10 h-10 rounded-full flex justify-center items-center shrink-0 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 mt-1">
+                                <i class="fa-solid fa-user-xmark"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-2">${nama}</h4>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">Kls ${kelas}</span>
+                                </div>
+                                <p class="text-xs text-red-500 dark:text-red-400 mt-1 leading-relaxed break-words">
+                                    <b class="text-slate-600 dark:text-slate-400 font-semibold">Bentuk:</b> ${bentuk}
+                                </p>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+
+            // Render List Prestasi
+            const listPres = document.getElementById('list-pp-prestasi');
+            if (totalPrestasi === 0) {
+                listPres.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-box-open text-2xl text-slate-300 mb-2 block"></i>Belum ada data prestasi</div>';
+            } else {
+                listPres.innerHTML = filteredPrestasi.map(item => {
+                    const nama = item['Nama_Siswa'] || '-';
+                    const kelas = item['Kelas'] || '-';
+                    const prestasi = item['Nama_Prestasi'] || '-';
+                    return `
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-emerald-100 dark:border-emerald-900/30 shadow-sm hover:-translate-y-1 transition-transform cursor-pointer" onclick="document.getElementById('global-student-search').value='${nama}'; searchStudentHistory();">
+                            <div class="w-10 h-10 rounded-full flex justify-center items-center shrink-0 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mt-1">
+                                <i class="fa-solid fa-medal"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-2">${nama}</h4>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">Kls ${kelas}</span>
+                                </div>
+                                <p class="text-xs text-emerald-500 dark:text-emerald-400 mt-1 leading-relaxed break-words">
+                                    <b class="text-slate-600 dark:text-slate-400 font-semibold">Prestasi:</b> ${prestasi}
+                                </p>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+            
+            document.getElementById('statistik-pelanggaran-prestasi').classList.remove('hide');
+        }
+		
 		// =============================================
         // STATISTIK AKTIVITAS SAYA
         // =============================================
@@ -2365,7 +2547,7 @@
                     
                     let studentText = topStudents.length > 0 
                         ? topStudents.map(s => `<span class="font-bold text-slate-700 dark:text-slate-200">${s.name}</span> <span class="text-[10px] opacity-70 border border-gray-300 dark:border-gray-600 rounded px-1">${s.count}x</span>`).join(', ')
-                        : `<span class="text-green-500 font-bold italic">Nihil / Aman</span>`;
+                        : `<span class="text-green-500 font-bold italic">Belum ada data</span>`;
                     
                     let rankColors = "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"; 
                     let rankIcon = `<span class="font-black text-sm">${index + 1}</span>`;
@@ -2430,7 +2612,7 @@
                             studentText = `<span class="italic text-slate-400 font-medium">Layanan Umum / Non-Siswa</span>`;
                         }
                     } else {
-                        studentText = `<span class="text-green-500 font-bold italic">Nihil / Aman</span>`;
+                        studentText = `<span class="text-green-500 font-bold italic">Belum ada data</span>`;
                     }
                     
                     let rankColors = "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400";
@@ -2678,6 +2860,9 @@
 			};
             // Eksekusi fungsinya
             renderKlasemenPelanggaranPrestasi();
+			
+			// Trigger auto-load data hari ini
+            resetFilterPP();
 			
         } // Penutup dari fungsi loadDashboardStats()
 
